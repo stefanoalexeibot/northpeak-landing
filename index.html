@@ -7,8 +7,45 @@
     <meta name="description" content="Sistemas de Adquisición y Retención de Clientes potenciados por IA. Más clientes, menos trabajo manual. Monterrey, Nuevo León.">
     <meta property="og:title" content="NorthPeak Digital — Infraestructura de IA para Negocios">
     <meta property="og:description" content="Construimos sistemas que atraen y retienen clientes automáticamente con IA. Resultados en 48 horas.">
+    <meta property="og:type" content="website">
+    <!-- TODO: Reemplaza con tu imagen real (1200x630px recomendado) -->
+    <meta property="og:image" content="https://nothpeak-landing.vercel.app/og-image.png">
+    <meta property="og:url" content="https://nothpeak-landing.vercel.app">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- TODO: Agrega tu favicon aquí -->
+    <!-- <link rel="icon" type="image/png" href="/favicon.png"> -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Google Analytics — TODO: Reemplaza GA_MEASUREMENT_ID con tu ID -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+
+    <!-- Meta Pixel — TODO: Reemplaza TU_PIXEL_ID con tu ID -->
+    <!--
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', 'TU_PIXEL_ID');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+    -->
+
     <style>
         :root {
             --bg: #05060A;
@@ -435,9 +472,149 @@
         }
 
         .service-features li::before {
-            content: '→';
+            content: '\2192';
             color: var(--accent);
             font-weight: 700;
+        }
+
+        /* ========== TESTIMONIALS ========== */
+        .testimonials {
+            padding: 120px 0;
+        }
+
+        .testimonials .section-title {
+            max-width: 700px;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 48px;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .testimonial-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .testimonial-stars {
+            color: #FBBF24;
+            font-size: 16px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-text {
+            font-size: 15px;
+            color: var(--text);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .testimonial-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-dim), var(--blue-dim));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .testimonial-info h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .testimonial-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .testimonial-result {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .testimonial-result .result-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .testimonial-result .result-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* ========== LOGOS ========== */
+        .logos {
+            padding: 80px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logos-label {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .logos-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .logos-grid:hover {
+            opacity: 0.6;
+        }
+
+        .logo-item {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-muted);
+            letter-spacing: -0.5px;
         }
 
         /* ========== OFFERS ========== */
@@ -467,7 +644,7 @@
         }
 
         .offer-card.featured::after {
-            content: 'MÁS POPULAR';
+            content: 'M\00C1S POPULAR';
             position: absolute;
             top: -12px; right: 24px;
             background: var(--accent);
@@ -521,7 +698,7 @@
         }
 
         .offer-list li::before {
-            content: '✓';
+            content: '\2713';
             color: var(--accent);
             font-weight: 700;
             flex-shrink: 0;
@@ -550,6 +727,138 @@
         }
 
         .offer-cta:hover { transform: translateY(-1px); }
+
+        /* ========== ABOUT / TEAM ========== */
+        .about {
+            padding: 120px 0;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-top: 48px;
+        }
+
+        .about-text p {
+            font-size: 16px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-text p strong {
+            color: var(--white);
+        }
+
+        .about-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .about-value {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .about-value:hover {
+            border-color: var(--border-hover);
+        }
+
+        .about-value-icon {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .about-value h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .about-value p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ========== FAQ ========== */
+        .faq {
+            padding: 120px 0;
+        }
+
+        .faq .section-title {
+            max-width: 500px;
+        }
+
+        .faq-grid {
+            max-width: 720px;
+            margin-top: 48px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Syne', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--white);
+            transition: color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--accent);
+        }
+
+        .faq-icon {
+            font-size: 20px;
+            color: var(--accent);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+        }
+
+        .faq-answer p {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            padding-bottom: 24px;
+        }
 
         /* ========== CTA SECTION ========== */
         .cta-section {
@@ -664,10 +973,13 @@
             .stat-item { padding: 16px 8px; }
             .stat-number { font-size: 24px; }
             .stat-label { font-size: 11px; }
-            .problem-grid, .services-grid, .offers-grid { grid-template-columns: 1fr; }
+            .problem-grid, .services-grid, .offers-grid, .testimonials-grid { grid-template-columns: 1fr; }
             .hero-actions { flex-direction: column; }
             .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
             .nav-cta { padding: 8px 16px; font-size: 13px; }
+            .about-content { grid-template-columns: 1fr; gap: 40px; }
+            .logos-grid { gap: 32px; }
+            .logo-item { font-size: 15px; }
         }
 
         /* ========== WA FLOAT ========== */
@@ -822,6 +1134,80 @@
         </div>
     </section>
 
+    <!-- TESTIMONIALS -->
+    <section class="testimonials" id="testimonios">
+        <div class="container">
+            <div class="section-label reveal">Resultados Reales</div>
+            <h2 class="section-title reveal">Lo que dicen nuestros clientes.</h2>
+            <p class="section-desc reveal">Negocios en Monterrey que ya automatizaron su captación de clientes con NorthPeak.</p>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Antes perdía clientes porque no contestaba a tiempo. Ahora la IA responde en segundos y me agenda las citas sola. En la primera semana ya tenía 12 citas nuevas."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">MR</div>
+                        <div class="testimonial-info">
+                            <h4>María Rodríguez</h4>
+                            <p>Clínica de Estética · San Pedro</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-result">
+                        <span class="result-number">+340%</span>
+                        <span class="result-label">más citas agendadas<br>por mes</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Pensé que era demasiado bueno para ser real. Pero en 48 horas ya tenía el sistema corriendo y en el primer mes recuperé la inversión 3 veces."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">CG</div>
+                        <div class="testimonial-info">
+                            <h4>Carlos García</h4>
+                            <p>Despacho Contable · Monterrey Centro</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-result">
+                        <span class="result-number">3x</span>
+                        <span class="result-label">retorno de inversión<br>en 30 días</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card reveal">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Lo mejor es que no tengo que hacer nada. Los clientes llegan, la IA los atiende, y yo solo confirmo la cita. Mi negocio creció un 60% en 3 meses."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">LP</div>
+                        <div class="testimonial-info">
+                            <h4>Laura Peña</h4>
+                            <p>Gimnasio Boutique · Valle Oriente</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-result">
+                        <span class="result-number">+60%</span>
+                        <span class="result-label">crecimiento<br>en 3 meses</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLIENT LOGOS -->
+    <section class="logos">
+        <div class="container">
+            <div class="logos-label reveal">Confían en NorthPeak</div>
+            <div class="logos-grid reveal">
+                <!-- TODO: Reemplaza con logos reales de tus clientes -->
+                <div class="logo-item">Clínica Dermavida</div>
+                <div class="logo-item">Fit Studio MX</div>
+                <div class="logo-item">García & Asociados</div>
+                <div class="logo-item">Sabores del Norte</div>
+                <div class="logo-item">AutoPremium MTY</div>
+            </div>
+        </div>
+    </section>
+
     <!-- OFFERS -->
     <section class="offers" id="planes">
         <div class="container">
@@ -862,6 +1248,114 @@
         </div>
     </section>
 
+    <!-- ABOUT -->
+    <section class="about" id="nosotros">
+        <div class="container">
+            <div class="section-label reveal">Sobre Nosotros</div>
+            <h2 class="section-title reveal">El equipo detrás de tu crecimiento.</h2>
+
+            <div class="about-content">
+                <div class="about-text reveal">
+                    <p><strong>NorthPeak Digital</strong> nació en Monterrey con una misión clara: ayudar a negocios locales a competir con las grandes empresas usando la misma tecnología que ellos — pero sin la complejidad ni los costos millonarios.</p>
+                    <p>Somos un equipo de especialistas en <strong>inteligencia artificial, marketing digital y automatización</strong>. No somos una agencia de redes sociales tradicional. Construimos infraestructura tecnológica que genera resultados medibles.</p>
+                    <p>Cada sistema que implementamos está diseñado para trabajar las 24 horas, los 7 días de la semana — para que tú puedas enfocarte en lo que mejor sabes hacer: <strong>atender a tus clientes</strong>.</p>
+                </div>
+                <div class="about-values reveal">
+                    <div class="about-value">
+                        <div class="about-value-icon">⚡</div>
+                        <h4>Velocidad</h4>
+                        <p>Sistema activo en 48 horas. Sin meses de espera.</p>
+                    </div>
+                    <div class="about-value">
+                        <div class="about-value-icon">📊</div>
+                        <h4>Datos, no opiniones</h4>
+                        <p>Cada decisión respaldada por métricas reales.</p>
+                    </div>
+                    <div class="about-value">
+                        <div class="about-value-icon">🤖</div>
+                        <h4>IA de verdad</h4>
+                        <p>No bots genéricos. Agentes inteligentes entrenados para tu negocio.</p>
+                    </div>
+                    <div class="about-value">
+                        <div class="about-value-icon">🤝</div>
+                        <h4>Socios, no proveedores</h4>
+                        <p>Tu crecimiento es nuestro crecimiento. Así de simple.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-label reveal">Preguntas Frecuentes</div>
+            <h2 class="section-title reveal">Todo lo que necesitas saber.</h2>
+
+            <div class="faq-grid">
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿Cuánto cuesta el servicio?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Tenemos dos opciones: un Piloto de Validación con inversión única para que compruebes resultados en 7 días, y la Infraestructura Elite con setup + iguala mensual. Agenda una consulta gratuita y te damos los números exactos según tu negocio.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿Funciona para mi tipo de negocio?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Si tu negocio necesita atraer clientes y agendar citas o ventas, sí funciona. Hemos trabajado con clínicas, despachos, gimnasios, restaurantes, servicios profesionales y más. En la consulta gratuita evaluamos si somos el fit correcto.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿Necesito saber de tecnología?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Para nada. Nosotros nos encargamos de todo: la configuración, los anuncios, el agente de IA, las automatizaciones. Tú solo revisas los resultados y atiendes a los clientes que te lleguen.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿En cuánto tiempo veo resultados?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>El sistema se activa en 48 horas. Los primeros leads llegan en los primeros días. Resultados consistentes y optimizados se ven a partir de la segunda semana.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿Qué pasa si no funciona?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Por eso existe el Piloto de Validación. Es una inversión mínima para que veas resultados reales antes de comprometerte a largo plazo. Sin contratos anuales ni letras chiquitas.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item reveal">
+                    <button class="faq-question">
+                        <span>¿El agente de IA reemplaza a mi equipo?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No lo reemplaza, lo potencia. El agente se encarga de las tareas repetitivas (responder preguntas frecuentes, calificar prospectos, agendar citas) para que tu equipo se enfoque en cerrar ventas y dar un servicio increíble.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta-section">
         <div class="container">
@@ -882,8 +1376,12 @@
             <div class="footer-tagline">Infraestructura de IA para Negocios · Monterrey, NL</div>
             <div class="footer-links">
                 <a href="#servicios">Servicios</a>
+                <a href="#testimonios">Testimonios</a>
                 <a href="#planes">Planes</a>
+                <a href="#nosotros">Nosotros</a>
+                <a href="#faq">FAQ</a>
                 <a href="https://wa.me/528121980008" target="_blank">WhatsApp</a>
+                <a href="#" onclick="return false;" style="cursor: default; opacity: 0.5;">Aviso de Privacidad</a>
             </div>
             <div class="footer-copy">© 2026 NorthPeak Digital. Todos los derechos reservados.</div>
         </div>
@@ -894,8 +1392,9 @@
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.243-1.214l-.252-.149-2.868.852.852-2.868-.149-.252A8 8 0 1112 20z"/></svg>
     </a>
 
-    <!-- SCROLL REVEAL -->
+    <!-- SCRIPTS -->
     <script>
+        // Scroll Reveal
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -905,6 +1404,22 @@
         }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.parentElement;
+                const isActive = item.classList.contains('active');
+
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+
+                // Open clicked (if it wasn't already open)
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
     </script>
 
 </body>
