@@ -1008,6 +1008,49 @@
             0%, 100% { box-shadow: 0 4px 24px rgba(37,211,102,0.4); }
             50% { box-shadow: 0 4px 36px rgba(37,211,102,0.6); }
         }
+
+        /* ========== CURSOR GLOW ========== */
+        #cursor-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0,229,160,0.07) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform;
+        }
+
+        /* ========== 3D TILT CARDS ========== */
+        .problem-card, .service-card, .testimonial-card, .offer-card, .about-value {
+            transition: transform 0.2s ease, background 0.3s ease, border-color 0.3s ease;
+            will-change: transform;
+        }
+
+        /* ========== MAGNETIC BUTTONS ========== */
+        .btn-primary, .btn-secondary, .nav-cta, .offer-cta {
+            transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease, border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+            will-change: transform;
+        }
+
+        /* ========== FLOATING ICONS ========== */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* ========== TEXT SHIMMER ========== */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Disable effects on touch/mobile */
+        @media (hover: none) {
+            #cursor-glow { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -1391,6 +1434,9 @@
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.243-1.214l-.252-.149-2.868.852.852-2.868-.149-.252A8 8 0 1112 20z"/></svg>
     </a>
 
+    <!-- CURSOR GLOW -->
+    <div id="cursor-glow"></div>
+
     <!-- SCRIPTS -->
     <script>
         // Scroll Reveal
@@ -1409,14 +1455,133 @@
             btn.addEventListener('click', () => {
                 const item = btn.parentElement;
                 const isActive = item.classList.contains('active');
-
-                // Close all
                 document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-
-                // Open clicked (if it wasn't already open)
                 if (!isActive) {
                     item.classList.add('active');
                 }
+            });
+        });
+
+        // ========== CURSOR GLOW ==========
+        const glow = document.getElementById('cursor-glow');
+        let glowX = 0, glowY = 0, currentX = 0, currentY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            glowX = e.clientX;
+            glowY = e.clientY + window.scrollY;
+        });
+
+        function animateGlow() {
+            currentX += (glowX - currentX) * 0.08;
+            currentY += (glowY - currentY) * 0.08;
+            glow.style.transform = `translate(${currentX - 300}px, ${currentY - 300}px)`;
+            requestAnimationFrame(animateGlow);
+        }
+        animateGlow();
+
+        // ========== 3D TILT ON CARDS ==========
+        const tiltCards = document.querySelectorAll('.problem-card, .service-card, .testimonial-card, .offer-card, .about-value');
+
+        tiltCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / centerY * -8;
+                const rotateY = (x - centerX) / centerX * 8;
+
+                card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px) scale(1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+            });
+        });
+
+        // ========== MAGNETIC BUTTONS ==========
+        const magneticBtns = document.querySelectorAll('.btn-primary, .btn-secondary, .nav-cta, .offer-cta');
+
+        magneticBtns.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px) scale(1.05)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0, 0) scale(1)';
+            });
+        });
+
+        // ========== PARALLAX ON SCROLL ==========
+        const heroTitle = document.querySelector('.hero h1');
+        const heroBadge = document.querySelector('.hero-badge');
+        const heroSub = document.querySelector('.hero-sub');
+        const ctaTitle = document.querySelector('.cta-title');
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+
+            if (heroTitle) {
+                heroTitle.style.transform = `translateY(${scrollY * 0.15}px)`;
+            }
+            if (heroBadge) {
+                heroBadge.style.transform = `translateY(${scrollY * 0.1}px)`;
+            }
+            if (heroSub) {
+                heroSub.style.transform = `translateY(${scrollY * 0.08}px)`;
+            }
+
+            // Parallax on stat numbers
+            document.querySelectorAll('.stat-number').forEach(stat => {
+                const rect = stat.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    const progress = (window.innerHeight - rect.top) / window.innerHeight;
+                    stat.style.transform = `scale(${0.8 + progress * 0.2})`;
+                }
+            });
+        });
+
+        // ========== CARD SPOTLIGHT EFFECT ==========
+        document.querySelectorAll('.problem-card, .service-card, .testimonial-card, .offer-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.background = `radial-gradient(circle 200px at ${x}px ${y}px, rgba(0,229,160,0.06), var(--bg-card) 70%)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.background = '';
+            });
+        });
+
+        // ========== FLOATING ANIMATION ON ICONS ==========
+        document.querySelectorAll('.problem-icon, .about-value-icon').forEach((icon, i) => {
+            icon.style.animation = `float ${2 + (i % 3) * 0.5}s ease-in-out infinite`;
+            icon.style.animationDelay = `${i * 0.2}s`;
+        });
+
+        // ========== TEXT SHIMMER ON SECTION LABELS ==========
+        document.querySelectorAll('.section-label').forEach(label => {
+            label.addEventListener('mouseenter', () => {
+                label.style.backgroundImage = 'linear-gradient(90deg, var(--accent), #00B4D8, var(--accent))';
+                label.style.backgroundSize = '200% 100%';
+                label.style.webkitBackgroundClip = 'text';
+                label.style.webkitTextFillColor = 'transparent';
+                label.style.backgroundClip = 'text';
+                label.style.animation = 'shimmer 1.5s ease infinite';
+            });
+            label.addEventListener('mouseleave', () => {
+                label.style.backgroundImage = '';
+                label.style.backgroundSize = '';
+                label.style.webkitBackgroundClip = '';
+                label.style.webkitTextFillColor = '';
+                label.style.backgroundClip = '';
+                label.style.animation = '';
             });
         });
     </script>
