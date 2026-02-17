@@ -20,15 +20,19 @@ import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
 import DuplicateProject from "@/components/admin/duplicate-project";
 import ClientActivityTimeline from "@/components/admin/client-activity-timeline";
+import AIContentGenerator from "@/components/admin/ai-content-generator";
+import AIStrategyCard from "@/components/admin/ai-strategy-card";
 
 interface AnalisisDigital {
   id: string;
   nombre_negocio: string;
   giro: string;
+  zona?: string;
   score: number;
   nivel: string;
   report_url: string;
   created_at: string;
+  oportunidades?: { titulo: string; canal: string; impacto: string }[];
 }
 
 interface Props {
@@ -321,6 +325,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
           <TabsTrigger value="payments" className="data-[state=active]:bg-northpeak-card">Pagos</TabsTrigger>
           <TabsTrigger value="activity" className="data-[state=active]:bg-northpeak-card">Actividad</TabsTrigger>
           <TabsTrigger value="analyses" className="data-[state=active]:bg-northpeak-card">Análisis</TabsTrigger>
+          <TabsTrigger value="ai" className="data-[state=active]:bg-northpeak-card">IA</TabsTrigger>
         </TabsList>
 
         {/* INFO TAB */}
@@ -645,6 +650,32 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* AI TAB */}
+        <TabsContent value="ai">
+          <div className="space-y-4">
+            <AIContentGenerator
+              clientName={client.name}
+              company={client.company}
+              giro={analyses[0]?.giro || ""}
+              zona={analyses[0]?.zona || ""}
+              score={analyses[0]?.score}
+              oportunidades={analyses[0]?.oportunidades?.map((o) => o.titulo)}
+            />
+            <AIStrategyCard
+              clientId={client.id}
+              analisis={analyses[0] ? {
+                id: analyses[0].id,
+                nombre_negocio: analyses[0].nombre_negocio,
+                giro: analyses[0].giro,
+                zona: analyses[0].zona,
+                score: analyses[0].score,
+                nivel: analyses[0].nivel,
+                oportunidades: analyses[0].oportunidades,
+              } : null}
+            />
+          </div>
         </TabsContent>
 
         {/* FILES TAB */}

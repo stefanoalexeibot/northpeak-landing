@@ -20,6 +20,7 @@ import {
   Monitor,
   Megaphone,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { getDefaultHallazgos } from "@/lib/analizador/scoring";
 import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
@@ -192,6 +193,7 @@ function AnalizadorContent() {
   const [history, setHistory] = useState<AnalisisRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [tab, setTab] = useState<"form" | "history">("form");
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Form state
   const [datos, setDatos] = useState<DatosNegocio>({
@@ -299,6 +301,31 @@ function AnalizadorContent() {
     setDatos({ nombre: "", giro: "", zona: "", contacto: "", telefono: "" });
     setHallazgos(getDefaultHallazgos());
     setResult(null);
+  }
+
+  async function handleAiFill() {
+    if (!datos.nombre || !datos.giro || !datos.zona) {
+      addToast("Llena nombre, giro y zona antes de usar IA", "error");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/ai/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: datos.nombre, giro: datos.giro, zona: datos.zona }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.error || "Error al analizar con IA", "error");
+      } else {
+        setHallazgos(data.hallazgos);
+        addToast("Hallazgos estimados por IA. Revisa y ajusta antes de generar.", "success");
+      }
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setAiLoading(false);
   }
 
   return (
@@ -473,6 +500,26 @@ function AnalizadorContent() {
               </div>
             </CardContent>
           </Card>
+
+          {/* AI Auto-fill button */}
+          <Button
+            onClick={handleAiFill}
+            disabled={aiLoading || !datos.nombre || !datos.giro || !datos.zona}
+            variant="outline"
+            className="w-full border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 h-10"
+          >
+            {aiLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Analizando con IA...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Llenar con IA (estimación automática)
+              </>
+            )}
+          </Button>
 
           {/* Channel sections */}
           <SectionCard title="Google Maps (25 pts)" icon={MapPin} iconColor="text-red-400" defaultOpen>

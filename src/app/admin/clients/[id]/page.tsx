@@ -36,7 +36,7 @@ export default async function ClientDetailPage({
     supabase.from("projects").select("*, deliverables(*)").eq("client_id", client.id).order("created_at", { ascending: false }),
     supabase.from("media").select("*").eq("client_id", client.id).order("created_at", { ascending: false }),
     supabase.from("payments").select("*").eq("client_id", client.id).order("created_at", { ascending: false }),
-    supabase.from("analisis_digital").select("id, nombre_negocio, giro, score, nivel, report_url, created_at").eq("client_id", client.id).order("created_at", { ascending: false }),
+    supabase.from("analisis_digital").select("id, nombre_negocio, giro, zona, score, nivel, oportunidades, report_url, created_at").eq("client_id", client.id).order("created_at", { ascending: false }),
   ]);
 
   // Build onboarding checklist
