@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ThemeToggle from "@/components/portal/theme-toggle";
+import NotificationBell from "@/components/portal/notification-bell";
 
 interface NavItem {
   label: string;
@@ -38,10 +39,10 @@ const navItems: NavItem[] = [
   { label: "Nota de venta", href: "/portal/invoice", icon: Receipt },
   { label: "Proyectos", href: "/portal/projects", icon: FolderOpen },
   { label: "Archivos", href: "/portal/files", icon: Image, badgeKey: "files" },
-  { label: "Pagos", href: "/portal/payments", icon: CreditCard },
+  { label: "Pagos", href: "/portal/payments", icon: CreditCard, badgeKey: "payments" },
   { label: "Calendario", href: "/portal/calendar", icon: CalendarDays },
   { label: "Referidos", href: "/portal/referrals", icon: Gift },
-  { label: "Soporte", href: "/portal/support", icon: MessageSquare },
+  { label: "Soporte", href: "/portal/support", icon: MessageSquare, badgeKey: "messages" },
 ];
 
 export default function PortalNav({ client }: { client: Client }) {
@@ -54,7 +55,12 @@ export default function PortalNav({ client }: { client: Client }) {
     async function fetchUnseen() {
       try {
         const supabase = createClient();
-        const [{ count: unseenDocs }, { count: unseenFiles }] = await Promise.all([
+        const [
+          { count: unseenDocs },
+          { count: unseenFiles },
+          { count: unreadMessages },
+          { count: pendingPayments },
+        ] = await Promise.all([
           supabase
             .from("documents")
             .select("*", { count: "exact", head: true })
@@ -66,10 +72,23 @@ export default function PortalNav({ client }: { client: Client }) {
             .select("*", { count: "exact", head: true })
             .eq("client_id", client.id)
             .eq("seen_by_client", false),
+          supabase
+            .from("messages")
+            .select("*", { count: "exact", head: true })
+            .eq("client_id", client.id)
+            .eq("sender_role", "admin")
+            .eq("read", false),
+          supabase
+            .from("payments")
+            .select("*", { count: "exact", head: true })
+            .eq("client_id", client.id)
+            .eq("status", "pending"),
         ]);
         setUnseenCounts({
           contracts: unseenDocs ?? 0,
           files: unseenFiles ?? 0,
+          messages: unreadMessages ?? 0,
+          payments: pendingPayments ?? 0,
         });
       } catch {
         // ignore
@@ -123,6 +142,7 @@ export default function PortalNav({ client }: { client: Client }) {
           </nav>
 
           <div className="flex items-center gap-3">
+            <NotificationBell clientId={client.id} />
             <ThemeToggle />
             <Link
               href="/portal/settings"

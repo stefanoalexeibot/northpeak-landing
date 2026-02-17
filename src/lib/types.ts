@@ -71,6 +71,7 @@ export interface MediaFile {
   file_type: string;
   file_size: number;
   seen_by_client?: boolean;
+  uploaded_by?: "admin" | "client";
   created_at: string;
 }
 
@@ -94,6 +95,8 @@ export interface Message {
   sender_id: string;
   sender_role: UserRole;
   content: string;
+  attachment_url?: string;
+  attachment_name?: string;
   read: boolean;
   created_at: string;
 }

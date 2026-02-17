@@ -2,6 +2,7 @@ import { getClientData } from "@/lib/supabase/get-client-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Receipt } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import InvoicePdfButton from "@/components/portal/invoice-pdf-button";
 
 interface InvoiceContent {
   items: { concept: string; amount: number }[];
@@ -29,9 +30,21 @@ export default async function InvoicePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">Nota de Venta</h1>
-        <p className="text-northpeak-text-muted mt-1">Detalle de tu inversión con NorthPeak</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-northpeak-text">Nota de Venta</h1>
+          <p className="text-northpeak-text-muted mt-1">Detalle de tu inversión con NorthPeak</p>
+        </div>
+        {content && content.items?.length > 0 && (
+          <InvoicePdfButton
+            title={doc?.title || "Nota de venta"}
+            clientName={client.name}
+            company={client.company}
+            items={content.items}
+            discount={content.discount ?? 0}
+            notes={content.notes}
+          />
+        )}
       </div>
 
       {!content || !content.items?.length ? (

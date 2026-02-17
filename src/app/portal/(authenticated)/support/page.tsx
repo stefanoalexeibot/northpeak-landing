@@ -5,24 +5,30 @@ import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, MessageSquare } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { Send, MessageSquare, Paperclip, X, FileText, Image as ImageIcon } from "lucide-react";
 
 interface Message {
   id: string;
   content: string;
   sender_role: string;
+  attachment_url?: string;
+  attachment_name?: string;
   created_at: string;
 }
 
 export default function SupportPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const supabase = createClient();
+  const { addToast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [clientId, setClientId] = useState<string>("");
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [attachment, setAttachment] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function load() {
@@ -64,18 +70,50 @@ export default function SupportPage() {
   }, [messages]);
 
   async function sendMessage() {
-    if (!newMessage.trim() || !clientId) return;
+    if ((!newMessage.trim() && !attachment) || !clientId) return;
     setSending(true);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data } = await supabase.from("messages").insert({
+    let attachmentUrl: string | undefined;
+    let attachmentName: string | undefined;
+
+    // Upload attachment if present
+    if (attachment) {
+      const ext = attachment.name.split(".").pop();
+      const path = `${clientId}/chat/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("client-files")
+        .upload(path, attachment);
+
+      if (uploadError) {
+        addToast("Error al subir el archivo", "error");
+        setSending(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("client-files")
+        .getPublicUrl(path);
+
+      attachmentUrl = urlData.publicUrl;
+      attachmentName = attachment.name;
+    }
+
+    const insertData: Record<string, unknown> = {
       client_id: clientId,
       sender_id: user.id,
       sender_role: "client",
-      content: newMessage.trim(),
-    }).select().single();
+      content: newMessage.trim() || (attachmentName ? `Archivo: ${attachmentName}` : ""),
+    };
+    if (attachmentUrl) {
+      insertData.attachment_url = attachmentUrl;
+      insertData.attachment_name = attachmentName;
+    }
+
+    const { data } = await supabase.from("messages").insert(insertData).select().single();
 
     if (data) {
       setMessages(prev => [...prev, data]);
@@ -86,13 +124,18 @@ export default function SupportPage() {
         body: JSON.stringify({
           type: "message_received",
           title: "Nuevo mensaje de soporte",
-          description: newMessage.trim().slice(0, 100),
+          description: (newMessage.trim() || attachmentName || "").slice(0, 100),
         }),
       }).catch(() => {});
     }
 
     setNewMessage("");
+    setAttachment(null);
     setSending(false);
+  }
+
+  function isImage(url: string) {
+    return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
   }
 
   return (
@@ -122,7 +165,38 @@ export default function SupportPage() {
                       ? "bg-northpeak-green text-northpeak-bg rounded-br-sm"
                       : "bg-northpeak-surface text-northpeak-text rounded-bl-sm"
                   }`}>
-                    <p>{msg.content}</p>
+                    {/* Attachment */}
+                    {msg.attachment_url && (
+                      <div className="mb-2">
+                        {isImage(msg.attachment_url) ? (
+                          <a href={msg.attachment_url} target="_blank" rel="noreferrer">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={msg.attachment_url}
+                              alt={msg.attachment_name || "Imagen"}
+                              className="max-w-full max-h-48 rounded-lg"
+                            />
+                          </a>
+                        ) : (
+                          <a
+                            href={msg.attachment_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`flex items-center gap-2 rounded-lg p-2 ${
+                              msg.sender_role === "client"
+                                ? "bg-northpeak-bg/20"
+                                : "bg-northpeak-bg/40"
+                            }`}
+                          >
+                            <FileText className="h-4 w-4 shrink-0" />
+                            <span className="text-xs truncate">{msg.attachment_name || "Archivo"}</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    {msg.content && !(msg.content.startsWith("Archivo:") && msg.attachment_url) && (
+                      <p>{msg.content}</p>
+                    )}
                     <p className={`text-[10px] mt-1 ${
                       msg.sender_role === "client" ? "text-northpeak-bg/60" : "text-northpeak-text-dim"
                     }`}>
@@ -140,7 +214,48 @@ export default function SupportPage() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Attachment preview */}
+          {attachment && (
+            <div className="px-4 py-2 border-t border-northpeak-surface flex items-center gap-2 bg-northpeak-bg/50">
+              {attachment.type.startsWith("image/") ? (
+                <ImageIcon className="h-4 w-4 text-northpeak-green shrink-0" />
+              ) : (
+                <FileText className="h-4 w-4 text-northpeak-green shrink-0" />
+              )}
+              <span className="text-xs text-northpeak-text truncate flex-1">{attachment.name}</span>
+              <button onClick={() => setAttachment(null)} className="text-northpeak-text-dim hover:text-red-400">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
           <div className="p-4 border-t border-northpeak-surface flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (file.size > 25 * 1024 * 1024) {
+                    addToast("El archivo no puede superar 25MB", "error");
+                    return;
+                  }
+                  setAttachment(file);
+                }
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-northpeak-text-muted hover:text-northpeak-green shrink-0"
+              title="Adjuntar archivo"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
@@ -150,7 +265,7 @@ export default function SupportPage() {
             />
             <Button
               onClick={sendMessage}
-              disabled={sending || !newMessage.trim()}
+              disabled={sending || (!newMessage.trim() && !attachment)}
               className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
               size="icon"
             >
