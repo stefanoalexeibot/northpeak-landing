@@ -110,14 +110,20 @@ Devuelve un JSON con esta estructura exacta:
 
     const result = await askClaude(SYSTEM_PROMPT, userMessage);
 
-    // Parse the JSON response
-    const hallazgos: Hallazgos = JSON.parse(result);
+    // Strip markdown code fences if present
+    const cleaned = result
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    const hallazgos: Hallazgos = JSON.parse(cleaned);
 
     return NextResponse.json({ hallazgos });
   } catch (error) {
-    console.error("AI analyze error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("AI analyze error:", msg);
     return NextResponse.json(
-      { error: "Error al analizar con IA" },
+      { error: "Error al analizar con IA: " + msg },
       { status: 500 }
     );
   }
