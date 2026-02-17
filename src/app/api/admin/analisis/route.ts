@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { calcularScore, clasificarPrioridad, generarOportunidades } from "@/lib/analizador/scoring";
 import { generarReporteHTML } from "@/lib/analizador/report-html";
+import { generarCotizacion } from "@/lib/analizador/pricing";
 import type { DatosNegocio, Hallazgos } from "@/lib/analizador/scoring";
 
 export async function POST(request: Request) {
@@ -30,8 +31,11 @@ export async function POST(request: Request) {
   const prioridad = clasificarPrioridad(score);
   const oportunidades = generarOportunidades(hallazgos);
 
+  // Generate cotizacion
+  const cotizacion = generarCotizacion(oportunidades, datos.giro, datos.zona);
+
   // Generate HTML report
-  const html = generarReporteHTML(datos, hallazgos, score, oportunidades, prioridad);
+  const html = generarReporteHTML(datos, hallazgos, score, oportunidades, prioridad, cotizacion);
 
   // Upload HTML to Supabase storage
   const slug = datos.nombre
@@ -66,6 +70,7 @@ export async function POST(request: Request) {
       score,
       nivel: prioridad.nivel,
       oportunidades,
+      cotizacion,
       report_url: urlData.publicUrl,
       client_id: client_id || null,
     })
@@ -85,6 +90,7 @@ export async function POST(request: Request) {
     nivel: prioridad.nivel,
     oportunidades: oportunidades.length,
     report_url: viewUrl,
+    cotizacion,
   });
 }
 

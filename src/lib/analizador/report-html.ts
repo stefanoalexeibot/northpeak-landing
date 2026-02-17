@@ -1,11 +1,13 @@
 import type { DatosNegocio, Hallazgos, Oportunidad } from "./scoring";
+import type { Cotizacion } from "./pricing";
 
 export function generarReporteHTML(
   datos: DatosNegocio,
   hallazgos: Hallazgos,
   score: number,
   ops: Oportunidad[],
-  prioridad: { nivel: string; color: string; desc: string }
+  prioridad: { nivel: string; color: string; desc: string },
+  cotizacion?: Cotizacion | null
 ): string {
   const { nivel, color: colorNivel, desc: descNivel } = prioridad;
 
@@ -166,8 +168,38 @@ export function generarReporteHTML(
         footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; }
         .footer-text { font-size: 13px; color: var(--text-dim); }
         .footer-text a { color: var(--accent); text-decoration: none; }
+        .cotizacion-section { padding: 48px 0; border-top: 1px solid var(--border); }
+        .cotizacion-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+        .cotizacion-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); margin-bottom: 8px; }
+        .cotizacion-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; }
+        .servicios-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .servicios-table th { text-align: left; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .servicios-table th:last-child { text-align: right; }
+        .servicios-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .servicios-table td:last-child { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--white); white-space: nowrap; }
+        .servicio-nombre { color: var(--text); font-weight: 500; }
+        .servicio-desc { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+        .servicio-tipo { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+        .paquete-card { background: linear-gradient(135deg, rgba(0,229,160,0.08) 0%, rgba(0,229,160,0.02) 100%); border: 1px solid rgba(0,229,160,0.2); border-radius: 16px; padding: 32px; margin: 32px 0; position: relative; overflow: hidden; }
+        .paquete-card::before { content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); filter: blur(40px); pointer-events: none; }
+        .paquete-badge { display: inline-flex; padding: 4px 12px; background: var(--accent); color: var(--bg); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+        .paquete-nombre { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--white); margin-bottom: 8px; }
+        .paquete-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+        .paquete-precio { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; color: var(--accent); }
+        .paquete-precio span { font-size: 16px; font-weight: 500; color: var(--text-muted); }
+        .paquete-servicios { list-style: none; margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .paquete-servicios li { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .paquete-servicios li::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+        .comparativa { display: flex; gap: 16px; margin: 24px 0; flex-wrap: wrap; }
+        .comparativa-item { flex: 1; min-width: 200px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+        .comparativa-item.destacado { border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.05); }
+        .comparativa-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+        .comparativa-precio { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+        .comparativa-precio.tachado { text-decoration: line-through; color: var(--text-dim); font-size: 22px; }
+        .comparativa-precio.verde { color: var(--accent); }
+        .ahorro-badge { display: inline-flex; padding: 6px 16px; background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.2); border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 16px; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 640px) { .score-section { flex-direction: column; align-items: flex-start; } .score-ring { width: 130px; height: 130px; } .score-ring svg { width: 130px; height: 130px; } .score-number { font-size: 34px; } }
+        @media (max-width: 640px) { .score-section { flex-direction: column; align-items: flex-start; } .score-ring { width: 130px; height: 130px; } .score-ring svg { width: 130px; height: 130px; } .score-number { font-size: 34px; } .paquete-servicios { grid-template-columns: 1fr; } .comparativa { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -226,6 +258,65 @@ export function generarReporteHTML(
             </div>
             ${opsHtml}
         </section>
+        ${cotizacion && cotizacion.serviciosRecomendados.length > 0 ? `
+        <section class="cotizacion-section">
+            <div class="cotizacion-label">Cotización Personalizada</div>
+            <h2 class="cotizacion-title">Soluciones para ${datos.nombre}</h2>
+            <p class="cotizacion-sub">Basado en las oportunidades detectadas, estos son los servicios que mayor impacto tendrían en tu negocio.</p>
+
+            <table class="servicios-table">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${cotizacion.serviciosRecomendados.map((s) => `
+                    <tr>
+                        <td>
+                            <div class="servicio-nombre">${s.nombre}</div>
+                            <div class="servicio-desc">${s.descripcion}</div>
+                        </td>
+                        <td>
+                            $${s.precioFinal.toLocaleString("es-MX")}
+                            <div class="servicio-tipo">${s.tipo === "mensual" ? "/mes" : "único"}</div>
+                        </td>
+                    </tr>`).join("")}
+                </tbody>
+            </table>
+
+            ${cotizacion.paqueteRecomendado ? `
+            <div class="paquete-card">
+                <div class="paquete-badge">Recomendado</div>
+                <div class="paquete-nombre">Paquete ${cotizacion.paqueteRecomendado.nombre}</div>
+                <p class="paquete-desc">${cotizacion.paqueteRecomendado.descripcion}</p>
+                <div class="paquete-precio">$${cotizacion.paqueteRecomendado.precioMensual.toLocaleString("es-MX")} <span>/mes</span></div>
+                <ul class="paquete-servicios">
+                    ${cotizacion.paqueteRecomendado.servicios.map((sid) => {
+                      const srv = cotizacion.serviciosRecomendados.find((s) => s.id === sid) || { nombre: sid };
+                      return `<li>${srv.nombre}</li>`;
+                    }).join("")}
+                </ul>
+            </div>
+
+            <div class="comparativa">
+                <div class="comparativa-item">
+                    <div class="comparativa-label">Individual</div>
+                    <div class="comparativa-precio tachado">$${cotizacion.totalMensualIndividual.toLocaleString("es-MX")}/mes</div>
+                </div>
+                <div class="comparativa-item destacado">
+                    <div class="comparativa-label">Con paquete ${cotizacion.paqueteRecomendado.nombre}</div>
+                    <div class="comparativa-precio verde">$${cotizacion.paqueteRecomendado.precioMensual.toLocaleString("es-MX")}/mes</div>
+                </div>
+            </div>
+            ${cotizacion.ahorroConPaquete > 0 ? `<div style="text-align: center"><span class="ahorro-badge">Ahorras $${cotizacion.ahorroConPaquete.toLocaleString("es-MX")}/mes con el paquete</span></div>` : ""}
+            ` : ""}
+
+            ${cotizacion.totalUnicoIndividual > 0 ? `<p style="font-size: 12px; color: var(--text-dim); margin-top: 16px; text-align: center;">* Servicios únicos (desarrollo web, branding): $${cotizacion.totalUnicoIndividual.toLocaleString("es-MX")} MXN. Precios + IVA. Inversión publicitaria no incluida.</p>` : `<p style="font-size: 12px; color: var(--text-dim); margin-top: 16px; text-align: center;">* Precios en MXN + IVA. Inversión publicitaria no incluida.</p>`}
+        </section>
+        ` : ""}
+
         <section class="cta-section">
             <h2 class="cta-title">¿Quieres resolver todo esto en 48 horas?</h2>
             <p class="cta-desc">

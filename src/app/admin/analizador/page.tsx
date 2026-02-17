@@ -21,9 +21,13 @@ import {
   Megaphone,
   Check,
   Sparkles,
+  DollarSign,
+  Package,
+  Zap,
 } from "lucide-react";
 import { getDefaultHallazgos } from "@/lib/analizador/scoring";
 import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
+import type { Cotizacion } from "@/lib/analizador/pricing";
 import { cn } from "@/lib/utils";
 
 interface AnalisisRecord {
@@ -211,7 +215,9 @@ function AnalizadorContent() {
     nivel: string;
     oportunidades: number;
     report_url: string;
+    cotizacion?: Cotizacion;
   } | null>(null);
+  const [aiPricingLoading, setAiPricingLoading] = useState(false);
 
   useEffect(() => {
     loadHistory();
@@ -279,6 +285,7 @@ function AnalizadorContent() {
         nivel: data.nivel,
         oportunidades: data.oportunidades,
         report_url: data.report_url,
+        cotizacion: data.cotizacion,
       });
 
       addToast(`Análisis generado: ${data.score}/100 (${data.nivel})`, "success");
@@ -301,6 +308,79 @@ function AnalizadorContent() {
     setDatos({ nombre: "", giro: "", zona: "", contacto: "", telefono: "" });
     setHallazgos(getDefaultHallazgos());
     setResult(null);
+  }
+
+  async function handleAiPricing() {
+    if (!result?.cotizacion) return;
+    setAiPricingLoading(true);
+    try {
+      const res = await fetch("/api/ai/pricing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          servicios: result.cotizacion.serviciosRecomendados,
+          giro: datos.giro,
+          zona: datos.zona,
+          score: result.score,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.error || "Error al ajustar precios", "error");
+      } else {
+        // Apply adjusted prices
+        const adjusted = { ...result.cotizacion };
+        adjusted.serviciosRecomendados = adjusted.serviciosRecomendados.map((s) => {
+          const adj = data.serviciosAjustados?.find((a: { id: string; precioAjustado: number }) => a.id === s.id);
+          return adj ? { ...s, precioFinal: adj.precioAjustado } : s;
+        });
+        adjusted.totalMensualIndividual = adjusted.serviciosRecomendados
+          .filter((s) => s.tipo === "mensual")
+          .reduce((sum, s) => sum + s.precioFinal, 0);
+        adjusted.totalUnicoIndividual = adjusted.serviciosRecomendados
+          .filter((s) => s.tipo === "unico")
+          .reduce((sum, s) => sum + s.precioFinal, 0);
+        adjusted.totalIndividual = adjusted.totalMensualIndividual + adjusted.totalUnicoIndividual;
+        if (adjusted.paqueteRecomendado) {
+          adjusted.ahorroConPaquete = Math.max(0, adjusted.totalMensualIndividual - adjusted.paqueteRecomendado.precioMensual);
+        }
+        setResult({ ...result, cotizacion: adjusted });
+        addToast(data.notaIA || "Precios ajustados por IA", "success");
+      }
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setAiPricingLoading(false);
+  }
+
+  function copyCotizacion() {
+    if (!result?.cotizacion) return;
+    const cot = result.cotizacion;
+    const lines = [
+      `COTIZACIÓN — ${datos.nombre}`,
+      `${datos.giro} · ${datos.zona}`,
+      "",
+      "SERVICIOS RECOMENDADOS:",
+      ...cot.serviciosRecomendados.map(
+        (s) => `  - ${s.nombre}: $${s.precioFinal.toLocaleString("es-MX")} (${s.tipo})`
+      ),
+      "",
+      `Total mensual individual: $${cot.totalMensualIndividual.toLocaleString("es-MX")}/mes`,
+    ];
+    if (cot.totalUnicoIndividual > 0) {
+      lines.push(`Servicios únicos: $${cot.totalUnicoIndividual.toLocaleString("es-MX")}`);
+    }
+    if (cot.paqueteRecomendado) {
+      lines.push(
+        "",
+        `PAQUETE RECOMENDADO: ${cot.paqueteRecomendado.nombre}`,
+        `$${cot.paqueteRecomendado.precioMensual.toLocaleString("es-MX")}/mes`,
+        `Ahorro: $${cot.ahorroConPaquete.toLocaleString("es-MX")}/mes`
+      );
+    }
+    lines.push("", "Precios en MXN + IVA");
+    navigator.clipboard.writeText(lines.join("\n"));
+    addToast("Cotización copiada al portapapeles", "success");
   }
 
   async function handleAiFill() {
@@ -433,6 +513,114 @@ function AnalizadorContent() {
                     </Button>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Cotizacion card */}
+          {result?.cotizacion && result.cotizacion.serviciosRecomendados.length > 0 && (
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-northpeak-text font-heading text-base flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-northpeak-green" />
+                    Cotización Automática
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAiPricing}
+                      disabled={aiPricingLoading}
+                      className="border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 h-7 text-xs"
+                    >
+                      {aiPricingLoading ? (
+                        <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 mr-1.5" />
+                      )}
+                      Ajustar con IA
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={copyCotizacion}
+                      className="border-northpeak-surface text-northpeak-text-muted h-7 text-xs"
+                    >
+                      <Copy className="h-3 w-3 mr-1.5" />
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Services table */}
+                <div className="border border-northpeak-surface rounded-lg overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-northpeak-surface bg-northpeak-bg/50">
+                        <th className="text-left px-4 py-2 text-xs font-medium text-northpeak-text-dim uppercase tracking-wider">Servicio</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-northpeak-text-dim uppercase tracking-wider">Precio</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.cotizacion.serviciosRecomendados.map((s) => (
+                        <tr key={s.id} className="border-b border-northpeak-surface last:border-0">
+                          <td className="px-4 py-3">
+                            <div className="text-northpeak-text font-medium text-sm">{s.nombre}</div>
+                            <div className="text-northpeak-text-dim text-xs">{s.canal}</div>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-northpeak-text font-mono font-medium">
+                              ${s.precioFinal.toLocaleString("es-MX")}
+                            </span>
+                            <span className="text-northpeak-text-dim text-xs ml-1">
+                              {s.tipo === "mensual" ? "/mes" : "único"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Totals */}
+                <div className="flex gap-3">
+                  <div className="flex-1 bg-northpeak-bg rounded-lg p-3 text-center">
+                    <div className="text-xs text-northpeak-text-dim uppercase tracking-wider mb-1">Individual</div>
+                    <div className="text-lg font-heading font-bold text-northpeak-text">
+                      ${result.cotizacion.totalMensualIndividual.toLocaleString("es-MX")}
+                      <span className="text-xs text-northpeak-text-dim font-normal">/mes</span>
+                    </div>
+                  </div>
+                  {result.cotizacion.paqueteRecomendado && (
+                    <div className="flex-1 bg-northpeak-green/5 border border-northpeak-green/20 rounded-lg p-3 text-center">
+                      <div className="text-xs text-northpeak-green uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
+                        <Package className="h-3 w-3" />
+                        {result.cotizacion.paqueteRecomendado.nombre}
+                      </div>
+                      <div className="text-lg font-heading font-bold text-northpeak-green">
+                        ${result.cotizacion.paqueteRecomendado.precioMensual.toLocaleString("es-MX")}
+                        <span className="text-xs text-northpeak-green/60 font-normal">/mes</span>
+                      </div>
+                    </div>
+                  )}
+                  {result.cotizacion.ahorroConPaquete > 0 && (
+                    <div className="flex-1 bg-northpeak-bg rounded-lg p-3 text-center flex flex-col items-center justify-center">
+                      <Zap className="h-4 w-4 text-yellow-400 mb-1" />
+                      <div className="text-sm font-bold text-yellow-400">
+                        -${result.cotizacion.ahorroConPaquete.toLocaleString("es-MX")}
+                      </div>
+                      <div className="text-xs text-northpeak-text-dim">ahorro/mes</div>
+                    </div>
+                  )}
+                </div>
+
+                {result.cotizacion.totalUnicoIndividual > 0 && (
+                  <p className="text-xs text-northpeak-text-dim text-center">
+                    + ${result.cotizacion.totalUnicoIndividual.toLocaleString("es-MX")} MXN en servicios únicos (desarrollo, branding)
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
