@@ -32,10 +32,14 @@ export default async function PortalAuthLayout({
 
   return (
     <PortalProviders clientId={client.id} initialTheme={profile?.theme || "dark"}>
-      <div className="min-h-screen bg-northpeak-bg">
+      <div className="relative min-h-screen">
+        {/* Base background */}
+        <div className="fixed inset-0 z-0 bg-northpeak-bg" />
+        {/* Visual effects layers */}
         <DotGrid />
         <AnimatedBackground />
         <CursorGlow />
+        {/* Content */}
         <div className="relative z-10">
           <PortalNav client={client} />
           <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">{children}</main>

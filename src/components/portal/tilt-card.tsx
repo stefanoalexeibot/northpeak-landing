@@ -33,7 +33,7 @@ export default function TiltCard({
         transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
         ...(glowEffect
           ? {
-              background: `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(0,229,160,0.06) 0%, transparent 60%)`,
+              background: `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(0,229,160,0.15) 0%, transparent 60%)`,
             }
           : {}),
       });

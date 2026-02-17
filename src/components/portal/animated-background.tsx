@@ -8,22 +8,22 @@ export default function AnimatedBackground() {
 
   return (
     <div className="fixed inset-0 z-[2] overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Layer 1: gray blob */}
+      {/* Layer 1: blue-gray blob */}
       <div
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-1 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 30% 50%, rgba(128,128,128,0.08) 0%, transparent 50%)",
-          filter: "blur(80px)",
+            "radial-gradient(ellipse at 30% 50%, rgba(100,130,180,0.18) 0%, transparent 50%)",
+          filter: "blur(60px)",
         }}
       />
-      {/* Layer 2: card-color blob */}
+      {/* Layer 2: purple blob */}
       <div
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-2 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 70% 50%, rgba(12,13,18,0.12) 0%, transparent 50%)",
-          filter: "blur(80px)",
+            "radial-gradient(ellipse at 70% 50%, rgba(120,80,200,0.14) 0%, transparent 50%)",
+          filter: "blur(60px)",
         }}
       />
       {/* Layer 3: green accent blob */}
@@ -31,8 +31,8 @@ export default function AnimatedBackground() {
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-3 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, rgba(0,229,160,0.07) 0%, transparent 50%)",
-          filter: "blur(80px)",
+            "radial-gradient(ellipse at 50% 50%, rgba(0,229,160,0.16) 0%, transparent 50%)",
+          filter: "blur(60px)",
         }}
       />
     </div>
