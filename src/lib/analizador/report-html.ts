@@ -1,5 +1,5 @@
 import type { DatosNegocio, Hallazgos, Oportunidad } from "./scoring";
-import type { Cotizacion } from "./pricing";
+import type { Cotizacion, CotizacionPersonalizada } from "./pricing";
 
 export function generarReporteHTML(
   datos: DatosNegocio,
@@ -7,7 +7,8 @@ export function generarReporteHTML(
   score: number,
   ops: Oportunidad[],
   prioridad: { nivel: string; color: string; desc: string },
-  cotizacion?: Cotizacion | null
+  cotizacion?: Cotizacion | null,
+  cotizacionPersonalizada?: CotizacionPersonalizada | null
 ): string {
   const { nivel, color: colorNivel, desc: descNivel } = prioridad;
 
@@ -258,7 +259,37 @@ export function generarReporteHTML(
             </div>
             ${opsHtml}
         </section>
-        ${cotizacion && cotizacion.serviciosRecomendados.length > 0 ? `
+        ${cotizacionPersonalizada && cotizacionPersonalizada.paquetes?.length > 0 ? `
+        <section class="cotizacion-section">
+            <div class="cotizacion-label">Propuesta Estratégica Personalizada</div>
+            <h2 class="cotizacion-title">Tu plan de crecimiento, ${datos.nombre}</h2>
+            <p class="cotizacion-sub">${cotizacionPersonalizada.estrategia}</p>
+
+            ${cotizacionPersonalizada.paquetes.map((p, i) => {
+              const prioLabel: Record<string, string> = { inmediata: "PRIORIDAD INMEDIATA", corto_plazo: "CORTO PLAZO", mediano_plazo: "MEDIANO PLAZO" };
+              const prioColor: Record<string, string> = { inmediata: "#EF4444", corto_plazo: "#F59E0B", mediano_plazo: "#3B82F6" };
+              const isFirst = i === 0;
+              return `
+            <div class="paquete-card" ${!isFirst ? 'style="border-color: var(--border); background: var(--bg-card);"' : ""}>
+                <div class="paquete-badge" style="${!isFirst ? `background: ${prioColor[p.prioridad] || "var(--accent)"}` : ""}">${prioLabel[p.prioridad] || "RECOMENDADO"}</div>
+                <div class="paquete-nombre">${p.nombre}</div>
+                <p class="paquete-desc">${p.descripcion}</p>
+                <div class="paquete-precio">$${p.precioMensual.toLocaleString("es-MX")} <span>/mes</span></div>
+                ${p.precioUnico > 0 ? `<p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">+ $${p.precioUnico.toLocaleString("es-MX")} MXN setup inicial</p>` : ""}
+                <ul class="paquete-servicios" style="grid-template-columns: 1fr;">
+                    ${p.servicios.map((s) => `<li>${s}</li>`).join("")}
+                </ul>
+                <div style="margin-top: 16px; padding: 12px 16px; background: rgba(0,229,160,0.06); border-radius: 10px; border: 1px solid rgba(0,229,160,0.12);">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">ROI Estimado</div>
+                    <div style="font-size: 13px; color: var(--text-muted);">${p.roiEstimado}</div>
+                </div>
+            </div>`;
+            }).join("")}
+
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 16px; text-align: center; font-style: italic;">${cotizacionPersonalizada.notaIA}</p>
+            <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px; text-align: center;">* Precios en MXN + IVA. Inversión publicitaria no incluida.</p>
+        </section>
+        ` : cotizacion && cotizacion.serviciosRecomendados.length > 0 ? `
         <section class="cotizacion-section">
             <div class="cotizacion-label">Cotización Personalizada</div>
             <h2 class="cotizacion-title">Soluciones para ${datos.nombre}</h2>

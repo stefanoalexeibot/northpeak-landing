@@ -24,10 +24,14 @@ import {
   DollarSign,
   Package,
   Zap,
+  Send,
+  ClipboardList,
+  X,
 } from "lucide-react";
 import { getDefaultHallazgos } from "@/lib/analizador/scoring";
 import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
-import type { Cotizacion } from "@/lib/analizador/pricing";
+import type { Cotizacion, CotizacionPersonalizada } from "@/lib/analizador/pricing";
+import type { Pregunta } from "@/lib/analizador/cuestionario";
 import { cn } from "@/lib/utils";
 
 interface AnalisisRecord {
@@ -216,8 +220,15 @@ function AnalizadorContent() {
     oportunidades: number;
     report_url: string;
     cotizacion?: Cotizacion;
+    cuestionario_token?: string;
+    cotizacion_personalizada?: CotizacionPersonalizada;
   } | null>(null);
   const [aiPricingLoading, setAiPricingLoading] = useState(false);
+  const [showCuestionarioInline, setShowCuestionarioInline] = useState(false);
+  const [cuestionarioPreguntas, setCuestionarioPreguntas] = useState<Pregunta[]>([]);
+  const [cuestionarioRespuestas, setCuestionarioRespuestas] = useState<Record<string, unknown>>({});
+  const [cuestionarioStep, setCuestionarioStep] = useState(0);
+  const [cuestionarioSubmitting, setCuestionarioSubmitting] = useState(false);
 
   useEffect(() => {
     loadHistory();
@@ -286,6 +297,7 @@ function AnalizadorContent() {
         oportunidades: data.oportunidades,
         report_url: data.report_url,
         cotizacion: data.cotizacion,
+        cuestionario_token: data.cuestionario_token,
       });
 
       addToast(`Análisis generado: ${data.score}/100 (${data.nivel})`, "success");
@@ -381,6 +393,55 @@ function AnalizadorContent() {
     lines.push("", "Precios en MXN + IVA");
     navigator.clipboard.writeText(lines.join("\n"));
     addToast("Cotización copiada al portapapeles", "success");
+  }
+
+  function copyCuestionarioLink() {
+    if (!result?.cuestionario_token) return;
+    const url = `${window.location.origin}/cuestionario/${result.cuestionario_token}`;
+    navigator.clipboard.writeText(url);
+    addToast("Link de cuestionario copiado", "success");
+  }
+
+  async function openInlineCuestionario() {
+    if (!result?.cuestionario_token) return;
+    setShowCuestionarioInline(true);
+    setCuestionarioStep(0);
+    setCuestionarioRespuestas({});
+    try {
+      const res = await fetch(`/api/cuestionario/${result.cuestionario_token}`);
+      const data = await res.json();
+      if (data.preguntas) {
+        setCuestionarioPreguntas(data.preguntas);
+      }
+    } catch {
+      addToast("Error al cargar preguntas", "error");
+    }
+  }
+
+  async function submitInlineCuestionario() {
+    if (!result?.cuestionario_token) return;
+    setCuestionarioSubmitting(true);
+    try {
+      const res = await fetch(`/api/cuestionario/${result.cuestionario_token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ respuestas: cuestionarioRespuestas }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.error || "Error al enviar", "error");
+      } else {
+        setResult({
+          ...result,
+          cotizacion_personalizada: data.cotizacion_personalizada,
+        });
+        setShowCuestionarioInline(false);
+        addToast("Cotización personalizada generada", "success");
+      }
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setCuestionarioSubmitting(false);
   }
 
   async function handleAiFill() {
@@ -513,6 +574,35 @@ function AnalizadorContent() {
                     </Button>
                   </div>
                 </div>
+                {/* Cuestionario buttons */}
+                {result.cuestionario_token && (
+                  <div className="flex gap-2 mt-4 pt-4 border-t border-northpeak-surface">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={copyCuestionarioLink}
+                      className="border-northpeak-green/30 bg-northpeak-green/5 text-northpeak-green hover:bg-northpeak-green/10"
+                    >
+                      <Send className="h-3.5 w-3.5 mr-1.5" />
+                      Enviar cuestionario
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={openInlineCuestionario}
+                      className="border-northpeak-surface text-northpeak-text"
+                    >
+                      <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
+                      Llenar cuestionario
+                    </Button>
+                    {result.cotizacion_personalizada && (
+                      <span className="flex items-center text-xs text-northpeak-green ml-auto">
+                        <Check className="h-3 w-3 mr-1" />
+                        Cotización personalizada lista
+                      </span>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -621,6 +711,159 @@ function AnalizadorContent() {
                     + ${result.cotizacion.totalUnicoIndividual.toLocaleString("es-MX")} MXN en servicios únicos (desarrollo, branding)
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Personalized cotización */}
+          {result?.cotizacion_personalizada && (
+            <Card className="bg-northpeak-card border-northpeak-green/30">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-northpeak-text font-heading text-base flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-northpeak-green" />
+                  Cotización Personalizada (IA)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-northpeak-text-muted">{result.cotizacion_personalizada.estrategia}</p>
+                {result.cotizacion_personalizada.paquetes.map((p, i) => (
+                  <div key={i} className={cn(
+                    "rounded-lg p-4 border",
+                    i === 0 ? "bg-northpeak-green/5 border-northpeak-green/20" : "bg-northpeak-bg border-northpeak-surface"
+                  )}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-northpeak-text">{p.nombre}</span>
+                      <span className="font-mono font-bold text-northpeak-green">
+                        ${p.precioMensual.toLocaleString("es-MX")}/mes
+                      </span>
+                    </div>
+                    <p className="text-xs text-northpeak-text-muted mb-2">{p.descripcion}</p>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {p.servicios.map((s, j) => (
+                        <span key={j} className="text-xs px-2 py-0.5 rounded-full bg-northpeak-surface text-northpeak-text-muted">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-northpeak-green/80 italic">{p.roiEstimado}</p>
+                  </div>
+                ))}
+                <p className="text-xs text-northpeak-text-dim text-center italic">{result.cotizacion_personalizada.notaIA}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Inline cuestionario modal */}
+          {showCuestionarioInline && cuestionarioPreguntas.length > 0 && (
+            <Card className="bg-northpeak-card border-purple-500/30">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-northpeak-text font-heading text-base flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 text-purple-400" />
+                    Cuestionario ({cuestionarioStep + 1}/{cuestionarioPreguntas.filter((p) => !p.dependeDe || cuestionarioRespuestas[p.dependeDe.preguntaId] === p.dependeDe.valor).length})
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" onClick={() => setShowCuestionarioInline(false)} className="h-7 w-7 p-0 text-northpeak-text-dim">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const visible = cuestionarioPreguntas.filter((p) => !p.dependeDe || cuestionarioRespuestas[p.dependeDe.preguntaId] === p.dependeDe.valor);
+                  const current = visible[cuestionarioStep];
+                  if (!current) return null;
+                  const isLast = cuestionarioStep === visible.length - 1;
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-sm text-northpeak-text font-medium">{current.texto}</p>
+                      {current.tipo === "opcion" && current.opciones && (
+                        <div className="grid gap-2">
+                          {current.opciones.map((op) => (
+                            <button
+                              key={op}
+                              onClick={() => {
+                                setCuestionarioRespuestas({ ...cuestionarioRespuestas, [current.id]: op });
+                                if (!isLast) setTimeout(() => setCuestionarioStep((s) => s + 1), 200);
+                              }}
+                              className={cn(
+                                "text-left px-4 py-2.5 rounded-lg border text-sm transition-colors",
+                                cuestionarioRespuestas[current.id] === op
+                                  ? "border-northpeak-green/40 bg-northpeak-green/10 text-northpeak-green"
+                                  : "border-northpeak-surface bg-northpeak-bg text-northpeak-text hover:border-northpeak-surface/80"
+                              )}
+                            >
+                              {op}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {current.tipo === "si_no" && (
+                        <div className="flex gap-3">
+                          {[{ label: "Sí", value: true }, { label: "No", value: false }].map((opt) => (
+                            <button
+                              key={opt.label}
+                              onClick={() => {
+                                setCuestionarioRespuestas({ ...cuestionarioRespuestas, [current.id]: opt.value });
+                                if (!isLast) setTimeout(() => setCuestionarioStep((s) => s + 1), 200);
+                              }}
+                              className={cn(
+                                "flex-1 py-3 rounded-lg border text-sm font-medium transition-colors",
+                                cuestionarioRespuestas[current.id] === opt.value
+                                  ? "border-northpeak-green/40 bg-northpeak-green/10 text-northpeak-green"
+                                  : "border-northpeak-surface bg-northpeak-bg text-northpeak-text hover:border-northpeak-surface/80"
+                              )}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {current.tipo === "numero" && (
+                        <Input
+                          type="number"
+                          value={(cuestionarioRespuestas[current.id] as number) || ""}
+                          onChange={(e) => setCuestionarioRespuestas({ ...cuestionarioRespuestas, [current.id]: Number(e.target.value) })}
+                          className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+                          placeholder="Escribe un número..."
+                        />
+                      )}
+                      <div className="flex justify-between pt-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCuestionarioStep((s) => Math.max(0, s - 1))}
+                          disabled={cuestionarioStep === 0}
+                          className="text-northpeak-text-muted"
+                        >
+                          Anterior
+                        </Button>
+                        {isLast ? (
+                          <Button
+                            size="sm"
+                            onClick={submitInlineCuestionario}
+                            disabled={cuestionarioSubmitting || cuestionarioRespuestas[current.id] === undefined}
+                            className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
+                          >
+                            {cuestionarioSubmitting ? (
+                              <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Generando...</>
+                            ) : (
+                              "Generar cotización"
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => setCuestionarioStep((s) => s + 1)}
+                            disabled={cuestionarioRespuestas[current.id] === undefined}
+                            className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
+                          >
+                            Siguiente
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           )}

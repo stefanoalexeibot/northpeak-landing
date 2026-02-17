@@ -1,4 +1,5 @@
 import type { Oportunidad } from "./scoring";
+import type { RespuestasCuestionario } from "./cuestionario";
 
 export interface Servicio {
   id: string;
@@ -266,4 +267,50 @@ export function generarCotizacion(
     totalUnicoIndividual,
     ahorroConPaquete,
   };
+}
+
+// --- Personalized quotation types ---
+
+export interface PaquetePersonalizado {
+  nombre: string;
+  descripcion: string;
+  servicios: string[];
+  precioMensual: number;
+  precioUnico: number;
+  prioridad: "inmediata" | "corto_plazo" | "mediano_plazo";
+  roiEstimado: string;
+}
+
+export interface CotizacionPersonalizada {
+  paquetes: PaquetePersonalizado[];
+  estrategia: string;
+  notaIA: string;
+  totalMensual: number;
+  totalUnico: number;
+}
+
+export function buildPersonalizedPricingContext(
+  oportunidades: Oportunidad[],
+  respuestas: RespuestasCuestionario,
+  giro: string,
+  zona: string
+): string {
+  const opsText = oportunidades
+    .map((o) => `- [${o.impacto.toUpperCase()}] ${o.canal}: ${o.titulo} — ${o.desc}`)
+    .join("\n");
+
+  const respText = Object.entries(respuestas)
+    .map(([k, v]) => `- ${k}: ${v}`)
+    .join("\n");
+
+  return `NEGOCIO: ${giro} en ${zona}
+
+OPORTUNIDADES DETECTADAS:
+${opsText}
+
+RESPUESTAS DEL CUESTIONARIO:
+${respText}
+
+CATÁLOGO DE SERVICIOS DISPONIBLES (precios base MXN):
+${SERVICIOS.map((s) => `- ${s.id}: ${s.nombre} — $${s.precioBase} (${s.tipo})`).join("\n")}`;
 }

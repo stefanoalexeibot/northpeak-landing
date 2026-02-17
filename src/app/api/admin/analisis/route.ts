@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { calcularScore, clasificarPrioridad, generarOportunidades } from "@/lib/analizador/scoring";
 import { generarReporteHTML } from "@/lib/analizador/report-html";
 import { generarCotizacion } from "@/lib/analizador/pricing";
 import type { DatosNegocio, Hallazgos } from "@/lib/analizador/scoring";
+import { randomBytes } from "crypto";
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -83,6 +85,22 @@ export async function POST(request: Request) {
 
   const viewUrl = `/api/reporte/${analisis.id}`;
 
+  // Create cuestionario with token (uses service role to bypass RLS)
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const token = randomBytes(16).toString("hex");
+  const { data: cuestionario } = await serviceSupabase
+    .from("cuestionarios")
+    .insert({
+      analisis_id: analisis.id,
+      token,
+    })
+    .select("id, token")
+    .single();
+
   return NextResponse.json({
     success: true,
     analisis,
@@ -91,6 +109,7 @@ export async function POST(request: Request) {
     oportunidades: oportunidades.length,
     report_url: viewUrl,
     cotizacion,
+    cuestionario_token: cuestionario?.token || null,
   });
 }
 
