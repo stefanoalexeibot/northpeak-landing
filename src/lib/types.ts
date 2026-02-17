@@ -132,7 +132,16 @@ export type NotificationType =
   | "referral_submitted"
   | "testimonial_submitted"
   | "payment_overdue"
-  | "file_uploaded";
+  | "file_uploaded"
+  | "cuestionario_completed";
+
+export type EtapaProspecto =
+  | "nuevo"
+  | "cuestionario_enviado"
+  | "cuestionario_completado"
+  | "en_negociacion"
+  | "cerrado_ganado"
+  | "cerrado_perdido";
 
 export interface Notification {
   id: string;

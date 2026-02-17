@@ -120,16 +120,63 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("analisis_digital")
-    .select("id, nombre_negocio, giro, zona, score, nivel, report_url, client_id, created_at")
+    .select("id, nombre_negocio, giro, zona, score, nivel, report_url, client_id, created_at, etapa, contacto, telefono")
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Map report URLs to proxy route
+  // Get cuestionario tokens for all analyses
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const ids = (data ?? []).map((a) => a.id);
+  const { data: cuestionarios } = ids.length > 0
+    ? await serviceSupabase
+        .from("cuestionarios")
+        .select("analisis_id, token")
+        .in("analisis_id", ids)
+    : { data: [] };
+
+  const tokenMap = new Map(
+    (cuestionarios ?? []).map((c) => [c.analisis_id, c.token])
+  );
+
   const mapped = (data ?? []).map((a) => ({
     ...a,
     report_url: `/api/reporte/${a.id}`,
+    cuestionario_token: tokenMap.get(a.id) || null,
   }));
 
   return NextResponse.json(mapped);
+}
+
+// PATCH: Update etapa
+export async function PATCH(request: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const { id, etapa } = await request.json();
+  if (!id || !etapa) {
+    return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from("analisis_digital")
+    .update({ etapa })
+    .eq("id", id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }

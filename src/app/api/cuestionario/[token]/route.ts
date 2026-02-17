@@ -5,6 +5,7 @@ import { generarReporteHTML } from "@/lib/analizador/report-html";
 import { clasificarPrioridad } from "@/lib/analizador/scoring";
 import { askClaude } from "@/lib/ai/claude";
 import { buildPersonalizedPricingContext } from "@/lib/analizador/pricing";
+import { createNotification } from "@/lib/notifications";
 import type { Oportunidad, DatosNegocio, Hallazgos } from "@/lib/analizador/scoring";
 import type { Cotizacion, CotizacionPersonalizada } from "@/lib/analizador/pricing";
 import type { RespuestasCuestionario } from "@/lib/analizador/cuestionario";
@@ -215,11 +216,22 @@ export async function POST(
 
     const { data: urlData } = supabase.storage.from("reportes").getPublicUrl(filename);
 
-    // Update analysis with new report URL
+    // Update analysis with new report URL + etapa
     await supabase
       .from("analisis_digital")
-      .update({ report_url: urlData.publicUrl })
+      .update({
+        report_url: urlData.publicUrl,
+        etapa: "cuestionario_completado",
+      })
       .eq("id", cuestionario.analisis_id);
+
+    // Send notification to admin
+    await createNotification(supabase, {
+      type: "cuestionario_completed",
+      title: `${analisis.nombre_negocio} completó el cuestionario`,
+      description: `Cotización personalizada generada — ${analisis.giro}, ${analisis.zona}`,
+      link: `/admin/analizador`,
+    });
 
     return NextResponse.json({
       success: true,

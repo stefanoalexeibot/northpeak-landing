@@ -24,9 +24,9 @@ import {
   DollarSign,
   Package,
   Zap,
-  Send,
   ClipboardList,
   X,
+  MessageCircle,
 } from "lucide-react";
 import { getDefaultHallazgos } from "@/lib/analizador/scoring";
 import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
@@ -44,7 +44,20 @@ interface AnalisisRecord {
   report_url: string;
   client_id: string | null;
   created_at: string;
+  etapa: string;
+  contacto?: string;
+  telefono?: string;
+  cuestionario_token?: string;
 }
+
+const ETAPA_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  nuevo: { label: "Nuevo", color: "text-gray-400", bg: "bg-gray-400/10" },
+  cuestionario_enviado: { label: "Cuestionario enviado", color: "text-blue-400", bg: "bg-blue-400/10" },
+  cuestionario_completado: { label: "Cotización lista", color: "text-northpeak-green", bg: "bg-northpeak-green/10" },
+  en_negociacion: { label: "En negociación", color: "text-yellow-400", bg: "bg-yellow-400/10" },
+  cerrado_ganado: { label: "Ganado", color: "text-emerald-400", bg: "bg-emerald-400/10" },
+  cerrado_perdido: { label: "Perdido", color: "text-red-400", bg: "bg-red-400/10" },
+};
 
 const GIROS = [
   "Restaurante",
@@ -402,6 +415,43 @@ function AnalizadorContent() {
     addToast("Link de cuestionario copiado", "success");
   }
 
+  function sendCuestionarioWhatsApp(token?: string, nombre?: string, contacto?: string, telefono?: string) {
+    const t = token || result?.cuestionario_token;
+    const n = nombre || datos.nombre;
+    const c = contacto || datos.contacto;
+    const p = telefono || datos.telefono;
+    if (!t) return;
+    const url = `${window.location.origin}/cuestionario/${t}`;
+    const msg = `Hola${c ? ` ${c}` : ""}, te preparamos un análisis digital de *${n}*.\n\nPara darte una cotización personalizada, contesta estas preguntas rápidas (2 min):\n${url}\n\n— NorthPeak Digital`;
+    const waUrl = `https://wa.me/${p ? p.replace(/\D/g, "") : ""}?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, "_blank");
+  }
+
+  function copyCotizacionPersonalizada() {
+    if (!result?.cotizacion_personalizada) return;
+    const cp = result.cotizacion_personalizada;
+    const lines = [
+      `PROPUESTA ESTRATÉGICA — ${datos.nombre}`,
+      `${datos.giro} · ${datos.zona}`,
+      "",
+      cp.estrategia,
+      "",
+      ...cp.paquetes.map((p, i) => [
+        `${i + 1}. ${p.nombre}`,
+        `   ${p.descripcion}`,
+        `   Precio: $${p.precioMensual.toLocaleString("es-MX")}/mes${p.precioUnico > 0 ? ` + $${p.precioUnico.toLocaleString("es-MX")} setup` : ""}`,
+        `   Incluye: ${p.servicios.join(", ")}`,
+        `   ROI: ${p.roiEstimado}`,
+        "",
+      ]).flat(),
+      cp.notaIA,
+      "",
+      "Precios en MXN + IVA",
+    ];
+    navigator.clipboard.writeText(lines.join("\n"));
+    addToast("Cotización personalizada copiada", "success");
+  }
+
   async function openInlineCuestionario() {
     if (!result?.cuestionario_token) return;
     setShowCuestionarioInline(true);
@@ -576,15 +626,24 @@ function AnalizadorContent() {
                 </div>
                 {/* Cuestionario buttons */}
                 {result.cuestionario_token && (
-                  <div className="flex gap-2 mt-4 pt-4 border-t border-northpeak-surface">
+                  <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-northpeak-surface">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => sendCuestionarioWhatsApp()}
+                      className="border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
+                      Enviar por WhatsApp
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={copyCuestionarioLink}
-                      className="border-northpeak-green/30 bg-northpeak-green/5 text-northpeak-green hover:bg-northpeak-green/10"
+                      className="border-northpeak-surface text-northpeak-text-muted"
                     >
-                      <Send className="h-3.5 w-3.5 mr-1.5" />
-                      Enviar cuestionario
+                      <Copy className="h-3.5 w-3.5 mr-1.5" />
+                      Copiar link
                     </Button>
                     <Button
                       variant="outline"
@@ -593,7 +652,7 @@ function AnalizadorContent() {
                       className="border-northpeak-surface text-northpeak-text"
                     >
                       <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
-                      Llenar cuestionario
+                      Llenar aquí
                     </Button>
                     {result.cotizacion_personalizada && (
                       <span className="flex items-center text-xs text-northpeak-green ml-auto">
@@ -719,10 +778,21 @@ function AnalizadorContent() {
           {result?.cotizacion_personalizada && (
             <Card className="bg-northpeak-card border-northpeak-green/30">
               <CardHeader className="pb-3">
-                <CardTitle className="text-northpeak-text font-heading text-base flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-northpeak-green" />
-                  Cotización Personalizada (IA)
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-northpeak-text font-heading text-base flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-northpeak-green" />
+                    Cotización Personalizada (IA)
+                  </CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyCotizacionPersonalizada}
+                    className="border-northpeak-surface text-northpeak-text-muted h-7 text-xs"
+                  >
+                    <Copy className="h-3 w-3 mr-1.5" />
+                    Copiar
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-northpeak-text-muted">{result.cotizacion_personalizada.estrategia}</p>
@@ -1110,62 +1180,81 @@ function AnalizadorContent() {
               </CardContent>
             </Card>
           ) : (
-            history.map((a) => (
-              <Card key={a.id} className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-surface/80 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-full text-lg font-heading font-bold shrink-0",
-                        nivelColor(a.nivel)
-                      )}
-                    >
-                      {a.score}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-northpeak-text truncate">
-                        {a.nombre_negocio}
-                      </p>
-                      <p className="text-xs text-northpeak-text-muted">
-                        {a.giro} · {a.zona}
-                      </p>
-                      <p className="text-xs text-northpeak-text-dim mt-0.5">
-                        {new Date(a.created_at).toLocaleDateString("es-MX", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyLink(a.report_url)}
-                        className="text-northpeak-text-muted hover:text-northpeak-text h-8"
-                      >
-                        {copied === a.report_url ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
+            history.map((a) => {
+              const etapa = ETAPA_CONFIG[a.etapa] || ETAPA_CONFIG.nuevo;
+              return (
+                <Card key={a.id} className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-surface/80 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center rounded-full text-lg font-heading font-bold shrink-0",
+                          nivelColor(a.nivel)
                         )}
-                      </Button>
-                      <a href={a.report_url} target="_blank" rel="noreferrer">
+                      >
+                        {a.score}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-northpeak-text truncate">
+                            {a.nombre_negocio}
+                          </p>
+                          <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0", etapa.color, etapa.bg)}>
+                            {etapa.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-northpeak-text-muted">
+                          {a.giro} · {a.zona}
+                        </p>
+                        <p className="text-xs text-northpeak-text-dim mt-0.5">
+                          {new Date(a.created_at).toLocaleDateString("es-MX", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        {a.cuestionario_token && a.etapa === "nuevo" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => sendCuestionarioWhatsApp(a.cuestionario_token, a.nombre_negocio, a.contacto, a.telefono)}
+                            className="text-green-400 hover:text-green-300 h-8"
+                            title="Enviar cuestionario por WhatsApp"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-northpeak-green hover:text-northpeak-green/80 h-8"
+                          onClick={() => copyLink(a.report_url)}
+                          className="text-northpeak-text-muted hover:text-northpeak-text h-8"
                         >
-                          <ExternalLink className="h-3.5 w-3.5" />
+                          {copied === a.report_url ? (
+                            <Check className="h-3.5 w-3.5" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
                         </Button>
-                      </a>
+                        <a href={a.report_url} target="_blank" rel="noreferrer">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-northpeak-green hover:text-northpeak-green/80 h-8"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       )}

@@ -14,6 +14,7 @@ import {
   Star,
   Search,
   BarChart3,
+  Kanban,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -25,6 +26,7 @@ const navItems = [
   { label: "Mensajes", href: "/admin/messages", icon: MessageSquare },
   { label: "Reseñas", href: "/admin/testimonials", icon: Star },
   { label: "Analizador", href: "/admin/analizador", icon: Search },
+  { label: "Pipeline", href: "/admin/pipeline", icon: Kanban },
   { label: "Reportes", href: "/admin/reports", icon: BarChart3 },
 ];
 
