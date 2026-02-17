@@ -7,7 +7,7 @@ export default function AnimatedBackground() {
   if (!isDesktop) return null;
 
   return (
-    <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none" aria-hidden="true">
+    <div className="fixed inset-0 z-[2] overflow-hidden pointer-events-none" aria-hidden="true">
       {/* Layer 1: gray blob */}
       <div
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-1 gpu-accelerated"

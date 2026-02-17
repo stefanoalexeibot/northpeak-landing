@@ -8,7 +8,7 @@ export default function DotGrid() {
 
   return (
     <div
-      className="fixed inset-0 z-[-20] pointer-events-none animate-dot-pulse gpu-accelerated"
+      className="fixed inset-0 z-[1] pointer-events-none animate-dot-pulse gpu-accelerated"
       style={{
         backgroundImage:
           "radial-gradient(circle, rgba(0,229,160,0.15) 1px, transparent 1px)",

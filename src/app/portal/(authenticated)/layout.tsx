@@ -36,8 +36,10 @@ export default async function PortalAuthLayout({
         <DotGrid />
         <AnimatedBackground />
         <CursorGlow />
-        <PortalNav client={client} />
-        <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8">{children}</main>
+        <div className="relative z-10">
+          <PortalNav client={client} />
+          <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">{children}</main>
+        </div>
       </div>
     </PortalProviders>
   );
