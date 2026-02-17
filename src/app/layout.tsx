@@ -1,10 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "NorthPeak Digital — Portal",
   description: "Portal de clientes NorthPeak Digital",
-  icons: { icon: "/favicon.png" },
+  icons: { icon: "/favicon.png", apple: "/favicon.png" },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "NorthPeak",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#05060A",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -14,7 +28,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark">
-      <body>{children}</body>
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body>
+        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
+      </body>
     </html>
   );
 }
