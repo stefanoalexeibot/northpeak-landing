@@ -1,0 +1,70 @@
+import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import ExportButton from "./export-button";
+
+export default async function AdminClientsPage() {
+  const supabase = createClient();
+  const { data: clients } = await supabase
+    .from("clients")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-northpeak-text">Clientes</h1>
+          <p className="text-northpeak-text-muted mt-1">Gestiona tus clientes</p>
+        </div>
+        <div className="flex gap-2">
+          {clients && clients.length > 0 && <ExportButton clients={clients} />}
+          <Link href="/admin/clients/new">
+            <Button className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo cliente
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {!clients || clients.length === 0 ? (
+        <Card className="bg-northpeak-card border-northpeak-surface">
+          <CardContent className="p-12 text-center">
+            <p className="text-northpeak-text-muted">No hay clientes registrados.</p>
+            <Link href="/admin/clients/new">
+              <Button className="mt-4 bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
+                Crear primer cliente
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-3">
+          {clients.map((client) => (
+            <Link key={client.id} href={`/admin/clients/${client.id}`}>
+              <Card className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-green/30 transition-colors cursor-pointer">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-northpeak-green/10 text-northpeak-green font-bold text-lg shrink-0">
+                    {client.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-northpeak-text truncate">{client.name}</p>
+                    <p className="text-sm text-northpeak-text-muted truncate">
+                      {client.company ? `${client.company} — ` : ""}{client.email}
+                    </p>
+                  </div>
+                  <p className="text-xs text-northpeak-text-dim hidden sm:block">
+                    {new Date(client.created_at).toLocaleDateString("es-MX")}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

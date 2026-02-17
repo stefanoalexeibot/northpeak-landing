@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    --background: 228 33% 3%;
+    --foreground: 228 12% 92%;
+    --card: 230 17% 6%;
+    --card-foreground: 228 12% 92%;
+    --popover: 230 17% 6%;
+    --popover-foreground: 228 12% 92%;
+    --primary: 160 100% 45%;
+    --primary-foreground: 228 33% 3%;
+    --secondary: 230 13% 10%;
+    --secondary-foreground: 228 12% 92%;
+    --muted: 230 13% 10%;
+    --muted-foreground: 228 8% 50%;
+    --accent: 160 100% 45%;
+    --accent-foreground: 228 33% 3%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 228 8% 14%;
+    --input: 228 8% 14%;
+    --ring: 160 100% 45%;
+    --radius: 0.75rem;
+  }
+}
+
+/* Light mode for portal only (admin stays dark) */
+.light {
+  --background: 220 20% 97%;
+  --foreground: 228 15% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 228 15% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 228 15% 15%;
+  --primary: 160 100% 38%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 15% 93%;
+  --secondary-foreground: 228 15% 15%;
+  --muted: 220 15% 93%;
+  --muted-foreground: 228 8% 45%;
+  --accent: 160 100% 38%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 88%;
+  --input: 220 13% 88%;
+  --ring: 160 100% 38%;
+}
+
+.light .bg-northpeak-bg { background-color: #F5F6F8; }
+.light .bg-northpeak-card { background-color: #FFFFFF; }
+.light .bg-northpeak-card\/80 { background-color: rgba(255, 255, 255, 0.8); }
+.light .bg-northpeak-surface { background-color: #ECEDF0; }
+.light .text-northpeak-text { color: #1A1C24; }
+.light .text-northpeak-text-muted { color: #5C5F6B; }
+.light .text-northpeak-text-dim { color: #8A8D9A; }
+.light .border-northpeak-surface { border-color: #E0E1E6; }
+.light .bg-northpeak-green\/10 { background-color: rgba(0, 229, 160, 0.1); }
+.light .hover\:bg-northpeak-surface:hover { background-color: #ECEDF0; }
+.light .hover\:border-northpeak-green\/30:hover { border-color: rgba(0, 229, 160, 0.3); }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
