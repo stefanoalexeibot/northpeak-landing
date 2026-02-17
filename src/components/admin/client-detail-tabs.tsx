@@ -638,7 +638,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                             {new Date(a.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
                           </p>
                         </div>
-                        <a href={a.report_url} target="_blank" rel="noreferrer">
+                        <a href={`/api/admin/analisis/${a.id}`} target="_blank" rel="noreferrer">
                           <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8">
                             <ExternalLink className="h-4 w-4" />
                           </Button>

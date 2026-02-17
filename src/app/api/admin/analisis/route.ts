@@ -76,13 +76,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Error al guardar: " + dbError.message }, { status: 500 });
   }
 
+  const viewUrl = `/api/admin/analisis/${analisis.id}`;
+
   return NextResponse.json({
     success: true,
     analisis,
     score,
     nivel: prioridad.nivel,
     oportunidades: oportunidades.length,
-    report_url: urlData.publicUrl,
+    report_url: viewUrl,
   });
 }
 
@@ -98,5 +100,11 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data);
+  // Map report URLs to proxy route
+  const mapped = (data ?? []).map((a) => ({
+    ...a,
+    report_url: `/api/admin/analisis/${a.id}`,
+  }));
+
+  return NextResponse.json(mapped);
 }
