@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/toast";
 import type { Client, Document, Project, MediaFile } from "@/lib/types";
 import {
   Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard,
@@ -30,6 +31,7 @@ interface Props {
 export default function ClientDetailTabs({ client, documents, projects, media, payments = [] }: Props) {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
 
   // --- Info tab state ---
   const [name, setName] = useState(client.name);
@@ -110,7 +112,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   async function createPayment() {
     if (!payAmount || !payConcept) return;
     setSavingPayment(true);
-    await supabase.from("payments").insert({
+    const { error } = await supabase.from("payments").insert({
       client_id: client.id,
       amount: parseFloat(payAmount),
       concept: payConcept,
@@ -120,12 +122,17 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
       notes: payNotes || null,
       paid_at: payStatus === "completed" ? new Date().toISOString() : null,
     });
+    setSavingPayment(false);
+    if (error) {
+      addToast(`Error al registrar pago: ${error.message}`, "error");
+      return;
+    }
+    addToast("Pago registrado exitosamente", "success");
     setShowPaymentDialog(false);
     setPayAmount("");
     setPayConcept("");
     setPayRef("");
     setPayNotes("");
-    setSavingPayment(false);
     router.refresh();
   }
 
