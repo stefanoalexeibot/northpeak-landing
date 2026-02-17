@@ -79,6 +79,16 @@ export default function SupportPage() {
 
     if (data) {
       setMessages(prev => [...prev, data]);
+      // Notify admin
+      fetch("/api/portal/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "message_received",
+          title: "Nuevo mensaje de soporte",
+          description: newMessage.trim().slice(0, 100),
+        }),
+      }).catch(() => {});
     }
 
     setNewMessage("");

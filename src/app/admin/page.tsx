@@ -1,33 +1,93 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FolderOpen, MessageSquare, Gift } from "lucide-react";
+import { DollarSign, FileText, MessageSquare, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import ClientsChart from "@/components/admin/charts/clients-chart";
 import ProjectsChart from "@/components/admin/charts/projects-chart";
-import ReferralsChart from "@/components/admin/charts/referrals-chart";
+import RevenueChart from "@/components/admin/charts/revenue-chart";
 import ActivityFeed from "@/components/admin/activity-feed";
+import OverduePaymentsCard from "@/components/admin/overdue-payments-card";
 import AdminDashboardClient from "@/components/admin/admin-dashboard-client";
 
 export default async function AdminDashboard() {
   const supabase = createClient();
 
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
   const [
-    { count: clientCount },
-    { count: projectCount },
+    { data: monthlyPayments },
+    { count: unsignedContracts },
     { count: messageCount },
-    { count: referralCount },
+    { data: overduePaymentsData },
   ] = await Promise.all([
-    supabase.from("clients").select("*", { count: "exact", head: true }),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase
+      .from("payments")
+      .select("amount")
+      .eq("status", "completed")
+      .gte("paid_at", startOfMonth),
+    supabase
+      .from("documents")
+      .select("*", { count: "exact", head: true })
+      .eq("type", "contract")
+      .or("signed.is.null,signed.eq.false"),
     supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
-    supabase.from("referrals").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase
+      .from("payments")
+      .select("id, client_id, concept, amount, due_date, clients(name)")
+      .eq("status", "pending")
+      .not("due_date", "is", null)
+      .lt("due_date", now.toISOString().split("T")[0]),
   ]);
 
+  const monthRevenue = monthlyPayments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+  const overdueCount = overduePaymentsData?.length ?? 0;
+
+  const overduePayments = (overduePaymentsData ?? []).map((p) => {
+    const clientName = (p.clients as unknown as { name: string } | null)?.name || "Cliente";
+    const daysOverdue = Math.floor(
+      (now.getTime() - new Date(p.due_date!).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return {
+      id: p.id,
+      client_id: p.client_id,
+      client_name: clientName,
+      concept: p.concept,
+      amount: Number(p.amount),
+      due_date: p.due_date!,
+      days_overdue: daysOverdue,
+    };
+  });
+
   const stats = [
-    { label: "Clientes", value: clientCount ?? 0, icon: Users, href: "/admin/clients", color: "text-northpeak-green" },
-    { label: "Proyectos activos", value: projectCount ?? 0, icon: FolderOpen, href: "/admin/clients", color: "text-northpeak-blue" },
-    { label: "Mensajes sin leer", value: messageCount ?? 0, icon: MessageSquare, href: "/admin/messages", color: "text-yellow-400" },
-    { label: "Referidos pendientes", value: referralCount ?? 0, icon: Gift, href: "/admin/referrals", color: "text-purple-400" },
+    {
+      label: "Ingresos del mes",
+      value: `$${monthRevenue.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
+      icon: DollarSign,
+      href: "/admin/clients",
+      color: "text-northpeak-green",
+    },
+    {
+      label: "Contratos pendientes",
+      value: unsignedContracts ?? 0,
+      icon: FileText,
+      href: "/admin/documents",
+      color: "text-northpeak-blue",
+    },
+    {
+      label: "Mensajes sin leer",
+      value: messageCount ?? 0,
+      icon: MessageSquare,
+      href: "/admin/messages",
+      color: "text-yellow-400",
+    },
+    {
+      label: "Pagos vencidos",
+      value: overdueCount,
+      icon: AlertTriangle,
+      href: "/admin/clients",
+      color: "text-red-400",
+    },
   ];
 
   // Recent clients
@@ -45,9 +105,14 @@ export default async function AdminDashboard() {
   const { data: allProjects } = await supabase.from("projects").select("status");
   const projectsByStatus = getStatusCounts(allProjects?.map(p => p.status) || []);
 
-  // Chart data: referrals by month
-  const { data: allReferrals } = await supabase.from("referrals").select("created_at").order("created_at");
-  const referralsByMonth = getMonthlyData(allReferrals?.map(r => r.created_at) || []);
+  // Chart data: revenue by month
+  const { data: allPayments } = await supabase
+    .from("payments")
+    .select("amount, paid_at")
+    .eq("status", "completed")
+    .not("paid_at", "is", null)
+    .order("paid_at");
+  const revenueByMonth = getMonthlyRevenue(allPayments ?? []);
 
   return (
     <AdminDashboardClient>
@@ -83,6 +148,15 @@ export default async function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading text-base">Ingresos por mes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RevenueChart data={revenueByMonth} />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
               <CardTitle className="text-northpeak-text font-heading text-base">Clientes por mes</CardTitle>
             </CardHeader>
             <CardContent>
@@ -98,19 +172,10 @@ export default async function AdminDashboard() {
               <ProjectsChart data={projectsByStatus} />
             </CardContent>
           </Card>
-
-          <Card className="bg-northpeak-card border-northpeak-surface">
-            <CardHeader>
-              <CardTitle className="text-northpeak-text font-heading text-base">Referidos por mes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ReferralsChart data={referralsByMonth} />
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Activity Feed + Recent Clients */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Activity Feed + Overdue Payments + Recent Clients */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
               <CardTitle className="text-northpeak-text font-heading">
@@ -119,6 +184,18 @@ export default async function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <ActivityFeed />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+                Pagos vencidos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OverduePaymentsCard payments={overduePayments} />
             </CardContent>
           </Card>
 
@@ -197,4 +274,25 @@ function getStatusCounts(statuses: string[]) {
     counts[s] = (counts[s] || 0) + 1;
   }
   return Object.entries(counts).map(([status, count]) => ({ status, count }));
+}
+
+function getMonthlyRevenue(payments: { amount: number; paid_at: string | null }[]) {
+  const months: Record<string, number> = {};
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.toLocaleDateString("es-MX", { month: "short", year: "2-digit" });
+    months[key] = 0;
+  }
+
+  for (const pay of payments) {
+    if (!pay.paid_at) continue;
+    const d = new Date(pay.paid_at);
+    const key = d.toLocaleDateString("es-MX", { month: "short", year: "2-digit" });
+    if (key in months) {
+      months[key] += Number(pay.amount);
+    }
+  }
+
+  return Object.entries(months).map(([month, amount]) => ({ month, amount }));
 }

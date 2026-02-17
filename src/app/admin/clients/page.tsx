@@ -4,13 +4,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import ExportButton from "./export-button";
+import ClientStatusBadge from "@/components/admin/client-status-badge";
+import ClientStatusFilter from "./client-status-filter";
 
-export default async function AdminClientsPage() {
+export default async function AdminClientsPage({
+  searchParams,
+}: {
+  searchParams: { status?: string };
+}) {
   const supabase = createClient();
-  const { data: clients } = await supabase
+  let query = supabase
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (searchParams.status && searchParams.status !== "all") {
+    query = query.eq("status", searchParams.status);
+  }
+
+  const { data: clients } = await query;
 
   return (
     <div className="space-y-6">
@@ -29,6 +41,8 @@ export default async function AdminClientsPage() {
           </Link>
         </div>
       </div>
+
+      <ClientStatusFilter current={searchParams.status} />
 
       {!clients || clients.length === 0 ? (
         <Card className="bg-northpeak-card border-northpeak-surface">
@@ -51,7 +65,10 @@ export default async function AdminClientsPage() {
                     {client.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-northpeak-text truncate">{client.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-northpeak-text truncate">{client.name}</p>
+                      <ClientStatusBadge status={client.status} />
+                    </div>
                     <p className="text-sm text-northpeak-text-muted truncate">
                       {client.company ? `${client.company} — ` : ""}{client.email}
                     </p>

@@ -66,6 +66,16 @@ export default function TestimonialPage() {
       addToast(error.message, "error");
     } else {
       addToast("Reseña enviada. Gracias por tu feedback!", "success");
+      // Notify admin
+      fetch("/api/portal/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "testimonial_submitted",
+          title: `Nueva reseña: "${title}"`,
+          description: `Calificación: ${rating}/5`,
+        }),
+      }).catch(() => {});
       // Reload to show existing
       const { data } = await supabase
         .from("testimonials")

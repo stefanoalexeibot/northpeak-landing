@@ -19,6 +19,7 @@ import {
 import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
 import DuplicateProject from "@/components/admin/duplicate-project";
+import ClientActivityTimeline from "@/components/admin/client-activity-timeline";
 
 interface Props {
   client: Client;
@@ -48,6 +49,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   const [payStatus, setPayStatus] = useState("pending");
   const [payRef, setPayRef] = useState("");
   const [payNotes, setPayNotes] = useState("");
+  const [payDueDate, setPayDueDate] = useState("");
   const [savingPayment, setSavingPayment] = useState(false);
 
   // --- Document upload ---
@@ -120,6 +122,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
       status: payStatus,
       reference_number: payRef || null,
       notes: payNotes || null,
+      due_date: payDueDate || null,
       paid_at: payStatus === "completed" ? new Date().toISOString() : null,
     });
     setSavingPayment(false);
@@ -133,6 +136,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
     setPayConcept("");
     setPayRef("");
     setPayNotes("");
+    setPayDueDate("");
     router.refresh();
   }
 
@@ -304,6 +308,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
           <TabsTrigger value="projects" className="data-[state=active]:bg-northpeak-card">Proyectos</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-northpeak-card">Archivos</TabsTrigger>
           <TabsTrigger value="payments" className="data-[state=active]:bg-northpeak-card">Pagos</TabsTrigger>
+          <TabsTrigger value="activity" className="data-[state=active]:bg-northpeak-card">Actividad</TabsTrigger>
         </TabsList>
 
         {/* INFO TAB */}
@@ -510,14 +515,37 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                 <p className="text-northpeak-text-muted text-sm">No hay pagos registrados.</p>
               ) : (
                 <div className="space-y-2">
-                  {payments.map((pay) => (
+                  {payments.map((pay) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const dueDate = pay.due_date ? new Date(pay.due_date + "T00:00:00") : null;
+                    const isOverdue = dueDate && dueDate < today && pay.status !== "completed";
+                    const isUpcoming = dueDate && !isOverdue && dueDate.getTime() - today.getTime() < 7 * 86400000 && pay.status !== "completed";
+                    return (
                     <div key={pay.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
                       <CreditCard className="h-5 w-5 text-northpeak-green shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
-                        <p className="text-xs text-northpeak-text-dim">
-                          {pay.payment_method} {pay.reference_number ? `— ${pay.reference_number}` : ""}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-xs text-northpeak-text-dim">
+                            {pay.payment_method} {pay.reference_number ? `— ${pay.reference_number}` : ""}
+                          </p>
+                          {pay.due_date && (
+                            <span className="text-xs text-northpeak-text-dim">
+                              Vence: {new Date(pay.due_date + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                            </span>
+                          )}
+                          {isOverdue && (
+                            <span className="text-[10px] font-medium text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">
+                              Vencido
+                            </span>
+                          )}
+                          {isUpcoming && (
+                            <span className="text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
+                              Próximo
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-bold text-northpeak-text">${Number(pay.amount).toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
@@ -529,9 +557,26 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ACTIVITY TAB */}
+        <TabsContent value="activity">
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading">Timeline de actividad</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClientActivityTimeline
+                clientId={client.id}
+                createdAt={client.created_at}
+                welcomeEmailSentAt={client.welcome_email_sent_at}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -732,6 +777,12 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               <div className="space-y-2">
                 <Label className="text-northpeak-text">Referencia</Label>
                 <Input value={payRef} onChange={(e) => setPayRef(e.target.value)} placeholder="Opcional" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-northpeak-text">Fecha de vencimiento</Label>
+                <Input type="date" value={payDueDate} onChange={(e) => setPayDueDate(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
               </div>
             </div>
             <div className="space-y-2">

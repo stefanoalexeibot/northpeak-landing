@@ -8,6 +8,7 @@ import ClientDetailTabs from "@/components/admin/client-detail-tabs";
 import DeleteClientButton from "@/components/admin/delete-client-button";
 import OnboardingChecklist from "@/components/admin/onboarding-checklist";
 import ClientNotes from "@/components/admin/client-notes";
+import ClientStatusSelect from "@/components/admin/client-status-select";
 
 export default async function ClientDetailPage({
   params,
@@ -62,7 +63,10 @@ export default async function ClientDetailPage({
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-heading font-bold text-northpeak-text">{client.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-heading font-bold text-northpeak-text">{client.name}</h1>
+            <ClientStatusSelect clientId={client.id} currentStatus={client.status} />
+          </div>
           <p className="text-northpeak-text-muted mt-1">
             {client.company ? `${client.company} — ` : ""}{client.email}
           </p>

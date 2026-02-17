@@ -18,6 +18,7 @@ export interface Client {
   cover_url?: string;
   welcome_email_sent_at?: string;
   admin_notes?: string;
+  status?: string;
   created_at: string;
 }
 
@@ -108,6 +109,7 @@ export interface Payment {
   status: PaymentStatus;
   reference_number?: string;
   notes?: string;
+  due_date?: string;
   paid_at?: string;
   created_at: string;
 }
@@ -118,6 +120,25 @@ export interface ProjectMilestone {
   title: string;
   due_date: string;
   completed: boolean;
+  created_at: string;
+}
+
+export type NotificationType =
+  | "contract_signed"
+  | "message_received"
+  | "referral_submitted"
+  | "testimonial_submitted"
+  | "payment_overdue"
+  | "file_uploaded";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  description?: string;
+  client_id?: string;
+  read: boolean;
+  link?: string;
   created_at: string;
 }
 

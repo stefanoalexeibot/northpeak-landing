@@ -95,6 +95,16 @@ export default function ReferralsPage() {
       setNotes("");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
+      // Notify admin
+      fetch("/api/portal/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "referral_submitted",
+          title: `Nuevo referido: ${data.referred_name}`,
+          description: `Referido enviado — ${data.referred_email}`,
+        }),
+      }).catch(() => {});
     }
 
     setSending(false);

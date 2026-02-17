@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { createNotification } from "@/lib/notifications";
+import { notifyAdmin } from "@/lib/email/notify-admin";
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -8,7 +10,7 @@ export async function POST(request: Request) {
 
   const { data: client } = await supabase
     .from("clients")
-    .select("id")
+    .select("id, name")
     .eq("user_id", user.id)
     .single();
 
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
   // Verify document belongs to this client
   const { data: doc } = await supabase
     .from("documents")
-    .select("id, client_id")
+    .select("id, client_id, title")
     .eq("id", documentId)
     .eq("client_id", client.id)
     .single();
@@ -36,6 +38,20 @@ export async function POST(request: Request) {
     .eq("id", documentId);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // Create notification + email
+  await createNotification(supabase, {
+    type: "contract_signed",
+    title: `${client.name} firmó "${doc.title}"`,
+    description: "Contrato firmado desde el portal",
+    clientId: client.id,
+    link: `/admin/clients/${client.id}`,
+  });
+
+  await notifyAdmin({
+    subject: `Contrato firmado: ${client.name}`,
+    body: `<p><strong>${client.name}</strong> ha firmado el documento "${doc.title}".</p>`,
+  });
 
   return NextResponse.json({ success: true });
 }
