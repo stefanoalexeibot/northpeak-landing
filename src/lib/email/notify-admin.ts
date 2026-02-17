@@ -8,7 +8,7 @@ export async function notifyAdmin({ subject, body }: { subject: string; body: st
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
-      from: "NorthPeak Digital <onboarding@resend.dev>",
+      from: "NorthPeak Digital <hola@northpeakdigital.com.mx>",
       to: ADMIN_EMAIL,
       subject,
       html: `

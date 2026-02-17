@@ -17,7 +17,7 @@ export async function sendWelcomeEmail({
 }) {
   try {
     const { data, error } = await getResend().emails.send({
-      from: "NorthPeak Digital <onboarding@resend.dev>",
+      from: "NorthPeak Digital <hola@northpeakdigital.com.mx>",
       to,
       subject: `Bienvenido a NorthPeak Digital, ${clientName}!`,
       html: `
