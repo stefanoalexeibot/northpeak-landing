@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/toast";
 import type { Client, Document, Project, MediaFile } from "@/lib/types";
 import {
-  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard,
+  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine,
 } from "lucide-react";
 import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
@@ -365,22 +365,51 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               ) : (
                 <div className="space-y-2">
                   {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
-                      <FileText className="h-5 w-5 text-northpeak-green shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-northpeak-text truncate">{doc.title}</p>
-                        <p className="text-xs text-northpeak-text-dim capitalize">{doc.type === "invoice" ? "Nota de venta" : doc.type === "contract" ? "Contrato" : "Bienvenida"}</p>
+                    <div key={doc.id} className="rounded-lg bg-northpeak-bg">
+                      <div className="flex items-center gap-3 p-3">
+                        <FileText className="h-5 w-5 text-northpeak-green shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-northpeak-text truncate">{doc.title}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-northpeak-text-dim capitalize">{doc.type === "invoice" ? "Nota de venta" : doc.type === "contract" ? "Contrato" : "Bienvenida"}</p>
+                            {doc.type === "contract" && (
+                              doc.signed ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-northpeak-green bg-northpeak-green/10 px-1.5 py-0.5 rounded-full">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Firmado {doc.signed_at && `— ${new Date(doc.signed_at).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}`}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
+                                  <Clock className="h-3 w-3" />
+                                  Pendiente de firma
+                                </span>
+                              )
+                            )}
+                          </div>
+                        </div>
+                        {doc.file_url && (
+                          <a href={doc.file_url} target="_blank" rel="noreferrer">
+                            <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </a>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => deleteDocument(doc.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      {doc.file_url && (
-                        <a href={doc.file_url} target="_blank" rel="noreferrer">
-                          <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </a>
+                      {doc.type === "contract" && doc.signed && doc.signature_data && (
+                        <div className="px-3 pb-3 pt-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <PenLine className="h-3.5 w-3.5 text-northpeak-text-dim" />
+                            <span className="text-xs text-northpeak-text-dim">Firma del cliente</span>
+                          </div>
+                          <div className="rounded-md bg-white p-3 inline-block">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={doc.signature_data} alt="Firma" className="h-16" />
+                          </div>
+                        </div>
                       )}
-                      <Button variant="ghost" size="icon" onClick={() => deleteDocument(doc.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   ))}
                 </div>
