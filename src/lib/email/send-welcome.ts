@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendWelcomeEmail({
   to,
@@ -14,7 +16,7 @@ export async function sendWelcomeEmail({
   portalUrl: string;
 }) {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: "NorthPeak Digital <onboarding@resend.dev>",
       to,
       subject: `Bienvenido a NorthPeak Digital, ${clientName}!`,
