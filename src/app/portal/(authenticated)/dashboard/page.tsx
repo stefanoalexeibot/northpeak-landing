@@ -1,10 +1,5 @@
 import { getClientData } from "@/lib/supabase/get-client-data";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import {
-  FileText, HandHeart, Receipt, FolderOpen,
-  Image, Gift, MessageSquare,
-} from "lucide-react";
+import DashboardQuickLinks from "@/components/portal/dashboard-quick-links";
 
 export default async function PortalDashboard() {
   const { supabase, client } = await getClientData();
@@ -22,13 +17,13 @@ export default async function PortalDashboard() {
   ]);
 
   const quickLinks = [
-    { label: "Contrato", href: "/portal/contract", icon: FileText, color: "text-blue-400" },
-    { label: "Bienvenida", href: "/portal/welcome", icon: HandHeart, color: "text-pink-400" },
-    { label: "Nota de venta", href: "/portal/invoice", icon: Receipt, color: "text-yellow-400" },
-    { label: "Proyectos", href: "/portal/projects", icon: FolderOpen, count: projectCount, color: "text-northpeak-green" },
-    { label: "Archivos", href: "/portal/files", icon: Image, count: fileCount, color: "text-purple-400" },
-    { label: "Referidos", href: "/portal/referrals", icon: Gift, count: referralCount, color: "text-orange-400" },
-    { label: "Soporte", href: "/portal/support", icon: MessageSquare, count: unreadCount, color: "text-cyan-400" },
+    { label: "Contrato", href: "/portal/contract", iconName: "FileText", color: "text-blue-400" },
+    { label: "Bienvenida", href: "/portal/welcome", iconName: "HandHeart", color: "text-pink-400" },
+    { label: "Nota de venta", href: "/portal/invoice", iconName: "Receipt", color: "text-yellow-400" },
+    { label: "Proyectos", href: "/portal/projects", iconName: "FolderOpen", count: projectCount, color: "text-northpeak-green" },
+    { label: "Archivos", href: "/portal/files", iconName: "Image", count: fileCount, color: "text-purple-400" },
+    { label: "Referidos", href: "/portal/referrals", iconName: "Gift", count: referralCount, color: "text-orange-400" },
+    { label: "Soporte", href: "/portal/support", iconName: "MessageSquare", count: unreadCount, color: "text-cyan-400" },
   ];
 
   return (
@@ -64,21 +59,7 @@ export default async function PortalDashboard() {
       </div>
 
       {/* Quick links */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {quickLinks.map((link) => (
-          <Link key={link.href} href={link.href}>
-            <Card className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-green/30 transition-all hover:-translate-y-0.5 cursor-pointer h-full">
-              <CardContent className="p-5 flex flex-col items-center text-center gap-2">
-                <link.icon className={`h-7 w-7 ${link.color}`} />
-                <p className="text-sm font-medium text-northpeak-text">{link.label}</p>
-                {link.count !== undefined && link.count !== null && link.count > 0 && (
-                  <span className="text-xs text-northpeak-text-muted">{link.count}</span>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <DashboardQuickLinks links={quickLinks} />
     </div>
   );
 }

@@ -1,0 +1,20 @@
+"use client";
+
+import { useDesktop } from "@/hooks/use-media-query";
+
+export default function DotGrid() {
+  const isDesktop = useDesktop();
+  if (!isDesktop) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[-20] pointer-events-none animate-dot-pulse gpu-accelerated"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle, rgba(0,229,160,0.08) 1px, transparent 1px)",
+        backgroundSize: "40px 40px",
+      }}
+      aria-hidden="true"
+    />
+  );
+}

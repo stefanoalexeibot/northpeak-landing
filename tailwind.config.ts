@@ -65,6 +65,37 @@ const config: Config = {
         heading: ["Syne", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
+      animation: {
+        "gradient-shift-1": "gradient-shift-1 30s ease infinite",
+        "gradient-shift-2": "gradient-shift-2 20s ease infinite reverse",
+        "gradient-shift-3": "gradient-shift-3 40s ease infinite",
+        "dot-pulse": "dot-pulse 8s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+      },
+      keyframes: {
+        "gradient-shift-1": {
+          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
+          "33%": { transform: "translate(30%, -20%) scale(1.1)" },
+          "66%": { transform: "translate(-20%, 20%) scale(0.9)" },
+        },
+        "gradient-shift-2": {
+          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
+          "33%": { transform: "translate(-30%, 30%) scale(1.15)" },
+          "66%": { transform: "translate(20%, -10%) scale(0.85)" },
+        },
+        "gradient-shift-3": {
+          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
+          "50%": { transform: "translate(20%, 20%) scale(1.05)" },
+        },
+        "dot-pulse": {
+          "0%, 100%": { opacity: "0.4" },
+          "50%": { opacity: "0.8" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "0" },
+          "50%": { opacity: "1" },
+        },
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

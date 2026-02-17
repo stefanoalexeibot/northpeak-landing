@@ -86,3 +86,19 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* GPU-accelerated layer */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .gpu-accelerated,
+  [class*="animate-"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
