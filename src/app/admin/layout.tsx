@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/sidebar";
+import AdminLayoutClient from "@/components/admin/admin-layout-client";
 
 export default async function AdminLayout({
   children,
@@ -22,6 +23,7 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen bg-northpeak-bg">
       <AdminSidebar />
+      <AdminLayoutClient />
       <main className="flex-1 ml-64 p-8">{children}</main>
     </div>
   );

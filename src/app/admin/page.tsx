@@ -5,6 +5,8 @@ import Link from "next/link";
 import ClientsChart from "@/components/admin/charts/clients-chart";
 import ProjectsChart from "@/components/admin/charts/projects-chart";
 import ReferralsChart from "@/components/admin/charts/referrals-chart";
+import ActivityFeed from "@/components/admin/activity-feed";
+import AdminDashboardClient from "@/components/admin/admin-dashboard-client";
 
 export default async function AdminDashboard() {
   const supabase = createClient();
@@ -48,104 +50,120 @@ export default async function AdminDashboard() {
   const referralsByMonth = getMonthlyData(allReferrals?.map(r => r.created_at) || []);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">
-          Dashboard
-        </h1>
-        <p className="text-northpeak-text-muted mt-1">
-          Panel de administración NorthPeak Digital
-        </p>
-      </div>
+    <AdminDashboardClient>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-northpeak-text">
+            Dashboard
+          </h1>
+          <p className="text-northpeak-text-muted mt-1">
+            Panel de administración NorthPeak Digital
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}>
-            <Card className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-green/30 transition-colors cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-northpeak-text-muted">{stat.label}</p>
-                    <p className="text-3xl font-bold text-northpeak-text mt-1">{stat.value}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat) => (
+            <Link key={stat.label} href={stat.href}>
+              <Card className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-green/30 transition-colors cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-northpeak-text-muted">{stat.label}</p>
+                      <p className="text-3xl font-bold text-northpeak-text mt-1">{stat.value}</p>
+                    </div>
+                    <stat.icon className={cn("h-8 w-8", stat.color)} />
                   </div>
-                  <stat.icon className={cn("h-8 w-8", stat.color)} />
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading text-base">Clientes por mes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClientsChart data={clientsByMonth} />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading text-base">Proyectos por estado</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProjectsChart data={projectsByStatus} />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading text-base">Referidos por mes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReferralsChart data={referralsByMonth} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Activity Feed + Recent Clients */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading">
+                Actividad reciente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActivityFeed />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading">
+                Clientes recientes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!recentClients || recentClients.length === 0 ? (
+                <p className="text-northpeak-text-muted text-sm">
+                  No hay clientes registrados.{" "}
+                  <Link href="/admin/clients/new" className="text-northpeak-green hover:underline">
+                    Crear el primero
+                  </Link>
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentClients.map((client) => (
+                    <Link
+                      key={client.id}
+                      href={`/admin/clients/${client.id}`}
+                      className="flex items-center gap-4 rounded-lg p-3 hover:bg-northpeak-surface transition-colors"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-northpeak-green/10 text-northpeak-green font-bold">
+                        {client.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-northpeak-text truncate">
+                          {client.name}
+                        </p>
+                        <p className="text-xs text-northpeak-text-muted truncate">
+                          {client.company || client.email}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="bg-northpeak-card border-northpeak-surface">
-          <CardHeader>
-            <CardTitle className="text-northpeak-text font-heading text-base">Clientes por mes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ClientsChart data={clientsByMonth} />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-northpeak-card border-northpeak-surface">
-          <CardHeader>
-            <CardTitle className="text-northpeak-text font-heading text-base">Proyectos por estado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProjectsChart data={projectsByStatus} />
-          </CardContent>
-        </Card>
-
-        <Card className="bg-northpeak-card border-northpeak-surface">
-          <CardHeader>
-            <CardTitle className="text-northpeak-text font-heading text-base">Referidos por mes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ReferralsChart data={referralsByMonth} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="bg-northpeak-card border-northpeak-surface">
-        <CardHeader>
-          <CardTitle className="text-northpeak-text font-heading">
-            Clientes recientes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!recentClients || recentClients.length === 0 ? (
-            <p className="text-northpeak-text-muted text-sm">
-              No hay clientes registrados.{" "}
-              <Link href="/admin/clients/new" className="text-northpeak-green hover:underline">
-                Crear el primero
-              </Link>
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {recentClients.map((client) => (
-                <Link
-                  key={client.id}
-                  href={`/admin/clients/${client.id}`}
-                  className="flex items-center gap-4 rounded-lg p-3 hover:bg-northpeak-surface transition-colors"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-northpeak-green/10 text-northpeak-green font-bold">
-                    {client.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-northpeak-text truncate">
-                      {client.name}
-                    </p>
-                    <p className="text-xs text-northpeak-text-muted truncate">
-                      {client.company || client.email}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    </AdminDashboardClient>
   );
 }
 

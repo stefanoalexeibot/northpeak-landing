@@ -16,6 +16,8 @@ import {
   Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard,
 } from "lucide-react";
 import type { Payment } from "@/lib/types";
+import ProjectTemplates from "@/components/admin/project-templates";
+import DuplicateProject from "@/components/admin/duplicate-project";
 
 interface Props {
   client: Client;
@@ -385,10 +387,13 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-northpeak-text font-heading">Proyectos</CardTitle>
-              <Button onClick={() => setShowProjectDialog(true)} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90 text-xs">
-                <Plus className="h-3 w-3 mr-1" />
-                Nuevo proyecto
-              </Button>
+              <div className="flex gap-2">
+                <ProjectTemplates clientId={client.id} />
+                <Button onClick={() => setShowProjectDialog(true)} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90 text-xs">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Nuevo proyecto
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {projects.length === 0 ? (
@@ -413,6 +418,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                           <option value="completed">Completado</option>
                           <option value="paused">Pausado</option>
                         </Select>
+                        <DuplicateProject project={proj} clientId={client.id} />
                         <Button variant="ghost" size="icon" onClick={() => deleteProject(proj.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
                           <Trash2 className="h-4 w-4" />
                         </Button>

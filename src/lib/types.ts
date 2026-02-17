@@ -17,6 +17,7 @@ export interface Client {
   photo_url?: string;
   cover_url?: string;
   welcome_email_sent_at?: string;
+  admin_notes?: string;
   created_at: string;
 }
 
