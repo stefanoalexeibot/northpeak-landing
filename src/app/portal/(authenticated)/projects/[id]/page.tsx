@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
+import DeliverableApproval from "@/components/portal/deliverable-approval";
 
 const statusColors: Record<string, string> = {
   planning: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -101,35 +102,70 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           {total === 0 ? (
             <p className="text-northpeak-text-muted text-sm">No hay entregables definidos.</p>
           ) : (
-            <div className="space-y-2">
-              {deliverables.map((del: { id: string; name: string; status: string; description?: string }) => {
+            <div className="space-y-3">
+              {deliverables.map((del: {
+                id: string;
+                name: string;
+                status: string;
+                description?: string;
+                client_approved?: boolean | null;
+                client_feedback?: string | null;
+              }) => {
                 const Icon = statusIcons[del.status] || Clock;
+                const canApprove = del.status === "review";
                 return (
                   <div
                     key={del.id}
-                    className={`flex items-center gap-3 rounded-lg p-3 ${
+                    className={`rounded-lg p-4 ${
                       del.status === "completed" ? "bg-green-500/5" : "bg-northpeak-bg"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 shrink-0 ${
-                      del.status === "completed" ? "text-green-400" :
-                      del.status === "in_progress" ? "text-yellow-400" :
-                      del.status === "review" ? "text-purple-400" :
-                      "text-northpeak-text-dim"
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${
-                        del.status === "completed" ? "text-northpeak-text-muted line-through" : "text-northpeak-text"
-                      }`}>
-                        {del.name}
-                      </p>
-                      {del.description && (
-                        <p className="text-xs text-northpeak-text-dim mt-0.5">{del.description}</p>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <Icon className={`h-5 w-5 shrink-0 ${
+                        del.status === "completed" ? "text-green-400" :
+                        del.status === "in_progress" ? "text-yellow-400" :
+                        del.status === "review" ? "text-purple-400" :
+                        "text-northpeak-text-dim"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium ${
+                          del.status === "completed" ? "text-northpeak-text-muted line-through" : "text-northpeak-text"
+                        }`}>
+                          {del.name}
+                        </p>
+                        {del.description && (
+                          <p className="text-xs text-northpeak-text-dim mt-0.5">{del.description}</p>
+                        )}
+                      </div>
+                      <Badge className={`${statusColors[del.status]} text-[10px]`}>
+                        {statusLabels[del.status]}
+                      </Badge>
                     </div>
-                    <Badge className={`${statusColors[del.status]} text-[10px]`}>
-                      {statusLabels[del.status]}
-                    </Badge>
+
+                    {/* Approval section for review status */}
+                    {canApprove && (
+                      <div className="mt-3 pl-8">
+                        <DeliverableApproval
+                          deliverableId={del.id}
+                          deliverableName={del.name}
+                        />
+                      </div>
+                    )}
+
+                    {/* Show approval status */}
+                    {del.client_approved === true && (
+                      <div className="mt-2 pl-8">
+                        <span className="text-xs text-green-400 flex items-center gap-1">
+                          <CheckCircle className="h-3 w-3" /> Aprobado por ti
+                        </span>
+                      </div>
+                    )}
+                    {del.client_approved === false && del.client_feedback && (
+                      <div className="mt-2 pl-8">
+                        <span className="text-xs text-yellow-400">Cambios solicitados:</span>
+                        <p className="text-xs text-northpeak-text-dim mt-0.5">{del.client_feedback}</p>
+                      </div>
+                    )}
                   </div>
                 );
               })}

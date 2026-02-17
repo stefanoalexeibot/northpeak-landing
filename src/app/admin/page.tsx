@@ -1,12 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, FileText, MessageSquare, AlertTriangle } from "lucide-react";
+import { DollarSign, FileText, MessageSquare, AlertTriangle, Users, CalendarClock } from "lucide-react";
 import Link from "next/link";
 import ClientsChart from "@/components/admin/charts/clients-chart";
 import ProjectsChart from "@/components/admin/charts/projects-chart";
 import RevenueChart from "@/components/admin/charts/revenue-chart";
 import ActivityFeed from "@/components/admin/activity-feed";
 import OverduePaymentsCard from "@/components/admin/overdue-payments-card";
+import UpcomingPaymentsCard from "@/components/admin/upcoming-payments-card";
 import AdminDashboardClient from "@/components/admin/admin-dashboard-client";
 
 export default async function AdminDashboard() {
@@ -14,12 +15,18 @@ export default async function AdminDashboard() {
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const today = now.toISOString().split("T")[0];
+  const in7days = new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0];
 
   const [
     { data: monthlyPayments },
     { count: unsignedContracts },
     { count: messageCount },
     { data: overduePaymentsData },
+    { data: pendingPaymentsData },
+    { data: upcomingPaymentsData },
+    { count: totalClients },
+    { count: activeClients },
   ] = await Promise.all([
     supabase
       .from("payments")
@@ -37,10 +44,24 @@ export default async function AdminDashboard() {
       .select("id, client_id, concept, amount, due_date, clients(name)")
       .eq("status", "pending")
       .not("due_date", "is", null)
-      .lt("due_date", now.toISOString().split("T")[0]),
+      .lt("due_date", today),
+    supabase
+      .from("payments")
+      .select("amount")
+      .eq("status", "pending"),
+    supabase
+      .from("payments")
+      .select("id, client_id, concept, amount, due_date, clients(name)")
+      .eq("status", "pending")
+      .not("due_date", "is", null)
+      .gte("due_date", today)
+      .lte("due_date", in7days),
+    supabase.from("clients").select("*", { count: "exact", head: true }),
+    supabase.from("clients").select("*", { count: "exact", head: true }).eq("status", "active"),
   ]);
 
   const monthRevenue = monthlyPayments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+  const totalPending = pendingPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
   const overdueCount = overduePaymentsData?.length ?? 0;
 
   const overduePayments = (overduePaymentsData ?? []).map((p) => {
@@ -59,6 +80,22 @@ export default async function AdminDashboard() {
     };
   });
 
+  const upcomingPayments = (upcomingPaymentsData ?? []).map((p) => {
+    const clientName = (p.clients as unknown as { name: string } | null)?.name || "Cliente";
+    const daysUntil = Math.ceil(
+      (new Date(p.due_date!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return {
+      id: p.id,
+      client_id: p.client_id,
+      client_name: clientName,
+      concept: p.concept,
+      amount: Number(p.amount),
+      due_date: p.due_date!,
+      days_until: daysUntil,
+    };
+  });
+
   const stats = [
     {
       label: "Ingresos del mes",
@@ -66,6 +103,15 @@ export default async function AdminDashboard() {
       icon: DollarSign,
       href: "/admin/clients",
       color: "text-northpeak-green",
+    },
+    {
+      label: "Por cobrar",
+      value: `$${totalPending.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`,
+      icon: CalendarClock,
+      href: "/admin/clients",
+      color: "text-northpeak-blue",
+      sub: overdueCount > 0 ? `${overdueCount} vencido${overdueCount > 1 ? "s" : ""}` : undefined,
+      subColor: "text-red-400",
     },
     {
       label: "Contratos pendientes",
@@ -87,6 +133,14 @@ export default async function AdminDashboard() {
       icon: AlertTriangle,
       href: "/admin/clients",
       color: "text-red-400",
+    },
+    {
+      label: "Clientes",
+      value: `${activeClients ?? 0}/${totalClients ?? 0}`,
+      icon: Users,
+      href: "/admin/clients",
+      color: "text-northpeak-green",
+      sub: "activos / total",
     },
   ];
 
@@ -126,17 +180,20 @@ export default async function AdminDashboard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {stats.map((stat) => (
             <Link key={stat.label} href={stat.href}>
               <Card className="bg-northpeak-card border-northpeak-surface hover:border-northpeak-green/30 transition-colors cursor-pointer">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-northpeak-text-muted">{stat.label}</p>
-                      <p className="text-3xl font-bold text-northpeak-text mt-1">{stat.value}</p>
+                      <p className="text-xs text-northpeak-text-muted">{stat.label}</p>
+                      <p className="text-2xl font-bold text-northpeak-text mt-1">{stat.value}</p>
+                      {stat.sub && (
+                        <p className={`text-[10px] mt-0.5 ${stat.subColor || "text-northpeak-text-dim"}`}>{stat.sub}</p>
+                      )}
                     </div>
-                    <stat.icon className={cn("h-8 w-8", stat.color)} />
+                    <stat.icon className={cn("h-7 w-7", stat.color)} />
                   </div>
                 </CardContent>
               </Card>
@@ -174,19 +231,8 @@ export default async function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Activity Feed + Overdue Payments + Recent Clients */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="bg-northpeak-card border-northpeak-surface">
-            <CardHeader>
-              <CardTitle className="text-northpeak-text font-heading">
-                Actividad reciente
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ActivityFeed />
-            </CardContent>
-          </Card>
-
+        {/* Payments overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
               <CardTitle className="text-northpeak-text font-heading flex items-center gap-2">
@@ -196,6 +242,32 @@ export default async function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <OverduePaymentsCard payments={overduePayments} />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-yellow-400" />
+                Pagos próximos (7 días)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UpcomingPaymentsCard payments={upcomingPayments} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Activity Feed + Recent Clients */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader>
+              <CardTitle className="text-northpeak-text font-heading">
+                Actividad reciente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActivityFeed />
             </CardContent>
           </Card>
 

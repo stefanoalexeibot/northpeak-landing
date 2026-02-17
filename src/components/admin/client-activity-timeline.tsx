@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
-  UserPlus, Mail, Pen, CreditCard, MessageSquare, Gift, Star,
+  UserPlus, Mail, Pen, CreditCard, MessageSquare, Gift, Star, Upload, FolderOpen,
 } from "lucide-react";
 
 interface TimelineEvent {
@@ -135,6 +135,40 @@ export default function ClientActivityTimeline({ clientId, createdAt, welcomeEma
           bg: "bg-yellow-400/10",
           label: `Reseña: "${t.title}"`,
           date: t.submitted_at,
+        });
+      });
+
+      // File uploads
+      const { data: files } = await supabase
+        .from("media")
+        .select("id, name, uploaded_by, created_at")
+        .eq("client_id", clientId);
+
+      files?.forEach((f) => {
+        items.push({
+          id: `file-${f.id}`,
+          icon: Upload,
+          color: "text-indigo-400",
+          bg: "bg-indigo-400/10",
+          label: `Archivo ${f.uploaded_by === "client" ? "subido por cliente" : "subido"}: ${f.name}`,
+          date: f.created_at,
+        });
+      });
+
+      // Projects
+      const { data: projects } = await supabase
+        .from("projects")
+        .select("id, name, status, created_at")
+        .eq("client_id", clientId);
+
+      projects?.forEach((p) => {
+        items.push({
+          id: `proj-${p.id}`,
+          icon: FolderOpen,
+          color: "text-teal-400",
+          bg: "bg-teal-400/10",
+          label: `Proyecto creado: "${p.name}"`,
+          date: p.created_at,
         });
       });
 

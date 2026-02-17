@@ -13,6 +13,7 @@ import {
   LogOut,
   Star,
   Search,
+  BarChart3,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -24,6 +25,7 @@ const navItems = [
   { label: "Mensajes", href: "/admin/messages", icon: MessageSquare },
   { label: "Reseñas", href: "/admin/testimonials", icon: Star },
   { label: "Analizador", href: "/admin/analizador", icon: Search },
+  { label: "Reportes", href: "/admin/reports", icon: BarChart3 },
 ];
 
 export default function AdminSidebar() {

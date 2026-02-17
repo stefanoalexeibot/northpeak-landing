@@ -14,12 +14,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/toast";
 import type { Client, Document, Project, MediaFile } from "@/lib/types";
 import {
-  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine,
+  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine, Search, ExternalLink,
 } from "lucide-react";
 import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
 import DuplicateProject from "@/components/admin/duplicate-project";
 import ClientActivityTimeline from "@/components/admin/client-activity-timeline";
+
+interface AnalisisDigital {
+  id: string;
+  nombre_negocio: string;
+  giro: string;
+  score: number;
+  nivel: string;
+  report_url: string;
+  created_at: string;
+}
 
 interface Props {
   client: Client;
@@ -27,9 +37,10 @@ interface Props {
   projects: (Project & { deliverables: { id: string; name: string; status: string; order_index: number }[] })[];
   media: MediaFile[];
   payments?: Payment[];
+  analyses?: AnalisisDigital[];
 }
 
-export default function ClientDetailTabs({ client, documents, projects, media, payments = [] }: Props) {
+export default function ClientDetailTabs({ client, documents, projects, media, payments = [], analyses = [] }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
@@ -309,6 +320,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
           <TabsTrigger value="files" className="data-[state=active]:bg-northpeak-card">Archivos</TabsTrigger>
           <TabsTrigger value="payments" className="data-[state=active]:bg-northpeak-card">Pagos</TabsTrigger>
           <TabsTrigger value="activity" className="data-[state=active]:bg-northpeak-card">Actividad</TabsTrigger>
+          <TabsTrigger value="analyses" className="data-[state=active]:bg-northpeak-card">Análisis</TabsTrigger>
         </TabsList>
 
         {/* INFO TAB */}
@@ -577,6 +589,60 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                 createdAt={client.created_at}
                 welcomeEmailSentAt={client.welcome_email_sent_at}
               />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ANALYSES TAB */}
+        <TabsContent value="analyses">
+          <Card className="bg-northpeak-card border-northpeak-surface">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-northpeak-text font-heading">Análisis digital</CardTitle>
+              <a href={`/admin/analizador?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}>
+                <Button className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90 text-xs">
+                  <Search className="h-3 w-3 mr-1" />
+                  Nuevo análisis
+                </Button>
+              </a>
+            </CardHeader>
+            <CardContent>
+              {analyses.length === 0 ? (
+                <p className="text-northpeak-text-muted text-sm">No hay análisis vinculados a este cliente.</p>
+              ) : (
+                <div className="space-y-2">
+                  {analyses.map((a) => {
+                    const nivelColor =
+                      a.nivel === "CRITICO" ? "text-red-400 bg-red-400/10" :
+                      a.nivel === "BAJO" ? "text-yellow-400 bg-yellow-400/10" :
+                      a.nivel === "MEDIO" ? "text-blue-400 bg-blue-400/10" :
+                      "text-northpeak-green bg-northpeak-green/10";
+                    return (
+                      <div key={a.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-northpeak-surface shrink-0">
+                          <span className="text-lg font-bold text-northpeak-text">{a.score}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-northpeak-text truncate">{a.nombre_negocio}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-northpeak-text-dim">{a.giro}</span>
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${nivelColor}`}>{a.nivel}</span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-northpeak-text-dim">
+                            {new Date(a.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
+                          </p>
+                        </div>
+                        <a href={a.report_url} target="_blank" rel="noreferrer">
+                          <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8">
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

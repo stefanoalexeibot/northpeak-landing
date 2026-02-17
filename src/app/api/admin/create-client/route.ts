@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const { name, email, company, phone, password } = await request.json();
+  const { name, email, company, phone, password, onboarding } = await request.json();
 
   // Use service role to create user (doesn't affect admin session)
   const serviceClient = createServiceClient(
@@ -39,16 +39,61 @@ export async function POST(request: Request) {
   }
 
   // Create client record
-  const { error: clientError } = await serviceClient.from("clients").insert({
-    user_id: authData.user.id,
-    name,
-    email,
-    company: company || "",
-    phone: phone || null,
-  });
+  const { data: clientData, error: clientError } = await serviceClient
+    .from("clients")
+    .insert({
+      user_id: authData.user.id,
+      name,
+      email,
+      company: company || "",
+      phone: phone || null,
+    })
+    .select("id")
+    .single();
 
   if (clientError) {
     return NextResponse.json({ error: clientError.message }, { status: 400 });
+  }
+
+  const clientId = clientData.id;
+
+  // Onboarding automation
+  if (onboarding) {
+    if (onboarding.autoContract) {
+      await serviceClient.from("documents").insert({
+        client_id: clientId,
+        type: "contract",
+        title: `Contrato de servicios — ${company || name}`,
+      });
+    }
+
+    if (onboarding.autoInvoice && onboarding.invoiceAmount) {
+      await serviceClient.from("documents").insert({
+        client_id: clientId,
+        type: "invoice",
+        title: "Nota de venta",
+        content: {
+          items: [{ concept: onboarding.invoiceConcept || "Servicios", amount: onboarding.invoiceAmount }],
+          discount: 0,
+          notes: "",
+        },
+      });
+      await serviceClient.from("payments").insert({
+        client_id: clientId,
+        amount: onboarding.invoiceAmount,
+        concept: onboarding.invoiceConcept || "Servicios",
+        status: "pending",
+        payment_method: "transfer",
+      });
+    }
+
+    if (onboarding.autoProject) {
+      await serviceClient.from("projects").insert({
+        client_id: clientId,
+        name: onboarding.projectName || `Proyecto ${company || name}`,
+        status: "planning",
+      });
+    }
   }
 
   // Send welcome email
@@ -69,5 +114,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, clientId });
 }

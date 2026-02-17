@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,6 +175,17 @@ function nivelColor(nivel: string) {
 }
 
 export default function AnalizadorPage() {
+  return (
+    <Suspense>
+      <AnalizadorContent />
+    </Suspense>
+  );
+}
+
+function AnalizadorContent() {
+  const searchParams = useSearchParams();
+  const linkedClientId = searchParams.get("client_id");
+  const linkedClientName = searchParams.get("client_name");
   const { addToast } = useToast();
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
@@ -249,7 +261,7 @@ export default function AnalizadorPage() {
       const res = await fetch("/api/admin/analisis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datos, hallazgos }),
+        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId }),
       });
 
       const data = await res.json();
@@ -299,6 +311,11 @@ export default function AnalizadorPage() {
           <p className="text-northpeak-text-muted mt-1">
             Analiza la presencia digital de prospectos y genera reportes
           </p>
+          {linkedClientName && (
+            <p className="text-xs text-northpeak-green mt-1">
+              Vinculado a: <span className="font-medium">{linkedClientName}</span>
+            </p>
+          )}
         </div>
       </div>
 

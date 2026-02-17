@@ -30,11 +30,13 @@ export default async function ClientDetailPage({
     { data: projects },
     { data: media },
     { data: payments },
+    { data: analyses },
   ] = await Promise.all([
     supabase.from("documents").select("*").eq("client_id", client.id).order("created_at", { ascending: false }),
     supabase.from("projects").select("*, deliverables(*)").eq("client_id", client.id).order("created_at", { ascending: false }),
     supabase.from("media").select("*").eq("client_id", client.id).order("created_at", { ascending: false }),
     supabase.from("payments").select("*").eq("client_id", client.id).order("created_at", { ascending: false }),
+    supabase.from("analisis_digital").select("id, nombre_negocio, giro, score, nivel, report_url, created_at").eq("client_id", client.id).order("created_at", { ascending: false }),
   ]);
 
   // Build onboarding checklist
@@ -98,6 +100,7 @@ export default async function ClientDetailPage({
         projects={projs}
         media={media ?? []}
         payments={payments ?? []}
+        analyses={analyses ?? []}
       />
     </div>
   );
