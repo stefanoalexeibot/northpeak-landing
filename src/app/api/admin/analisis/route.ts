@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Error al guardar: " + dbError.message }, { status: 500 });
   }
 
-  const viewUrl = `/api/admin/analisis/${analisis.id}`;
+  const viewUrl = `/api/reporte/${analisis.id}`;
 
   return NextResponse.json({
     success: true,
@@ -109,7 +109,7 @@ export async function GET() {
   // Map report URLs to proxy route
   const mapped = (data ?? []).map((a) => ({
     ...a,
-    report_url: `/api/admin/analisis/${a.id}`,
+    report_url: `/api/reporte/${a.id}`,
   }));
 
   return NextResponse.json(mapped);
