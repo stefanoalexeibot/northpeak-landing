@@ -13,7 +13,7 @@ export default function AnimatedBackground() {
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-1 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 30% 50%, rgba(128,128,128,0.04) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 30% 50%, rgba(128,128,128,0.08) 0%, transparent 50%)",
           filter: "blur(80px)",
         }}
       />
@@ -22,7 +22,7 @@ export default function AnimatedBackground() {
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-2 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 70% 50%, rgba(12,13,18,0.06) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 70% 50%, rgba(12,13,18,0.12) 0%, transparent 50%)",
           filter: "blur(80px)",
         }}
       />
@@ -31,7 +31,7 @@ export default function AnimatedBackground() {
         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] animate-gradient-shift-3 gpu-accelerated"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, rgba(0,229,160,0.03) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 50% 50%, rgba(0,229,160,0.07) 0%, transparent 50%)",
           filter: "blur(80px)",
         }}
       />

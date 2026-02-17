@@ -29,8 +29,7 @@ export default function CursorGlow() {
       className="fixed inset-0 z-[50] pointer-events-none"
       style={{
         background:
-          "radial-gradient(600px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px), rgba(0,229,160,0.08), transparent 40%)",
-        mixBlendMode: "screen",
+          "radial-gradient(600px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px), rgba(0,229,160,0.15), transparent 40%)",
       }}
       aria-hidden="true"
     />
