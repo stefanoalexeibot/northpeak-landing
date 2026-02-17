@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +16,8 @@ import {
   Search,
   BarChart3,
   Kanban,
+  Menu,
+  X,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -33,6 +36,24 @@ const navItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  // Close drawer on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -40,8 +61,8 @@ export default function AdminSidebar() {
     router.push("/portal/login");
   }
 
-  return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-northpeak-surface bg-northpeak-card">
+  const sidebarContent = (
+    <>
       <div className="flex h-16 items-center justify-between px-6 border-b border-northpeak-surface">
         <div className="flex items-center">
           <img src="/logo.png" alt="NorthPeak" className="h-7" />
@@ -49,10 +70,18 @@ export default function AdminSidebar() {
             Admin
           </span>
         </div>
-        <NotificationBell />
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <button
+            onClick={() => setOpen(false)}
+            className="lg:hidden p-1 text-northpeak-text-muted hover:text-northpeak-text"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {navItems.map((item) => {
           const isActive =
             item.href === "/admin"
@@ -86,6 +115,45 @@ export default function AdminSidebar() {
           Cerrar sesión
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-northpeak-surface bg-northpeak-card px-4 lg:hidden">
+        <button
+          onClick={() => setOpen(true)}
+          className="p-1.5 rounded-lg text-northpeak-text-muted hover:bg-northpeak-surface hover:text-northpeak-text transition-colors"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <img src="/logo.png" alt="NorthPeak" className="h-6" />
+        <NotificationBell />
+      </div>
+
+      {/* Desktop sidebar — always visible */}
+      <aside className="hidden lg:flex fixed left-0 top-0 z-40 h-screen w-64 flex-col border-r border-northpeak-surface bg-northpeak-card">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile drawer overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-50 h-screen w-72 flex-col border-r border-northpeak-surface bg-northpeak-card transition-transform duration-300 ease-in-out lg:hidden flex",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

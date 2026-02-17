@@ -26,7 +26,7 @@ export default async function AdminLayout({
       <div className="flex min-h-screen bg-northpeak-bg">
         <AdminSidebar />
         <AdminLayoutClient />
-        <main className="flex-1 ml-64 p-8">{children}</main>
+        <main className="flex-1 pt-14 px-4 pb-6 lg:pt-0 lg:ml-64 lg:p-8">{children}</main>
       </div>
     </ToastProvider>
   );
