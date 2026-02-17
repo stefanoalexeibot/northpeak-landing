@@ -60,7 +60,7 @@ export default function PortalNav({ client }: { client: Client }) {
             .select("*", { count: "exact", head: true })
             .eq("client_id", client.id)
             .eq("type", "contract")
-            .eq("seen_by_client", false),
+            .or("signed.is.null,signed.eq.false"),
           supabase
             .from("media")
             .select("*", { count: "exact", head: true })

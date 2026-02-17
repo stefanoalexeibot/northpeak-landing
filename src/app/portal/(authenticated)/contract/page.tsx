@@ -14,13 +14,7 @@ export default async function ContractPage() {
     .eq("type", "contract")
     .order("created_at", { ascending: false });
 
-  // Mark contracts as seen
-  if (docs && docs.length > 0) {
-    const unseenIds = docs.filter(d => !d.seen_by_client).map(d => d.id);
-    if (unseenIds.length > 0) {
-      await supabase.from("documents").update({ seen_by_client: true }).in("id", unseenIds);
-    }
-  }
+  // No need to mark as seen — badge now tracks unsigned contracts
 
   return (
     <div className="space-y-6">

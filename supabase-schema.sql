@@ -95,6 +95,9 @@ ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Clients can read own documents" ON documents FOR SELECT USING (
   EXISTS (SELECT 1 FROM clients WHERE clients.id = documents.client_id AND clients.user_id = auth.uid())
 );
+CREATE POLICY "Clients can update own documents" ON documents FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM clients WHERE clients.id = documents.client_id AND clients.user_id = auth.uid())
+);
 CREATE POLICY "Admin full access to documents" ON documents FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
@@ -224,7 +227,7 @@ CREATE TRIGGER on_auth_user_created
 
 
 -- ========== STORAGE ==========
-INSERT INTO storage.buckets (id, name, public) VALUES ('client-files', 'client-files', false)
+INSERT INTO storage.buckets (id, name, public) VALUES ('client-files', 'client-files', true)
 ON CONFLICT (id) DO NOTHING;
 
 CREATE POLICY "Admin can upload files" ON storage.objects FOR INSERT
