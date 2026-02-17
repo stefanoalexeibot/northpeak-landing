@@ -172,7 +172,7 @@ export default async function AdminDashboard() {
     <AdminDashboardClient>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-northpeak-text">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
             Dashboard
           </h1>
           <p className="text-northpeak-text-muted mt-1">
@@ -202,7 +202,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
               <CardTitle className="text-northpeak-text font-heading text-base">Ingresos por mes</CardTitle>
@@ -232,7 +232,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Payments overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
               <CardTitle className="text-northpeak-text font-heading flex items-center gap-2">
@@ -259,7 +259,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Activity Feed + Recent Clients */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="bg-northpeak-card border-northpeak-surface">
             <CardHeader>
               <CardTitle className="text-northpeak-text font-heading">

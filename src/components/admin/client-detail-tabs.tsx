@@ -317,7 +317,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   return (
     <>
       <Tabs defaultValue="info">
-        <TabsList className="bg-northpeak-surface">
+        <TabsList className="bg-northpeak-surface w-full overflow-x-auto justify-start flex-nowrap">
           <TabsTrigger value="info" className="data-[state=active]:bg-northpeak-card">Info</TabsTrigger>
           <TabsTrigger value="documents" className="data-[state=active]:bg-northpeak-card">Documentos</TabsTrigger>
           <TabsTrigger value="projects" className="data-[state=active]:bg-northpeak-card">Proyectos</TabsTrigger>
@@ -842,7 +842,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
             <DialogTitle className="text-northpeak-text">Registrar pago</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-northpeak-text">Monto ($)</Label>
                 <Input type="number" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} placeholder="0.00" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
@@ -861,7 +861,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               <Label className="text-northpeak-text">Concepto</Label>
               <Input value={payConcept} onChange={(e) => setPayConcept(e.target.value)} placeholder="Pago mensual de servicios" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-northpeak-text">Estado</Label>
                 <Select value={payStatus} onChange={(e) => setPayStatus(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text">
@@ -876,7 +876,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                 <Input value={payRef} onChange={(e) => setPayRef(e.target.value)} placeholder="Opcional" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-northpeak-text">Fecha de vencimiento</Label>
                 <Input type="date" value={payDueDate} onChange={(e) => setPayDueDate(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />

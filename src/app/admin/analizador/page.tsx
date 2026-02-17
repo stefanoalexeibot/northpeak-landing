@@ -521,12 +521,12 @@ function AnalizadorContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-northpeak-text">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
             Analizador Digital
           </h1>
-          <p className="text-northpeak-text-muted mt-1">
+          <p className="text-northpeak-text-muted mt-1 text-sm">
             Analiza la presencia digital de prospectos y genera reportes
           </p>
           {linkedClientName && (
@@ -538,7 +538,7 @@ function AnalizadorContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-northpeak-card border border-northpeak-surface rounded-lg p-1 w-fit">
+      <div className="flex gap-1 bg-northpeak-card border border-northpeak-surface rounded-lg p-1 w-fit overflow-x-auto max-w-full">
         <button
           onClick={() => setTab("form")}
           className={cn(
@@ -704,8 +704,8 @@ function AnalizadorContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Services table */}
-                <div className="border border-northpeak-surface rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
+                <div className="border border-northpeak-surface rounded-lg overflow-x-auto">
+                  <table className="w-full text-sm min-w-[320px]">
                     <thead>
                       <tr className="border-b border-northpeak-surface bg-northpeak-bg/50">
                         <th className="text-left px-4 py-2 text-xs font-medium text-northpeak-text-dim uppercase tracking-wider">Servicio</th>
@@ -734,7 +734,7 @@ function AnalizadorContent() {
                 </div>
 
                 {/* Totals */}
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 bg-northpeak-bg rounded-lg p-3 text-center">
                     <div className="text-xs text-northpeak-text-dim uppercase tracking-wider mb-1">Individual</div>
                     <div className="text-lg font-heading font-bold text-northpeak-text">
@@ -1051,13 +1051,13 @@ function AnalizadorContent() {
               <Toggle value={hallazgos.instagram.tiene_cuenta} onChange={(v) => updateIG("tiene_cuenta", v)} label="Tiene cuenta" />
               {hallazgos.instagram.tiene_cuenta && (
                 <>
-                  <div className="flex items-center justify-between py-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-1.5">
                     <span className="text-sm text-northpeak-text">Username</span>
                     <Input
                       value={hallazgos.instagram.username}
                       onChange={(e) => updateIG("username", e.target.value)}
                       placeholder="@..."
-                      className="w-40 bg-northpeak-bg border-northpeak-surface text-northpeak-text h-8 text-sm"
+                      className="w-full sm:w-40 bg-northpeak-bg border-northpeak-surface text-northpeak-text h-8 text-sm"
                     />
                   </div>
                   <NumberInput value={hallazgos.instagram.seguidores} onChange={(v) => updateIG("seguidores", v)} label="Seguidores" />
@@ -1105,13 +1105,13 @@ function AnalizadorContent() {
               <Toggle value={hallazgos.sitio_web.tiene_sitio} onChange={(v) => updateSW("tiene_sitio", v)} label="Tiene sitio web" />
               {hallazgos.sitio_web.tiene_sitio && (
                 <>
-                  <div className="flex items-center justify-between py-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-1.5">
                     <span className="text-sm text-northpeak-text">URL</span>
                     <Input
                       value={hallazgos.sitio_web.url}
                       onChange={(e) => updateSW("url", e.target.value)}
                       placeholder="https://..."
-                      className="w-56 bg-northpeak-bg border-northpeak-surface text-northpeak-text h-8 text-sm"
+                      className="w-full sm:w-56 bg-northpeak-bg border-northpeak-surface text-northpeak-text h-8 text-sm"
                     />
                   </div>
                   <Toggle value={hallazgos.sitio_web.es_responsive} onChange={(v) => updateSW("es_responsive", v)} label="Responsive (se ve bien en celular)" />

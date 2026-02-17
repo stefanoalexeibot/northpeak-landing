@@ -220,7 +220,7 @@ export default function AdminDocumentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">Generar Documentos</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">Generar Documentos</h1>
         <p className="text-northpeak-text-muted mt-1">Genera los 4 PDFs del Piloto de Validacion para un cliente</p>
       </div>
 
@@ -307,7 +307,7 @@ export default function AdminDocumentsPage() {
         </CardHeader>
         {showConfig && (
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-northpeak-text">Precio del piloto (MXN)</Label>
                 <Input

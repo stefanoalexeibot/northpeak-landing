@@ -135,7 +135,7 @@ export default function AdminMessageList({ clients, unreadByClient, lastMessageB
           </div>
         </div>
 
-        <div className="h-96 overflow-y-auto p-4 space-y-3">
+        <div className="h-[60vh] sm:h-96 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
             <p className="text-center text-northpeak-text-muted text-sm py-8">No hay mensajes con este cliente.</p>
           ) : (

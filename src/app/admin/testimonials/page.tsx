@@ -14,7 +14,7 @@ export default async function AdminTestimonialsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">Reseñas</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">Reseñas</h1>
         <p className="text-northpeak-text-muted mt-1">Gestiona las reseñas de clientes</p>
       </div>
 

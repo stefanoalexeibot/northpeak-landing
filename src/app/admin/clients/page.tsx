@@ -26,17 +26,17 @@ export default async function AdminClientsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-northpeak-text">Clientes</h1>
-          <p className="text-northpeak-text-muted mt-1">Gestiona tus clientes</p>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">Clientes</h1>
+          <p className="text-northpeak-text-muted mt-1 text-sm">Gestiona tus clientes</p>
         </div>
         <div className="flex gap-2">
           {clients && clients.length > 0 && <ExportButton clients={clients} />}
           <Link href="/admin/clients/new">
             <Button className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo cliente
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Nuevo cliente</span>
             </Button>
           </Link>
         </div>

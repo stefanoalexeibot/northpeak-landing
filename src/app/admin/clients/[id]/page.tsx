@@ -58,18 +58,18 @@ export default async function ClientDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <Link href="/admin/clients">
-          <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-text">
+          <Button variant="ghost" size="icon" className="text-northpeak-text-muted hover:text-northpeak-text shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-heading font-bold text-northpeak-text">{client.name}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="text-xl sm:text-3xl font-heading font-bold text-northpeak-text truncate">{client.name}</h1>
             <ClientStatusSelect clientId={client.id} currentStatus={client.status} />
           </div>
-          <p className="text-northpeak-text-muted mt-1">
+          <p className="text-northpeak-text-muted mt-1 text-sm truncate">
             {client.company ? `${client.company} — ` : ""}{client.email}
           </p>
         </div>
@@ -77,7 +77,7 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Onboarding + Notes side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-northpeak-card border-northpeak-surface">
           <CardHeader>
             <CardTitle className="text-northpeak-text font-heading text-base">Onboarding</CardTitle>

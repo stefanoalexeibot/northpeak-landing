@@ -78,7 +78,7 @@ export default function NewClientPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-heading font-bold text-northpeak-text">Nuevo cliente</h1>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">Nuevo cliente</h1>
           <p className="text-northpeak-text-muted mt-1">Crea una cuenta de acceso para el cliente</p>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function NewClientPage() {
                 </label>
 
                 {autoInvoice && (
-                  <div className="grid grid-cols-2 gap-3 pl-7">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
                     <Input
                       value={invoiceConcept}
                       onChange={(e) => setInvoiceConcept(e.target.value)}

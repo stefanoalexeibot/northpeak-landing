@@ -154,16 +154,16 @@ export default function PipelinePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
           Pipeline de Prospectos
         </h1>
-        <p className="text-northpeak-text-muted mt-1">
+        <p className="text-northpeak-text-muted mt-1 text-sm">
           Arrastra las tarjetas entre columnas para actualizar el estado
         </p>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
         {COLUMNAS.map((col) => {
           const count = prospectos.filter((p) => p.etapa === col.etapa).length;
           return (
@@ -189,7 +189,7 @@ export default function PipelinePage() {
             <div
               key={col.etapa}
               className={cn(
-                "flex-shrink-0 w-72 rounded-xl border-2 transition-colors",
+                "flex-shrink-0 w-60 sm:w-68 md:w-72 rounded-xl border-2 transition-colors",
                 isOver ? col.color.replace("/30", "/60") + " bg-northpeak-card/50" : "border-transparent"
               )}
               onDragOver={(e) => handleDragOver(e, col.etapa)}

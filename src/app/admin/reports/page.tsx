@@ -97,7 +97,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-northpeak-text">Reportes y Métricas</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">Reportes y Métricas</h1>
         <p className="text-northpeak-text-muted mt-1">Resumen del rendimiento del negocio</p>
       </div>
 
