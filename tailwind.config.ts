@@ -88,8 +88,8 @@ const config: Config = {
           "50%": { transform: "translate(20%, 20%) scale(1.05)" },
         },
         "dot-pulse": {
-          "0%, 100%": { opacity: "0.4" },
-          "50%": { opacity: "0.8" },
+          "0%, 100%": { opacity: "0.25" },
+          "50%": { opacity: "0.45" },
         },
         "glow-pulse": {
           "0%, 100%": { opacity: "0" },
