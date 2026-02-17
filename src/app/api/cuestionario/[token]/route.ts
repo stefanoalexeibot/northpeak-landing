@@ -3,8 +3,47 @@ import { NextResponse } from "next/server";
 import { generarPreguntas } from "@/lib/analizador/cuestionario";
 import { generarReporteHTML } from "@/lib/analizador/report-html";
 import { clasificarPrioridad } from "@/lib/analizador/scoring";
+import { askClaude } from "@/lib/ai/claude";
+import { buildPersonalizedPricingContext } from "@/lib/analizador/pricing";
 import type { Oportunidad, DatosNegocio, Hallazgos } from "@/lib/analizador/scoring";
 import type { Cotizacion, CotizacionPersonalizada } from "@/lib/analizador/pricing";
+import type { RespuestasCuestionario } from "@/lib/analizador/cuestionario";
+
+const PRICING_SYSTEM_PROMPT = `Eres un estratega de marketing digital experto en negocios locales en México.
+Tu trabajo es crear paquetes de servicios PERSONALIZADOS y estratégicos basados en las oportunidades detectadas y las respuestas del prospecto.
+
+REGLAS:
+1. Crea 2-3 paquetes con nombres creativos y relevantes al giro (NO uses "Starter", "Premium", etc.)
+2. Cada paquete debe tener un enfoque estratégico diferente (ej: "captar clientes rápido" vs "construir marca")
+3. Ajusta precios según:
+   - Facturación del negocio (más facturación → precios premium, menos → precios accesibles)
+   - Inversión actual en marketing (si ya invierte mucho, el valor percibido es mayor)
+   - Urgencia (urgente → incluir setup fees, largo plazo → descuento por compromiso)
+   - Si no tiene equipo de marketing → incluir más servicio completo (managed)
+4. Prioriza servicios según el objetivo del prospecto:
+   - "más clientes" → ads + Google Maps + SEO
+   - "más ventas por cliente" → Instagram + CRM + retargeting
+   - "lanzar sucursal" → branding + web + Google Maps
+   - "posicionamiento" → Instagram + contenido + PR digital
+5. Incluye ROI estimado realista para cada paquete
+6. Precios en MXN. Todos los precios deben ser divisibles entre 100.
+
+Responde ÚNICAMENTE con JSON puro (sin markdown):
+{
+  "paquetes": [
+    {
+      "nombre": "Nombre Creativo",
+      "descripcion": "2-3 oraciones explicando la estrategia y por qué le conviene",
+      "servicios": ["lista de servicios incluidos en texto libre"],
+      "precioMensual": 5000,
+      "precioUnico": 0,
+      "prioridad": "inmediata|corto_plazo|mediano_plazo",
+      "roiEstimado": "Estimación realista del retorno (ej: +20-30 clientes/mes en 3 meses)"
+    }
+  ],
+  "estrategia": "Resumen de la estrategia general en 2-3 oraciones, explicando por qué estos paquetes en este orden",
+  "notaIA": "Nota sobre pricing y valor para este prospecto específico (1-2 oraciones)"
+}`;
 
 function getSupabase() {
   return createClient(
@@ -102,27 +141,30 @@ export async function POST(
   }
 
   try {
-    // Call AI to generate personalized quotation
-    const aiRes = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL || `https://${process.env.VERCEL_URL || "localhost:3000"}`).origin : "http://localhost:3000"}/api/ai/pricing-personalizado`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          oportunidades: analisis.oportunidades,
-          respuestas,
-          giro: analisis.giro,
-          zona: analisis.zona,
-        }),
-      }
+    // Call AI directly to generate personalized quotation
+    const oportunidades = analisis.oportunidades as Oportunidad[];
+    const context = buildPersonalizedPricingContext(
+      oportunidades,
+      respuestas as RespuestasCuestionario,
+      analisis.giro,
+      analisis.zona
     );
 
-    if (!aiRes.ok) {
-      const err = await aiRes.json();
-      throw new Error(err.error || "AI pricing failed");
-    }
+    const aiResponse = await askClaude(PRICING_SYSTEM_PROMPT, context, { maxTokens: 2048 });
+    const cleaned = aiResponse.replace(/```(?:json)?\s*/g, "").replace(/```\s*/g, "").trim();
+    const parsed = JSON.parse(cleaned);
 
-    const cotizacionPersonalizada: CotizacionPersonalizada = await aiRes.json();
+    const cotizacionPersonalizada: CotizacionPersonalizada = {
+      ...parsed,
+      totalMensual: parsed.paquetes.reduce(
+        (sum: number, p: { precioMensual: number }) => sum + p.precioMensual,
+        0
+      ),
+      totalUnico: parsed.paquetes.reduce(
+        (sum: number, p: { precioUnico: number }) => sum + (p.precioUnico || 0),
+        0
+      ),
+    };
 
     // Save answers + personalized quotation
     await supabase
@@ -144,7 +186,6 @@ export async function POST(
       telefono: analisis.telefono || "",
     };
     const hallazgos = analisis.hallazgos as Hallazgos;
-    const oportunidades = analisis.oportunidades as Oportunidad[];
     const prioridad = clasificarPrioridad(analisis.score);
     const cotizacionGenerica = analisis.cotizacion as Cotizacion | null;
 
