@@ -116,13 +116,13 @@ export default function AdminPaymentsPage() {
   async function deletePayment(id: string) {
     if (!confirm("¿Eliminar este pago?")) return;
     setDeleting(id);
-    await fetch("/api/admin/delete-payment", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    const { error } = await supabase.from("payments").delete().eq("id", id);
     setDeleting(null);
-    loadPayments();
+    if (error) {
+      alert(`Error al eliminar: ${error.message}`);
+      return;
+    }
+    setPayments(prev => prev.filter(p => p.id !== id));
   }
 
   // ── Derived stats ─────────────────────────────────────────────
@@ -144,7 +144,7 @@ export default function AdminPaymentsPage() {
   // ── Filtered list ────────────────────────────────────────────
   const filtered = payments.filter(p => {
     if (tab === "pending")     return p.status === "pending";
-    if (tab === "comprobante") return p.status === "pending" && !!p.comprobante_url;
+    if (tab === "comprobante") return !!p.comprobante_url;
     if (tab === "completed")   return p.status === "completed";
     return true;
   });
@@ -152,7 +152,7 @@ export default function AdminPaymentsPage() {
   // ── Badge counts ─────────────────────────────────────────────
   const counts: Record<Tab, number> = {
     pending:     payments.filter(p => p.status === "pending").length,
-    comprobante: withComprobante.length,
+    comprobante: payments.filter(p => !!p.comprobante_url).length,
     completed:   payments.filter(p => p.status === "completed").length,
     all:         payments.length,
   };

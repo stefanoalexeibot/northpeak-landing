@@ -1,5 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
+
+function getServiceClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 async function getAdmin() {
   const supabase = createClient();
@@ -58,6 +67,46 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // Auto-create the first upcoming payment so it appears immediately
+  try {
+    const today = new Date();
+    const dayToday = today.getDate();
+    const diaCobroNum = Number(dia_cobro) || 1;
+
+    let nextYear = today.getFullYear();
+    let nextMonth = today.getMonth();
+
+    if (diaCobroNum <= dayToday) {
+      // Day has already passed this month → next month
+      nextMonth += 1;
+      if (nextMonth > 11) { nextMonth = 0; nextYear += 1; }
+    }
+
+    // Build next due date (handles month overflow, e.g. Feb 31 → Feb 28)
+    const tentative = new Date(nextYear, nextMonth, diaCobroNum);
+    const dueDateStr = tentative.toISOString().split("T")[0];
+    const token = randomBytes(16).toString("hex");
+
+    const service = getServiceClient();
+
+    await service.from("payments").insert({
+      client_id: data.client_id,
+      amount: data.monto,
+      concept: data.concepto,
+      status: "pending",
+      due_date: dueDateStr,
+      pago_token: token,
+    });
+
+    // Set ultimo_cobro = dueDateStr so the cron skips that month
+    await service
+      .from("pagos_recurrentes")
+      .update({ ultimo_cobro: dueDateStr })
+      .eq("id", data.id);
+  } catch {
+    // Non-fatal — recurring record already saved
+  }
 
   return NextResponse.json(data);
 }
