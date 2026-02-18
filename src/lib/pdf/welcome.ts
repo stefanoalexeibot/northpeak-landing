@@ -1,116 +1,211 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { COMPANY, COLORS, type ClientFormData } from "./constants";
-import { createDoc, addHeader, addFooter, addSection, addParagraph, checkPageBreak } from "./utils";
+import {
+  createDoc,
+  addHeader,
+  addFooter,
+  addSection,
+  addInfoBox,
+  checkPageBreak,
+} from "./utils";
 
 export function generateWelcomePDF(data: ClientFormData): jsPDF {
   const doc = createDoc();
-  let y = addHeader(doc, "Documento de Bienvenida - Piloto de Validacion");
+  let y = addHeader(doc, "Documento de Bienvenida");
 
-  // Greeting
-  y = addParagraph(doc, `Estimado/a ${data.name},`, y + 2);
-  y = addParagraph(
-    doc,
-    `Bienvenido/a a NorthPeak Digital! Estamos emocionados de comenzar a trabajar contigo y con ${data.businessName}. A continuacion encontraras toda la informacion necesaria para nuestro Piloto de Validacion.`,
-    y + 1
+  // ── Saludo personal ──────────────────────────────────────────
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  doc.text(`Hola, ${data.name}!`, 20, y);
+  y += 7;
+
+  doc.setFontSize(9.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.textMuted);
+  const greeting = doc.splitTextToSize(
+    `Estamos muy emocionados de comenzar a trabajar con ${data.businessName}. Este documento es tu guía de arranque — encontrarás todo lo que necesitas saber para que los próximos ${data.config.pilotDays} días sean un éxito.`,
+    170
   );
+  doc.text(greeting, 20, y);
+  y += greeting.length * 5 + 7;
 
-  // What's included
-  y = addSection(doc, "Que incluye el Piloto de Validacion?", y + 4);
+  // ── Acceso al portal ─────────────────────────────────────────
+  y = addInfoBox(
+    doc,
+    "Tu acceso al Portal de Clientes NorthPeak",
+    [
+      `Dirección:  ${process.env.NEXT_PUBLIC_SITE_URL || "northpeakdigital.com.mx"}/portal`,
+      `Email:      ${data.email}`,
+      `Contraseña: La que te enviamos por WhatsApp al registrarte`,
+    ],
+    y,
+    "green"
+  );
+  y += 2;
+
+  // ── Qué incluye ──────────────────────────────────────────────
+  y = checkPageBreak(doc, y, 60);
+  y = addSection(doc, "¿Qué incluye tu Piloto de Validación?", y);
 
   autoTable(doc, {
-    startY: y + 1,
-    head: [["#", "Componente", "Descripcion"]],
+    startY: y,
+    head: [["#", "Componente", "Lo que hace por tu negocio"]],
     body: [
-      ["1", "Landing Page", "Pagina web optimizada para conversion con tu marca y oferta"],
-      ["2", "Meta Ads", "Campana de publicidad en Facebook e Instagram con segmentacion local"],
-      ["3", "Agente IA WhatsApp", "Asistente inteligente que responde y agenda automaticamente"],
-      ["4", "CRM Basico", "Sistema para dar seguimiento a cada prospecto generado"],
-      ["5", "Reporte Final", "Analisis de resultados con metricas y recomendaciones"],
+      [
+        "1",
+        "Landing Page",
+        "Página web profesional y optimizada para convertir visitas en prospectos, con tu imagen de marca y oferta principal.",
+      ],
+      [
+        "2",
+        "Meta Ads",
+        `Campaña de publicidad en Facebook e Instagram con segmentación geográfica en ${data.zone || "tu zona"}, orientada a tu cliente ideal.`,
+      ],
+      [
+        "3",
+        "Agente IA WhatsApp",
+        "Bot inteligente que responde preguntas frecuentes, califica prospectos y agenda citas automáticamente, las 24 horas.",
+      ],
+      [
+        "4",
+        "CRM de Seguimiento",
+        "Panel en tiempo real para ver y gestionar cada prospecto generado durante el piloto.",
+      ],
+      [
+        "5",
+        "Reporte Final",
+        "Análisis detallado con métricas clave, resultados obtenidos y recomendaciones concretas para el siguiente paso.",
+      ],
     ],
     theme: "grid",
-    headStyles: { fillColor: COLORS.tableHeader, textColor: COLORS.white, fontSize: 8, fontStyle: "bold" },
-    bodyStyles: { fontSize: 8, textColor: COLORS.text },
+    headStyles: {
+      fillColor: COLORS.tableHeader,
+      textColor: COLORS.white,
+      fontSize: 8,
+      fontStyle: "bold",
+    },
+    bodyStyles: { fontSize: 8.5, textColor: COLORS.text, cellPadding: 3 },
     alternateRowStyles: { fillColor: COLORS.tableRowAlt },
     margin: { left: 20, right: 20 },
-    columnStyles: { 0: { cellWidth: 10, halign: "center" }, 1: { cellWidth: 35 } },
+    columnStyles: {
+      0: { cellWidth: 8, halign: "center" },
+      1: { cellWidth: 38, fontStyle: "bold" },
+    },
   });
 
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
-  y = checkPageBreak(doc, y);
+  y = checkPageBreak(doc, y, 55);
 
-  // Timeline
-  y = addSection(doc, `Timeline - Dia por Dia (${data.config.pilotDays} dias)`, y);
+  // ── Timeline ─────────────────────────────────────────────────
+  y = addSection(doc, `Plan de trabajo — ${data.config.pilotDays} días`, y);
 
   const startDate = new Date(data.startDate + "T12:00:00");
-  const timeline: string[][] = [];
-  const activities = [
-    "Kickoff: recibimos materiales, configuramos cuentas",
-    "Diseno de landing page + configuracion de CRM",
-    "Configuracion del Agente IA en WhatsApp",
-    "Creacion de campanas en Meta Ads",
-    "Revision conjunta y aprobacion de materiales",
-    "Lanzamiento de campana - En vivo!",
-    "Monitoreo y optimizacion de resultados",
-    "Cierre de piloto + entrega de reporte final",
+  const activities: string[] = [
+    "Kickoff: recibimos materiales, configuramos cuentas y accesos",
+    "Diseño y desarrollo de la landing page + estructura del CRM",
+    "Configuración del Agente de IA en WhatsApp",
+    "Creación y configuración de campañas en Meta Ads",
+    "Revisión conjunta, aprobación de materiales y ajustes finales",
+    "¡Lanzamiento! — Campaña en vivo, primeros prospectos",
+    "Monitoreo, optimización y ajustes basados en datos reales",
+    "Cierre del piloto + entrega del reporte final de resultados",
   ];
 
-  for (let i = 0; i < Math.min(data.config.pilotDays + 1, activities.length); i++) {
-    timeline.push([`Dia ${i}`, getDayStr(startDate, i), activities[i]]);
+  const days = Math.min(data.config.pilotDays, activities.length);
+  const timelineBody: string[][] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    const dateStr = d.toLocaleDateString("es-MX", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+    const dayLabel = i === 0 ? "Día 1" : i === days - 1 ? `Día ${days}` : `Día ${i + 1}`;
+    timelineBody.push([dayLabel, dateStr, activities[i]]);
   }
 
   autoTable(doc, {
-    startY: y + 1,
-    head: [["Dia", "Fecha", "Actividad"]],
-    body: timeline,
+    startY: y,
+    head: [["Día", "Fecha", "Actividad"]],
+    body: timelineBody,
     theme: "grid",
-    headStyles: { fillColor: COLORS.tableHeader, textColor: COLORS.white, fontSize: 8, fontStyle: "bold" },
-    bodyStyles: { fontSize: 8, textColor: COLORS.text },
+    headStyles: {
+      fillColor: COLORS.tableHeader,
+      textColor: COLORS.white,
+      fontSize: 8,
+      fontStyle: "bold",
+    },
+    bodyStyles: { fontSize: 8.5, textColor: COLORS.text, cellPadding: 2.5 },
     alternateRowStyles: { fillColor: COLORS.tableRowAlt },
     margin: { left: 20, right: 20 },
-    columnStyles: { 0: { cellWidth: 15, halign: "center" }, 1: { cellWidth: 35 } },
+    columnStyles: {
+      0: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+      1: { cellWidth: 32 },
+    },
   });
 
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
-  y = checkPageBreak(doc, y);
+  y = checkPageBreak(doc, y, 65);
 
-  // Checklist
+  // ── Checklist ────────────────────────────────────────────────
   y = addSection(doc, "Lo que necesitamos de tu parte", y);
 
+  doc.setFontSize(8.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text(
+    "Para arrancar lo antes posible, envíanos lo siguiente por WhatsApp o email:",
+    20,
+    y
+  );
+  y += 8;
+
   const checklist = [
-    "Logo de tu negocio en alta resolucion (PNG o SVG)",
-    "5-10 fotos de tu negocio, productos o servicios",
-    "Numero de WhatsApp Business para el agente IA",
-    "Horarios de atencion al publico",
-    "Lista de servicios principales con precios",
-    "Acceso como colaborador a tu cuenta de Meta Business (Facebook/Instagram)",
+    "Logo de tu negocio en alta resolución (PNG o SVG con fondo transparente)",
+    "5 a 10 fotos de tu negocio, productos o servicios (buena calidad)",
+    "Número de WhatsApp Business para configurar el Agente de IA",
+    "Horarios de atención al público",
+    "Lista de servicios o productos principales con precios (o rangos)",
+    "Acceso como colaborador a tu cuenta de Meta Business (Facebook / Instagram)",
   ];
 
   checklist.forEach((item) => {
-    y = checkPageBreak(doc, y, 8);
+    y = checkPageBreak(doc, y, 10);
+    // Green checkbox
+    doc.setDrawColor(5, 150, 105);
+    doc.setLineWidth(0.5);
+    doc.setFillColor(240, 253, 244);
+    doc.rect(22, y - 3.2, 4, 4, "FD");
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLORS.text);
-    doc.text(`[ ]  ${item}`, 24, y);
-    y += 5.5;
+    doc.text(item, 30, y);
+    y += 6.5;
   });
 
   y += 4;
-  y = checkPageBreak(doc, y);
+  y = checkPageBreak(doc, y, 35);
 
-  // Contact
-  y = addSection(doc, "Datos de Contacto", y);
-  y = addParagraph(doc, `${COMPANY.name}`, y);
-  y = addParagraph(doc, `WhatsApp: ${COMPANY.whatsapp}`, y);
-  y = addParagraph(doc, `Email: ${COMPANY.email}`, y);
-  y = addParagraph(doc, `Web: ${COMPANY.web}`, y);
+  // ── Contacto ─────────────────────────────────────────────────
+  y = addSection(doc, "¿Tienes dudas? Contáctanos directamente", y);
+
+  y = addInfoBox(
+    doc,
+    "Datos de contacto",
+    [
+      `${COMPANY.name}  —  Fundador, NorthPeak Digital`,
+      `WhatsApp: ${COMPANY.whatsapp}`,
+      `Email:    ${COMPANY.email}`,
+      `Web:      ${COMPANY.web}`,
+    ],
+    y,
+    "gray"
+  );
 
   addFooter(doc);
   return doc;
-}
-
-function getDayStr(start: Date, daysToAdd: number): string {
-  const d = new Date(start);
-  d.setDate(d.getDate() + daysToAdd);
-  return d.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
 }

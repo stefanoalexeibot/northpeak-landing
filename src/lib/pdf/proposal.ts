@@ -1,130 +1,218 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { COMPANY, COLORS, type ClientFormData } from "./constants";
-import { createDoc, addHeader, addFooter, addSection, addParagraph, checkPageBreak, formatCurrency } from "./utils";
+import {
+  createDoc,
+  addHeader,
+  addFooter,
+  addSection,
+  addParagraph,
+  checkPageBreak,
+  formatCurrency,
+} from "./utils";
 
 export function generateProposalPDF(data: ClientFormData): jsPDF {
   const doc = createDoc();
-  let y = addHeader(doc, "Propuesta Comercial - Piloto de Validacion");
+  let y = addHeader(doc, "Propuesta Comercial");
+  const W = doc.internal.pageSize.getWidth();
 
-  // Client info
+  // ── "Preparado para" ─────────────────────────────────────────
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.textMuted);
-  doc.text(`Preparado para: ${data.name} - ${data.businessName}`, 20, y);
-  y += 8;
-
-  // The Problem
-  y = addSection(doc, "El Problema", y);
-  y = addParagraph(
-    doc,
-    `Hoy en dia, muchos negocios locales como ${data.businessName} dependen del boca a boca o de redes sociales organicas para atraer clientes. Sin un sistema automatizado de atraccion y seguimiento, se pierden oportunidades todos los dias: personas que buscan exactamente lo que tu ofreces en ${data.zone || "tu zona"}, pero nunca te encuentran.`,
-    y
-  );
-  y += 2;
-  y = addParagraph(
-    doc,
-    "Sin una landing page optimizada, sin publicidad segmentada y sin un sistema de seguimiento, es como tener un negocio increible escondido en una calle sin salida.",
-    y
-  );
-
+  doc.text("Preparado exclusivamente para:", 20, y);
   y += 6;
 
-  // The Solution
-  y = addSection(doc, "La Solucion: Piloto de Validacion NorthPeak", y);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.text);
+  const nameLabel = data.businessName
+    ? `${data.name}  —  ${data.businessName}`
+    : data.name;
+  doc.text(nameLabel, 20, y);
+  y += 10;
+
+  // ── El reto ───────────────────────────────────────────────────
+  y = addSection(doc, "El reto de crecer en digital", y);
+
   y = addParagraph(
     doc,
-    `Nuestro Piloto de Validacion es un programa de ${data.config.pilotDays} dias disenado para negocios de tipo "${data.businessType}" donde implementamos un sistema completo de atraccion de clientes usando tecnologia de punta: publicidad digital segmentada, inteligencia artificial y automatizacion.`,
+    `Hoy en día, muchos negocios como ${data.businessName || "el tuyo"} dependen del boca a boca o de publicaciones orgánicas para atraer nuevos clientes. Sin un sistema automatizado de captación y seguimiento, se escapan oportunidades todos los días: personas que buscan exactamente lo que ofreces en ${data.zone || "tu zona"}, pero que nunca llegan a ti.`,
     y
   );
-  y += 2;
+  y += 3;
   y = addParagraph(
     doc,
-    "El objetivo es simple: validar que esta estrategia funciona para tu negocio, con una inversion minima y en tiempo record.",
+    `Sin una página optimizada, sin publicidad segmentada y sin un proceso de calificación automático, cada prospecto que no te responde a tiempo es un cliente que se va a la competencia. La pregunta no es si necesitas un sistema digital — es cuándo arrancar.`,
     y
   );
+  y += 7;
 
-  y += 6;
+  // ── Nuestra propuesta ─────────────────────────────────────────
+  y = addSection(doc, `Nuestra propuesta: Piloto de Validación (${data.config.pilotDays} días)`, y);
 
-  // What's included
-  y = addSection(doc, "Que Incluye?", y);
+  y = addParagraph(
+    doc,
+    `El Piloto de Validación es un programa intensivo diseñado para negocios del sector "${data.businessType}" en el que implementamos un sistema completo de atracción de clientes: landing page profesional, publicidad digital segmentada, inteligencia artificial y automatización.`,
+    y
+  );
+  y += 3;
+  y = addParagraph(
+    doc,
+    `La lógica es simple: antes de comprometerse a una estrategia de largo plazo, valida que funciona para TU negocio específico — con una inversión mínima, en tiempo récord, con datos reales.`,
+    y
+  );
+  y += 7;
+
+  // ── Qué incluye ───────────────────────────────────────────────
+  y = addSection(doc, "¿Qué incluye?", y);
 
   autoTable(doc, {
-    startY: y + 1,
-    head: [["Componente", "Descripcion", "Valor"]],
+    startY: y,
+    head: [["Componente", "Descripción", ""]],
     body: [
-      ["Landing Page", "Pagina web profesional optimizada para conversion con tu marca", "Incluido"],
-      ["Meta Ads", "Campana de Facebook e Instagram con segmentacion local en " + (data.zone || "tu zona"), "Incluido"],
-      ["Agente IA WhatsApp", "Bot inteligente que responde, califica y agenda prospectos 24/7", "Incluido"],
-      ["CRM Basico", "Panel para ver y dar seguimiento a cada prospecto en tiempo real", "Incluido"],
-      ["Reporte Final", "Analisis completo de metricas, resultados y recomendaciones", "Incluido"],
+      [
+        "Landing Page",
+        `Página web profesional optimizada para conversión, con tu identidad de marca y oferta principal. Diseñada para capturar prospectos en ${data.zone || "tu zona"}.`,
+        "✓",
+      ],
+      [
+        "Meta Ads",
+        `Campaña de publicidad en Facebook e Instagram con segmentación geográfica y demográfica precisa. Gestionada y optimizada durante todo el piloto.`,
+        "✓",
+      ],
+      [
+        "Agente IA WhatsApp",
+        "Asistente inteligente que responde preguntas frecuentes, califica prospectos según sus necesidades y agenda citas automáticamente — las 24 horas, sin intervención humana.",
+        "✓",
+      ],
+      [
+        "CRM de Seguimiento",
+        "Panel en tiempo real para ver y gestionar cada prospecto generado. Nunca pierdas de vista una oportunidad de venta.",
+        "✓",
+      ],
+      [
+        "Reporte Final",
+        "Análisis completo al cierre del piloto: métricas clave, costo por prospecto, tasa de conversión y recomendaciones concretas para escalar.",
+        "✓",
+      ],
     ],
     theme: "grid",
-    headStyles: { fillColor: COLORS.tableHeader, textColor: COLORS.white, fontSize: 8, fontStyle: "bold" },
-    bodyStyles: { fontSize: 8, textColor: COLORS.text },
+    headStyles: {
+      fillColor: COLORS.tableHeader,
+      textColor: COLORS.white,
+      fontSize: 8,
+      fontStyle: "bold",
+    },
+    bodyStyles: { fontSize: 8.5, textColor: COLORS.text, cellPadding: 3 },
     alternateRowStyles: { fillColor: COLORS.tableRowAlt },
     margin: { left: 20, right: 20 },
-    columnStyles: { 2: { cellWidth: 25, halign: "center" } },
+    columnStyles: {
+      0: { cellWidth: 42, fontStyle: "bold" },
+      2: { cellWidth: 10, halign: "center", textColor: [5, 150, 105] as [number, number, number] },
+    },
   });
 
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
-  y = checkPageBreak(doc, y);
+  y = checkPageBreak(doc, y, 55);
 
-  // Investment
-  y = addSection(doc, "Inversion", y);
+  // ── Inversión ─────────────────────────────────────────────────
+  y = addSection(doc, "Inversión", y);
 
-  const boxY = y;
+  // Caja de precio — green border + light fill
+  const boxW = W - 40;
   doc.setFillColor(240, 253, 244);
-  doc.roundedRect(20, boxY - 2, 170, 28, 3, 3, "F");
   doc.setDrawColor(...COLORS.tableHeader);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(20, boxY - 2, 170, 28, 3, 3, "S");
+  doc.setLineWidth(0.8);
+  doc.roundedRect(20, y, boxW, 34, 3, 3, "FD");
 
+  // Barra izquierda
+  doc.setFillColor(...COLORS.tableHeader);
+  doc.rect(20, y, 4, 34, "F");
+
+  // Precio principal
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.tableHeader);
-  doc.text(`Setup del Piloto: ${formatCurrency(data.config.pilotPrice)}`, 30, boxY + 8);
+  doc.text(`Setup del Piloto: ${formatCurrency(data.config.pilotPrice)}`, 30, y + 11);
 
+  // Presupuesto ads
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.text);
-  doc.text(`+ Presupuesto publicitario Meta Ads: ${formatCurrency(data.config.adBudgetMin)} - ${formatCurrency(data.config.adBudgetMax)} (se paga directo a Meta)`, 30, boxY + 16);
-  doc.text("Pago unico. Sin mensualidades. Sin compromisos a largo plazo.", 30, boxY + 22);
+  doc.text(
+    `+ Presupuesto Meta Ads: ${formatCurrency(data.config.adBudgetMin)} a ${formatCurrency(data.config.adBudgetMax)}`,
+    30,
+    y + 20
+  );
+  doc.setFontSize(8);
+  doc.setTextColor(...COLORS.textMuted);
+  doc.text("(El presupuesto publicitario se paga directamente a Meta, no a NorthPeak)", 30, y + 26);
 
-  y = boxY + 34;
+  // Badge inferior
+  doc.setFontSize(8.5);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...COLORS.tableHeader);
+  doc.text("Pago único  ·  Sin mensualidades  ·  Sin contratos a largo plazo", 30, y + 32);
 
-  // Why NorthPeak
-  y = checkPageBreak(doc, y, 40);
-  y = addSection(doc, "Por Que NorthPeak?", y);
+  y += 42;
+  y = checkPageBreak(doc, y, 55);
 
-  const reasons = [
-    `Resultados en ${data.config.pilotDays} dias, no en meses`,
-    "Tecnologia de IA aplicada a tu negocio local",
-    "Sin contratos largos - prueba primero, decide despues",
-    "Atencion personalizada directa con el fundador",
-    "Enfocados 100% en negocios locales en Mexico",
+  // ── Por qué NorthPeak ─────────────────────────────────────────
+  y = addSection(doc, "¿Por qué NorthPeak?", y);
+
+  const reasons: [string, string][] = [
+    [`Resultados en ${data.config.pilotDays} días,`, "no en meses ni trimestres de espera"],
+    ["IA aplicada a tu negocio local,", "tecnología de punta sin complicaciones técnicas"],
+    ["Sin contratos a largo plazo,", "prueba el piloto y decide con información real en la mano"],
+    ["Atención directa con el fundador,", "sin intermediarios, sin ejecutivos de cuenta genéricos"],
+    ["100% enfocados en negocios locales en México,", "entendemos tu mercado y tu cliente"],
   ];
 
-  reasons.forEach((r) => {
+  reasons.forEach(([bold, rest]) => {
+    y = checkPageBreak(doc, y, 10);
+
+    // Bullet circle
+    doc.setFillColor(...COLORS.tableHeader);
+    doc.circle(24, y - 1.2, 1.5, "F");
+
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLORS.text);
-    doc.text(`>  ${r}`, 24, y);
-    y += 5.5;
+    doc.text(bold, 30, y);
+
+    const boldW = doc.getTextWidth(bold);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...COLORS.textMuted);
+    // Si la línea es muy larga, ponemos el resto en la siguiente línea
+    if (30 + boldW + doc.getTextWidth(` ${rest}`) < W - 20) {
+      doc.text(` ${rest}`, 30 + boldW, y);
+    } else {
+      const restLines = doc.splitTextToSize(rest, W - 38);
+      doc.text(restLines, 30, y + 5);
+      y += restLines.length * 5;
+    }
+    y += 6.5;
   });
 
+  y += 4;
+  y = checkPageBreak(doc, y, 35);
+
+  // ── CTA ───────────────────────────────────────────────────────
+  y = addSection(doc, "¿Listo para arrancar?", y);
+
+  y = addParagraph(
+    doc,
+    "Los pilotos se agendan por orden de llegada y los cupos son limitados. Escríbenos hoy para confirmar tu lugar y acordar la fecha de inicio.",
+    y
+  );
   y += 6;
-  y = checkPageBreak(doc, y, 30);
 
-  // CTA
-  y = addSection(doc, "Listo para empezar?", y);
-  y = addParagraph(doc, "Agenda una llamada o escribenos por WhatsApp:", y);
-  y += 2;
-
-  doc.setFontSize(10);
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLORS.tableHeader);
   doc.text(`WhatsApp: ${COMPANY.whatsapp}`, 24, y);
-  y += 5;
+  y += 7;
   doc.text(`Email: ${COMPANY.email}`, 24, y);
 
   addFooter(doc);
