@@ -41,6 +41,7 @@ const CATEGORIA_LABELS: Record<string, string> = {
   desarrollo: "Desarrollo",
   diseno: "Diseño",
   consultoria: "Consultoría",
+  paquete: "Paquete",
   otro: "Otro",
 };
 
@@ -49,6 +50,7 @@ const CATEGORIA_COLORS: Record<string, string> = {
   desarrollo: "bg-purple-500/20 text-purple-400 border-purple-500/30",
   diseno: "bg-pink-500/20 text-pink-400 border-pink-500/30",
   consultoria: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+  paquete: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
   otro: "bg-gray-500/20 text-gray-400 border-gray-500/30",
 };
 
