@@ -364,9 +364,9 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
   function openPagoLink(paymentId: string) {
     setPagoLinkPaymentId(paymentId);
-    setPagoLinkBanco("");
-    setPagoLinkClabe("");
-    setPagoLinkTitular("");
+    setPagoLinkBanco("NU MEXICO");
+    setPagoLinkClabe("638180010141018767");
+    setPagoLinkTitular("JOSE ALEJANDRO LUNA DE LEON");
     setPagoLinkReferencia("");
     setGeneratedLink(null);
     setCopiedLink(false);

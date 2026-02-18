@@ -2,6 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createNotification } from "@/lib/notifications";
 
+function getAnonClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
 function getServiceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +20,7 @@ export async function GET(
   _request: Request,
   { params }: { params: { token: string } }
 ) {
-  const supabase = getServiceClient();
+  const supabase = getAnonClient();
   const { token } = params;
 
   const { data: payment, error } = await supabase
