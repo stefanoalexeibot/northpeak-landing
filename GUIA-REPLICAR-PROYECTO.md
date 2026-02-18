@@ -314,7 +314,7 @@ Todas las tablas tienen RLS habilitado. Patron general:
 
 ### 2.3 Storage Buckets
 
-- **`client-files`** — Archivos subidos (documentos, media). Estructura: `{client_id}/docs/` y `{client_id}/media/`
+- **`client-files`** — Archivos subidos (documentos, media). Estructura: `{client_id}/docs/`, `{client_id}/media/`, y `comprobantes/{client_id}/{payment_id}.{ext}` (comprobantes de pago subidos por clientes)
 - **`reportes`** — Reportes HTML del analizador digital
 
 ### 2.4 Realtime
@@ -621,10 +621,16 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 Pagina publica (sin autenticacion) para que el cliente pague una factura pendiente:
 - **Diseno oscuro** con branding de la marca
 - Muestra: nombre del cliente, concepto, monto, datos bancarios (banco, CLABE, titular, referencia)
-- Instrucciones de transferencia paso a paso
-- Boton "Ya realize mi pago" — llama a `/api/pago/[token]` para confirmar
-- Al confirmar: pago pasa a `status = completed`, se registra `paid_at`, se crea notificacion `payment_received` al admin
+- Instrucciones de transferencia paso a paso (5 pasos numerados con circulos verdes)
+- **Subida de comprobante:** zona de carga (click o drag-and-drop) para adjuntar imagen/PDF antes de confirmar
+  - Muestra nombre y tamano del archivo una vez seleccionado
+  - Boton para quitar el archivo si el usuario se equivoca
+- Boton "Ya realize mi pago" — envia `FormData` con el comprobante a `/api/pago/[token]`
+- Al confirmar: pago pasa a `status = completed`, se registra `paid_at`, se crea notificacion `payment_received` al admin con link al comprobante
+- Pantalla de exito: muestra badge "Comprobante adjunto y guardado" si se subio un archivo
 - Si el token no existe o ya fue pagado: muestra mensaje de estado correspondiente
+
+> Implementacion: `useRef<HTMLInputElement>` para el input oculto, `FormData` en el submit, un `useState` para `comprobante: File | null`.
 
 ---
 
@@ -660,7 +666,8 @@ Pagina publica (sin autenticacion) para que el cliente pague una factura pendien
 ### Pago (publico, sin auth)
 | Ruta | Metodo | Funcion |
 |------|--------|---------|
-| `/api/pago/[token]` | POST | Cliente confirma que realizo transferencia; marca pago como completado y notifica al admin |
+| `/api/pago/[token]` | GET | Retorna datos del pago: concepto, monto, datos bancarios, nombre del cliente, status, due_date |
+| `/api/pago/[token]` | POST | Acepta `FormData` con campo `comprobante` (File, opcional); sube archivo a Storage en `client-files/comprobantes/{client_id}/{payment_id}.{ext}` con `upsert: true`; marca pago completado; crea notificacion `payment_received` con link al comprobante (o al perfil del cliente si no hay archivo) |
 
 ### Portal
 | Ruta | Metodo | Funcion |
@@ -703,14 +710,44 @@ Configuracion:
 
 ## 8. GENERACION DE PDFs
 
-4 tipos de documento (`src/lib/pdf/`):
-1. **Bienvenida** — Documento de bienvenida personalizado
-2. **Contrato** — Contrato de servicios
-3. **Propuesta** — Propuesta comercial
-4. **Cotizacion** — Cotizacion de servicios
+4 tipos de documento en `src/lib/pdf/`:
 
-Se generan con jsPDF, se pueden descargar individuales o en ZIP (JSZip).
-Todos en espanol con branding de la marca.
+1. **Bienvenida** (`welcome.ts`) — Saludo personalizado, caja verde de acceso al portal, tabla de servicios con descripcion de valor, timeline del piloto, checkboxes de siguiente paso, caja de contacto
+2. **Contrato** (`contract.ts`) — Numero de contrato auto-generado, cuadros de Prestador/Cliente en dos columnas, 10 clausulas con barra verde izquierda, seccion de firma con lineas dibujadas
+3. **Propuesta** (`proposal.ts`) — "Preparado exclusivamente para", El reto, Nuestra propuesta, tabla de componentes incluidos con check verde, caja de inversion, bullets con circulos verdes rellenos, CTA
+4. **Cotizacion** (`quote.ts`) — Numero de cotizacion, fecha y vigencia, cuadros Emisor/Cliente, tabla de servicios, subtotal/IVA/TOTAL, caja de datos bancarios (Nu, CLABE 638180010141018767, Jose Alejandro Luna de Leon), notas con bullets
+
+**Utilidades de diseno** (`src/lib/pdf/utils.ts`):
+- `addHeader(doc, title)` — Banda oscura (`#05060A`) 32mm + franja verde 3mm en la parte superior + nombre de marca en blanco + tagline en verde + contacto derecha + titulo del documento con subrayado verde 1.5mm
+- `addFooter(doc)` — Fondo gris claro + texto de empresa centrado + numero de pagina a la derecha + franja verde 1.5mm al pie
+- `addSection(doc, title, y)` — Barra verde 3x9mm a la izquierda + titulo en color tableHeader. Retorna `y+10`
+- `addInfoBox(doc, title, lines, y, color)` — Caja redondeada con relleno claro + barra izquierda de color (green/amber/gray) + titulo en negrita + lineas de contenido
+- `addDivider(doc, y)` — Linea fina en color borde. Retorna `y+5`
+- `checkPageBreak(doc, y, margin)` — Agrega pagina nueva automaticamente si no hay espacio suficiente
+
+**Constantes** (`src/lib/pdf/constants.ts`):
+- `COMPANY` — nombre legal, brand, email, whatsapp
+- `COLORS` — tableHeader (verde), text, textMuted, border, white, tableRowAlt
+
+**Patron para cuadros de dos columnas** (Emisor/Cliente, Prestador/Cliente):
+```typescript
+const colW = (W - 45) / 2;
+const boxH = 28;
+doc.roundedRect(20, y, colW, boxH, 2, 2, "F");  // izquierda
+doc.roundedRect(25 + colW, y, colW, boxH, 2, 2, "F");  // derecha
+```
+
+**Nota tecnica (componentes cliente):** Usar dynamic import para jsPDF en paginas con `"use client"`:
+```typescript
+const jsPDF = (await import("jspdf")).default;
+const autoTable = (await import("jspdf-autotable")).default;
+// Castear doc como unknown, no como jsPDF (dynamic import devuelve valor, no tipo)
+(doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY
+```
+
+Se pueden descargar individuales o en ZIP (JSZip). Todos en espanol con branding de la marca.
+
+**Cotizador rapido** (`/admin/cotizador`): La generacion de PDF esta implementada con dynamic import de jsPDF. Genera PDF con header/footer de marca, cuadros Emisor/Cliente, tabla de servicios y totales. Se descarga como `cotizacion-{cliente}-{numero}.pdf`.
 
 ---
 
@@ -958,8 +995,8 @@ NEXT_PUBLIC_SITE_URL=https://tudominio.com  (opcional, para links en emails)
 8. Pagina `/admin/cotizador` — cotizador rapido basado en el catalogo
 9. Columns `pago_token` y `datos_bancarios` en tabla `payments`
 10. API `/api/admin/pago-link` — genera token unico por pago pendiente
-11. Pagina publica `/pago/[token]` — cliente ve datos bancarios y confirma pago
-12. API `/api/pago/[token]` POST — confirma el pago y notifica al admin
+11. Pagina publica `/pago/[token]` — cliente ve datos bancarios, adjunta comprobante (opcional) y confirma pago
+12. API `/api/pago/[token]` GET/POST — GET retorna datos del pago; POST acepta FormData con comprobante, sube a Storage, confirma pago y notifica al admin
 13. Componente `ComboboxInput` con listas de sugerencias (zonas, giros, conceptos)
 14. Cron `/api/cron/weekly-summary` — resumen semanal por email cada lunes
 15. Dark-mode styles para `input[type="date"]` en globals.css
@@ -1111,4 +1148,4 @@ INSERT INTO catalogo_servicios (nombre, descripcion, precio, categoria) VALUES
 
 ---
 
-> **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.
+> **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026, incluyendo: diseno profesional de PDFs, cotizador rapido con generacion de PDF, subida de comprobante de pago por el cliente y datos bancarios reales. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.

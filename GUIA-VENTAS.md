@@ -212,6 +212,17 @@ Cuando quieras la revisamos juntos — te puedo explicar cada opcion en 10 min p
 2. Camina al prospecto por cada paquete
 3. Explica el ROI y la estrategia
 
+**Opcion D: Cotizador Rapido (PDF formal)**
+Si el prospecto pide una cotizacion por escrito con tus servicios exactos:
+1. Ve a **Admin → Cotizador** (`/admin/cotizador`)
+2. Busca y agrega servicios del catalogo (o ingresa descripcion libre)
+3. Ajusta cantidades, precios y aplica descuento si aplica
+4. (Opcional) Selecciona el cliente en el dropdown
+5. Click en **"Generar PDF"** — descarga un PDF con branding profesional
+6. Envia el PDF al prospecto por WhatsApp o email
+
+> El cotizador usa el catalogo de servicios de `/admin/catalogo`. Puedes agregar o modificar servicios desde ahi.
+
 ---
 
 ## PASO 6: NEGOCIAR Y CERRAR
@@ -271,6 +282,25 @@ Una vez cerrada la venta:
    - Seguir el avance de su proyecto
    - Comunicarse por chat
    - Subir/descargar archivos
+
+### Sobre los documentos generados automaticamente
+
+Los 4 tipos de documento (contrato, bienvenida, propuesta, cotizacion) tienen un diseno profesional con branding de NorthPeak: encabezado oscuro, acento verde, datos de contacto y pie de pagina. Se generan y descargan en PDF con un clic desde `/admin/documents`.
+
+### Flujo de cobro con link de pago
+
+Una vez que el cliente tiene un pago registrado en el sistema:
+
+1. En la pestana **Pagos** del cliente, localiza el pago pendiente
+2. Click en el icono de enlace — ingresa los datos bancarios:
+   - **Banco:** Nu (Nubank)
+   - **CLABE:** 638180010141018767
+   - **Beneficiario:** Jose Alejandro Luna de Leon
+3. Al generar, copia la URL y enviala al cliente por WhatsApp
+4. El cliente abre la pagina, ve los datos de transferencia y puede **adjuntar su comprobante** (imagen o PDF)
+5. Al presionar "Ya realize mi pago", recibes una notificacion con link directo al comprobante
+
+> Este flujo evita perseguir al cliente por confirmacion — el comprobante llega directo a tu panel.
 
 ---
 
