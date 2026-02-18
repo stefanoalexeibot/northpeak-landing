@@ -96,5 +96,22 @@ export async function POST(
     link: comprobanteUrl || `/admin/clients/${payment.client_id}`,
   });
 
+  // Fire-and-forget: notificar a n8n → Telegram
+  const n8nWebhook = process.env.N8N_WEBHOOK_PAGO;
+  if (n8nWebhook) {
+    fetch(n8nWebhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cliente: clientName,
+        concepto: payment.concept,
+        monto: `$${amount} MXN`,
+        comprobante_url: comprobanteUrl,
+        admin_link: `${process.env.NEXT_PUBLIC_APP_URL}/admin/clients/${payment.client_id}`,
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {});
+  }
+
   return NextResponse.json({ success: true, comprobanteUrl });
 }
