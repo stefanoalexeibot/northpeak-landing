@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,9 @@ import {
   TrendingUp,
   RefreshCw,
 } from "lucide-react";
+
+// Module-level singleton — stable across renders
+const supabase = createClient();
 
 interface PaymentRow {
   id: string;
@@ -59,23 +62,29 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 export default function AdminPaymentsPage() {
-  const supabase = createClient();
   const [payments, setPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("pending");
   const [confirming, setConfirming] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const loadingRef = useRef(false);
 
   const loadPayments = useCallback(async () => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     setLoading(true);
+
+    // Try join first
     const { data, error } = await supabase
       .from("payments")
       .select("*, clients(id, name, company)")
       .order("created_at", { ascending: false });
 
-    if (error || !data) {
-      // Fallback: load payments without join, then merge client names
-      const { data: paymentsOnly } = await supabase
+    if (!error && data) {
+      setPayments(data as unknown as PaymentRow[]);
+    } else {
+      // Fallback: two queries + merge
+      const { data: pays } = await supabase
         .from("payments")
         .select("*")
         .order("created_at", { ascending: false });
@@ -86,20 +95,39 @@ export default function AdminPaymentsPage() {
       const clientMap = Object.fromEntries(
         (clientsList ?? []).map(c => [c.id, c])
       );
-
-      const merged = (paymentsOnly ?? []).map(p => ({
+      const merged = (pays ?? []).map(p => ({
         ...p,
         clients: clientMap[p.client_id] ?? null,
       }));
       setPayments(merged as PaymentRow[]);
-    } else {
-      setPayments(data as unknown as PaymentRow[]);
     }
-    setLoading(false);
-  }, [supabase]);
 
+    setLoading(false);
+    loadingRef.current = false;
+  }, []);
+
+  // Initial load
+  useEffect(() => { loadPayments(); }, [loadPayments]);
+
+  // Reload when window regains focus (syncs deletes/updates from client-detail page)
   useEffect(() => {
-    loadPayments();
+    function handleFocus() { loadPayments(); }
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [loadPayments]);
+
+  // Realtime subscription — reflects changes made anywhere in the app
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-payments-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "payments" },
+        () => { loadPayments(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [loadPayments]);
 
   async function confirmPayment(id: string) {
@@ -137,9 +165,7 @@ export default function AdminPaymentsPage() {
     .filter(p => p.status === "completed" && p.paid_at && p.paid_at >= startOfMonth)
     .reduce((s, p) => s + Number(p.amount), 0);
 
-  const withComprobante = payments.filter(
-    p => p.status === "pending" && p.comprobante_url
-  );
+  const withComprobante = payments.filter(p => !!p.comprobante_url);
 
   // ── Filtered list ────────────────────────────────────────────
   const filtered = payments.filter(p => {
@@ -152,7 +178,7 @@ export default function AdminPaymentsPage() {
   // ── Badge counts ─────────────────────────────────────────────
   const counts: Record<Tab, number> = {
     pending:     payments.filter(p => p.status === "pending").length,
-    comprobante: payments.filter(p => !!p.comprobante_url).length,
+    comprobante: withComprobante.length,
     completed:   payments.filter(p => p.status === "completed").length,
     all:         payments.length,
   };
@@ -229,7 +255,7 @@ export default function AdminPaymentsPage() {
                 <ImageIcon className={`h-4 w-4 ${withComprobante.length > 0 ? "text-yellow-400" : "text-northpeak-text-muted"}`} />
               </div>
               <div>
-                <p className="text-xs text-northpeak-text-muted">Esperando confirmar</p>
+                <p className="text-xs text-northpeak-text-muted">Con comprobante</p>
                 <p className={`text-xl font-bold ${withComprobante.length > 0 ? "text-yellow-400" : "text-northpeak-text-muted"}`}>
                   {withComprobante.length} {withComprobante.length === 1 ? "pago" : "pagos"}
                 </p>
@@ -279,7 +305,9 @@ export default function AdminPaymentsPage() {
               <CreditCard className="h-10 w-10 text-northpeak-text-dim mb-3" />
               <p className="text-northpeak-text-muted text-sm">
                 {tab === "comprobante"
-                  ? "No hay pagos con comprobante pendiente de confirmar."
+                  ? "No hay pagos con comprobante."
+                  : tab === "pending"
+                  ? "No hay pagos pendientes."
                   : "No hay pagos en esta categoría."}
               </p>
             </div>
@@ -313,7 +341,6 @@ export default function AdminPaymentsPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      {/* Client name */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-semibold text-northpeak-text truncate">
                           {client?.name ?? "Cliente"}
@@ -335,7 +362,6 @@ export default function AdminPaymentsPage() {
                         )}
                       </div>
 
-                      {/* Concept + meta */}
                       <p className="text-xs text-northpeak-text-muted truncate mt-0.5">
                         {pay.concept}
                         {pay.payment_method ? ` · ${METHOD_LABELS[pay.payment_method] ?? pay.payment_method}` : ""}
@@ -356,7 +382,6 @@ export default function AdminPaymentsPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-0.5 shrink-0">
-                      {/* Ver comprobante */}
                       {hasComprobante && (
                         <a
                           href={pay.comprobante_url}
@@ -369,7 +394,6 @@ export default function AdminPaymentsPage() {
                         </a>
                       )}
 
-                      {/* Confirmar pago */}
                       {pay.status === "pending" && (
                         <Button
                           variant="ghost"
@@ -387,7 +411,6 @@ export default function AdminPaymentsPage() {
                         </Button>
                       )}
 
-                      {/* Ir al cliente */}
                       {client && (
                         <Link href={`/admin/clients/${client.id}`}>
                           <Button
@@ -401,7 +424,6 @@ export default function AdminPaymentsPage() {
                         </Link>
                       )}
 
-                      {/* Eliminar */}
                       <Button
                         variant="ghost"
                         size="icon"

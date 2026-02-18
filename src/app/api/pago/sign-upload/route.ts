@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "No se pudo generar el enlace de subida" }, { status: 500 });
   }
 
-  const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/client-files/${path}`;
+  const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()}/storage/v1/object/public/client-files/${path}`;
 
   return NextResponse.json({ signedUrl: data.signedUrl, path, publicUrl });
 }
