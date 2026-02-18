@@ -190,8 +190,197 @@ export default function CotizadorPage() {
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 
-  function showSummary() {
-    addToast("Resumen generado (PDF pendiente de implementar)", "info");
+  async function generatePDF() {
+    if (items.length === 0) return;
+
+    const jsPDF = (await import("jspdf")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
+
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const COLORS = {
+      green: [5, 150, 105] as [number, number, number],
+      text: [30, 30, 35] as [number, number, number],
+      muted: [100, 100, 110] as [number, number, number],
+      light: [245, 247, 250] as [number, number, number],
+      border: [220, 225, 230] as [number, number, number],
+      white: [255, 255, 255] as [number, number, number],
+    };
+
+    // Green accent line
+    doc.setFillColor(...COLORS.green);
+    doc.rect(0, 0, pageWidth, 3, "F");
+
+    // Brand + title
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.text);
+    doc.text("NORTHPEAK DIGITAL", 20, 18);
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...COLORS.muted);
+    doc.text("Marketing Digital · Automatización · Inteligencia Artificial", 20, 24);
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.green);
+    doc.text("COTIZACIÓN", 20, 36);
+
+    // Quote number + date
+    const quoteNo = `COT-${Date.now().toString().slice(-6)}`;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.green);
+    doc.text(quoteNo, pageWidth - 20, 30, { align: "right" });
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...COLORS.muted);
+    doc.text(`Fecha: ${today}`, pageWidth - 20, 36, { align: "right" });
+
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 15);
+    doc.text(
+      `Vigencia: ${validUntil.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}`,
+      pageWidth - 20,
+      42,
+      { align: "right" }
+    );
+
+    doc.setDrawColor(...COLORS.border);
+    doc.setLineWidth(0.3);
+    doc.line(20, 42, pageWidth - 20, 42);
+
+    let y = 50;
+
+    // Client / Issuer boxes
+    const colW = 80;
+    doc.setFillColor(...COLORS.light);
+    doc.roundedRect(20, y, colW, 28, 2, 2, "F");
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.muted);
+    doc.text("EMISOR", 24, y + 5);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.text);
+    doc.text("NorthPeak Digital", 24, y + 11);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("a.luna@northpeakdigital.com.mx", 24, y + 17);
+    doc.text("+52 812 198 0008", 24, y + 22);
+
+    if (clientName || businessName) {
+      const rightX = pageWidth - 20 - colW;
+      doc.setFillColor(...COLORS.light);
+      doc.roundedRect(rightX, y, colW, 28, 2, 2, "F");
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.muted);
+      doc.text("CLIENTE", rightX + 4, y + 5);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.text);
+      if (clientName) doc.text(clientName, rightX + 4, y + 11);
+      if (businessName) {
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(businessName, rightX + 4, y + 17);
+      }
+    }
+
+    y += 36;
+
+    // Items table
+    const tableBody = items.map((item, i) => [
+      String(i + 1),
+      item.nombre,
+      item.tipo === "mensual" ? "Mensual" : "Pago único",
+      `$${item.precioUnitario.toLocaleString("es-MX")}`,
+      String(item.cantidad),
+      `$${(item.precioUnitario * item.cantidad).toLocaleString("es-MX")}`,
+    ]);
+
+    autoTable(doc, {
+      startY: y,
+      head: [["#", "Servicio", "Tipo", "Precio Unit.", "Cant.", "Total"]],
+      body: tableBody,
+      theme: "grid",
+      headStyles: {
+        fillColor: COLORS.green,
+        textColor: COLORS.white,
+        fontSize: 8,
+        fontStyle: "bold",
+      },
+      bodyStyles: { fontSize: 8, textColor: COLORS.text },
+      alternateRowStyles: { fillColor: COLORS.light },
+      margin: { left: 20, right: 20 },
+      columnStyles: {
+        0: { cellWidth: 8, halign: "center" },
+        2: { cellWidth: 22, halign: "center" },
+        3: { cellWidth: 28, halign: "right" },
+        4: { cellWidth: 12, halign: "center" },
+        5: { cellWidth: 28, halign: "right" },
+      },
+    });
+
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
+
+    // Totals
+    const totalsX = pageWidth - 20;
+    const labelX = totalsX - 60;
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...COLORS.text);
+    doc.text("Subtotal:", labelX, y);
+    doc.text(`$${subtotal.toLocaleString("es-MX")}`, totalsX, y, { align: "right" });
+    y += 6;
+
+    if (includeIVA) {
+      doc.text("IVA (16%):", labelX, y);
+      doc.text(`$${iva.toLocaleString("es-MX")}`, totalsX, y, { align: "right" });
+      y += 6;
+    }
+
+    doc.setDrawColor(...COLORS.green);
+    doc.setLineWidth(0.5);
+    doc.line(labelX, y - 2, totalsX, y - 2);
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...COLORS.green);
+    doc.text("TOTAL:", labelX, y + 4);
+    doc.text(`$${total.toLocaleString("es-MX")} MXN`, totalsX, y + 4, { align: "right" });
+
+    y += 16;
+
+    // Notes
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...COLORS.muted);
+    doc.text("• Cotización válida por 15 días naturales.", 20, y);
+    y += 5;
+    doc.text("• El pago deberá realizarse previo al inicio de los servicios.", 20, y);
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setDrawColor(...COLORS.border);
+    doc.setLineWidth(0.3);
+    doc.line(20, pageHeight - 18, pageWidth - 20, pageHeight - 18);
+    doc.setFontSize(7);
+    doc.setTextColor(...COLORS.muted);
+    doc.text(
+      "a.luna@northpeakdigital.com.mx  |  +52 812 198 0008  |  northpeakdigital.com.mx",
+      20,
+      pageHeight - 12
+    );
+
+    const fileName = `cotizacion-${clientName || businessName || "northpeak"}-${quoteNo}.pdf`
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    doc.save(fileName);
+    addToast("PDF generado correctamente");
   }
 
   if (loading) {
@@ -451,7 +640,7 @@ export default function CotizadorPage() {
               {items.length > 0 && (
                 <div className="grid grid-cols-1 gap-2 pt-2">
                   <Button
-                    onClick={showSummary}
+                    onClick={generatePDF}
                     className="bg-northpeak-green hover:bg-northpeak-green/90 text-black w-full"
                   >
                     <FileText className="h-4 w-4 mr-2" />
