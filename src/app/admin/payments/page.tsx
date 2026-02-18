@@ -68,11 +68,33 @@ export default function AdminPaymentsPage() {
 
   const loadPayments = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("payments")
       .select("*, clients(id, name, company)")
       .order("created_at", { ascending: false });
-    setPayments((data ?? []) as unknown as PaymentRow[]);
+
+    if (error || !data) {
+      // Fallback: load payments without join, then merge client names
+      const { data: paymentsOnly } = await supabase
+        .from("payments")
+        .select("*")
+        .order("created_at", { ascending: false });
+      const { data: clientsList } = await supabase
+        .from("clients")
+        .select("id, name, company");
+
+      const clientMap = Object.fromEntries(
+        (clientsList ?? []).map(c => [c.id, c])
+      );
+
+      const merged = (paymentsOnly ?? []).map(p => ({
+        ...p,
+        clients: clientMap[p.client_id] ?? null,
+      }));
+      setPayments(merged as PaymentRow[]);
+    } else {
+      setPayments(data as unknown as PaymentRow[]);
+    }
     setLoading(false);
   }, [supabase]);
 
