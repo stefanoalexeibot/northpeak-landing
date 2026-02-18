@@ -6,7 +6,7 @@
 
 ## 1. RESUMEN EJECUTIVO
 
-**Que es:** Un sistema SaaS dual (Admin Panel + Portal de Cliente) para gestionar clientes de una agencia de marketing digital. Incluye: CRM, gestion de proyectos, documentos, pagos, mensajeria, analisis con IA, cuestionario dinamico con cotizacion personalizada por IA, pipeline Kanban de prospectos, integracion WhatsApp, y automatizaciones.
+**Que es:** Un sistema SaaS dual (Admin Panel + Portal de Cliente) para gestionar clientes de una agencia de marketing digital. Incluye: CRM, gestion de proyectos, documentos, pagos, mensajeria, analisis con IA, cuestionario dinamico con cotizacion personalizada por IA, pipeline Kanban de prospectos, integracion WhatsApp, catalogo de servicios, cotizador rapido, tareas por cliente, pagos recurrentes automatizados, generador de link de pago y automatizaciones.
 
 **Stack tecnologico:**
 - **Frontend/Backend:** Next.js 14.2 (App Router) + TypeScript + Tailwind CSS
@@ -26,11 +26,15 @@ src/
     admin/          → Panel de administracion
       analizador/   → Analizador digital + cuestionario inline
       pipeline/     → Pipeline Kanban de prospectos
+      catalogo/     → Catalogo de servicios y paquetes
+      cotizador/    → Cotizador rapido para prospectos
     portal/         → Portal del cliente
     cuestionario/   → Pagina publica de cuestionario (sin auth)
+    pago/           → Pagina publica de pago (sin auth, token-based)
     api/            → Endpoints del backend
       cuestionario/ → API publica del cuestionario (token-based)
       ai/           → Endpoints de IA (analyze, content, strategy, pricing)
+      pago/         → Endpoint publico de confirmacion de pago
   components/       → Componentes React
     admin/          → Componentes del admin (sidebar, tabs, charts, etc.)
     portal/         → Componentes del portal (nav, efectos visuales, etc.)
@@ -171,6 +175,8 @@ reference_number text
 notes            text
 due_date         date
 paid_at          timestamptz
+pago_token       text UNIQUE            -- Token publico para link de pago
+datos_bancarios  jsonb                  -- {banco, clabe, titular, referencia}
 created_at       timestamptz DEFAULT now()
 ```
 
@@ -205,7 +211,7 @@ submitted_at timestamptz DEFAULT now()
 Notificaciones del sistema.
 ```sql
 id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
-type        text NOT NULL  -- contract_signed|message_received|referral_submitted|testimonial_submitted|payment_overdue|file_uploaded|cuestionario_completed
+type        text NOT NULL  -- contract_signed|message_received|referral_submitted|testimonial_submitted|payment_overdue|file_uploaded|cuestionario_completed|payment_received
 title       text NOT NULL
 description text
 client_id   uuid REFERENCES clients ON DELETE SET NULL
@@ -213,6 +219,7 @@ read        boolean DEFAULT false
 link        text
 created_at  timestamptz DEFAULT now()
 ```
+> Hay un check constraint en `type` — al agregar nuevos tipos hay que actualizar el constraint con `ALTER TABLE notifications DROP CONSTRAINT ...` y recrearlo.
 
 #### `analisis_digital`
 Resultados del analizador de presencia digital.
@@ -247,6 +254,47 @@ created_at                timestamptz DEFAULT now()
 completed_at              timestamptz
 ```
 > Sin RLS — acceso solo via service role desde API routes publicas.
+
+#### `tareas`
+Tareas internas del admin vinculadas a un cliente.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+titulo      text NOT NULL
+descripcion text
+status      text DEFAULT 'pendiente'  -- pendiente|en_progreso|completada
+prioridad   text DEFAULT 'media'      -- baja|media|alta
+due_date    date
+created_at  timestamptz DEFAULT now()
+```
+
+#### `catalogo_servicios`
+Catalogo de servicios y paquetes que ofrece la agencia.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+nombre      text NOT NULL
+descripcion text
+precio      decimal NOT NULL
+categoria   text NOT NULL  -- marketing|diseno|desarrollo|consultoria|paquete
+activo      boolean DEFAULT true
+created_at  timestamptz DEFAULT now()
+```
+> Pre-poblado con ~30 servicios y paquetes al crear el proyecto.
+
+#### `pagos_recurrentes`
+Configuracion de cobros automatizados mensuales.
+```sql
+id                  uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id           uuid REFERENCES clients ON DELETE CASCADE
+concepto            text NOT NULL
+monto               decimal NOT NULL
+dia_cobro           integer NOT NULL  -- 1-28 (dia del mes)
+activo              boolean DEFAULT true
+fecha_inicio        date NOT NULL
+fecha_fin           date             -- NULL = sin fin
+ultimo_pago_creado  date
+created_at          timestamptz DEFAULT now()
+```
 
 #### `ai_strategies`
 Estrategias generadas por IA.
@@ -301,8 +349,8 @@ Habilitado en la tabla `notifications` para push en tiempo real al portal del cl
 ## 4. PANEL DE ADMINISTRACION
 
 ### 4.1 Layout
-- Sidebar fijo a la izquierda (64px de ancho)
-- Links: Dashboard, Clientes, Documentos, Mensajes, Referidos, Testimonios, Analizador, Pipeline, Reportes
+- Sidebar fijo a la izquierda (64px de ancho, responsive — drawer en mobile)
+- Links: Dashboard, Clientes, Documentos, Mensajes, Referidos, Testimonios, Analizador, Pipeline, Catalogo, Cotizador, Reportes
 - Boton de cerrar sesion
 - Logo de la marca arriba
 - Contenido principal con padding izquierdo de 64px
@@ -358,14 +406,22 @@ Secciones superiores:
 - Card de notas del admin (textarea editable, se guarda en `admin_notes`)
 
 Tabs (componente `client-detail-tabs.tsx`):
-1. **Info** — Editar nombre, empresa, telefono. Boton reenviar email de bienvenida.
+1. **Info** — Editar nombre, empresa, telefono. Boton reenviar email de bienvenida. Card de **Tareas** (CRUD de tareas internas con prioridad, fecha y status).
 2. **Documentos** — Lista de docs, subir nuevo, editor de nota de venta (items + descuento + notas).
 3. **Proyectos** — CRUD de proyectos + entregables. Templates de proyecto. Duplicar proyecto. Cambiar status.
 4. **Archivos** — Subir y ver archivos compartidos con el cliente.
-5. **Pagos** — Registrar pagos (monto, concepto, metodo, status, referencia, fecha vencimiento, notas).
+5. **Pagos** — Registrar pagos (monto, concepto con autocompletado, metodo, status, referencia, fecha vencimiento, notas). Boton "Link de pago" por cada pago pendiente (genera URL publica con datos bancarios). Card de **Pagos Recurrentes** (configurar cobros automaticos mensuales).
 6. **Actividad** — Timeline de actividad del cliente.
 7. **Analisis** — Analisis digitales vinculados. Link para crear nuevo analisis.
 8. **IA** — Generador de contenido para redes + Estrategia IA (playbook 30 dias).
+
+**Flujo de link de pago:**
+1. Admin presiona icono de enlace en un pago pendiente
+2. Se abre dialog para ingresar: banco, CLABE, titular, referencia
+3. Al generar: API crea un token unico y guarda datos bancarios en `payments`
+4. Admin copia la URL publica `/pago/{token}` y la envia al cliente
+5. Cliente abre la pagina, ve instrucciones de transferencia y boton "Ya pague"
+6. Al confirmar: pago se marca como completado y se crea notificacion `payment_received`
 
 ### 4.6 Documentos (`/admin/documents`)
 Generador de PDFs con jsPDF:
@@ -403,6 +459,7 @@ Dashboard de metricas:
 - Grafica de ingresos 12 meses
 
 ### 4.11 Analizador Digital (`/admin/analizador`)
+> **Nota:** El campo "Giro" usa `ComboboxInput` con 55+ giros predefinidos. El campo "Zona/Ubicacion" usa `ComboboxInput` con 60+ ciudades de Mexico (enfocado en AMM). Ver seccion 10.2.
 Herramienta para analizar la presencia digital de prospectos:
 - Form de datos: nombre, giro (dropdown con ~23 opciones), zona, contacto, telefono
 - Boton "Llenar con IA" — llama a Claude para estimar hallazgos
@@ -440,6 +497,26 @@ Tablero Kanban para gestionar el embudo de ventas de prospectos analizados:
 
 ### 4.13 Busqueda Rapida (Command Search)
 Componente `command-search.tsx` — paleta de comandos tipo Cmd+K para buscar clientes y navegar rapido.
+
+### 4.14 Catalogo de Servicios (`/admin/catalogo`)
+Catalogo completo de servicios y paquetes que ofrece la agencia:
+- CRUD de servicios: nombre, descripcion, precio, categoria, activo/inactivo
+- Categorias: Marketing, Diseno, Desarrollo, Consultoria, **Paquete** (verde)
+- Filtro por categoria con tabs
+- Busqueda por nombre o descripcion
+- Precios formateados en MXN
+- Toggle activo/inactivo inline
+- Pre-poblado con ~30 servicios al iniciar (ver seccion 17)
+
+### 4.15 Cotizador Rapido (`/admin/cotizador`)
+Generador de cotizaciones en tiempo real usando el catalogo:
+- Busqueda y seleccion de servicios del catalogo
+- Agregar servicios a la cotizacion con cantidad y precio unitario
+- Descuento global en %
+- Totales en tiempo real (subtotal, descuento, total)
+- Selector de cliente (opcional)
+- Generacion de PDF de cotizacion
+- El campo "concepto" en pagos usa `ComboboxInput` con conceptos predefinidos
 
 ---
 
@@ -539,6 +616,18 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 
 ---
 
+## 5C. PAGINA PUBLICA: PAGO (`/pago/[token]`)
+
+Pagina publica (sin autenticacion) para que el cliente pague una factura pendiente:
+- **Diseno oscuro** con branding de la marca
+- Muestra: nombre del cliente, concepto, monto, datos bancarios (banco, CLABE, titular, referencia)
+- Instrucciones de transferencia paso a paso
+- Boton "Ya realize mi pago" — llama a `/api/pago/[token]` para confirmar
+- Al confirmar: pago pasa a `status = completed`, se registra `paid_at`, se crea notificacion `payment_received` al admin
+- Si el token no existe o ya fue pagado: muestra mensaje de estado correspondiente
+
+---
+
 ## 6. API ROUTES (Backend)
 
 ### Admin
@@ -549,6 +638,10 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 | `/api/admin/notifications` | GET | Obtiene notificaciones del admin |
 | `/api/admin/payments` | POST | Gestiona pagos |
 | `/api/admin/analisis` | POST/GET/PATCH | Genera/lista analisis digitales + actualiza etapa (pipeline) |
+| `/api/admin/catalogo` | GET/POST/PATCH/DELETE | CRUD del catalogo de servicios |
+| `/api/admin/tareas` | GET/POST/PATCH/DELETE | CRUD de tareas por cliente |
+| `/api/admin/pagos-recurrentes` | GET/POST/PATCH/DELETE | CRUD de cobros recurrentes |
+| `/api/admin/pago-link` | POST | Genera token de pago y guarda datos bancarios |
 
 ### IA
 | Ruta | Metodo | Funcion |
@@ -564,6 +657,11 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 | `/api/cuestionario/[token]` | GET | Retorna preguntas + datos del negocio para un token valido |
 | `/api/cuestionario/[token]` | POST | Recibe respuestas, genera cotizacion IA, actualiza reporte HTML, envia notificacion |
 
+### Pago (publico, sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/pago/[token]` | POST | Cliente confirma que realizo transferencia; marca pago como completado y notifica al admin |
+
 ### Portal
 | Ruta | Metodo | Funcion |
 |------|--------|---------|
@@ -576,6 +674,8 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 | Ruta | Schedule | Funcion |
 |------|----------|---------|
 | `/api/cron/payment-reminders` | Diario 14:00 UTC | Envia recordatorios de pago por email |
+| `/api/cron/recurring-payments` | Diario 10:00 UTC | Crea pagos automaticamente segun `pagos_recurrentes` activos |
+| `/api/cron/weekly-summary` | Lunes 9:00 UTC | Envia resumen semanal al admin: ingresos, prospectos, pipeline, cobros vencidos |
 
 Patron de autenticacion en TODAS las API routes:
 ```typescript
@@ -689,6 +789,29 @@ northpeak-blue:       #3B82F6   (accent secundario)
 ### Componentes shadcn/ui instalados
 avatar, badge, button, card, dialog, input, label, select, separator, tabs, textarea, toast
 
+### 10.2 ComboboxInput (autocompletado con sugerencias)
+Componente custom `src/components/ui/combobox-input.tsx` — typeahead reutilizable:
+- Filtra opciones en tiempo real mientras el usuario escribe
+- Navegacion con teclado (↑↓ flechas, Enter para seleccionar, Escape para cerrar)
+- Click fuera para cerrar
+- Si no hay texto: muestra todas las opciones
+- Usado en: giro del analizador, zona/ubicacion del analizador, concepto de pago, concepto de factura
+
+Listas de sugerencias (`src/lib/suggestions.ts`):
+- **`ZONAS_MEXICO`** — 60+ ciudades mexicanas (AMM primero: San Pedro, MTY, San Nicolas, Guadalupe, Apodaca, Escobedo, Santa Catarina, Juarez, Garcia, Cadereyta; luego CDMX, GDL, Puebla, QRO, etc.)
+- **`GIROS_NEGOCIO`** — 55+ tipos de negocio (Restaurante, Cafeteria, Salon de Belleza, Barberia, Consultorio, Veterinaria, Tienda en linea, Agencia de Marketing, etc.)
+- **`CONCEPTOS_PAGO`** — 20 conceptos comunes de pago (Mensualidad de servicios digitales, Gestion de redes sociales, Meta Ads, Diseno web, etc.)
+
+### 10.3 Dark-mode date picker
+Los inputs `type="date"` usan estilos en `src/app/globals.css`:
+```css
+input[type="date"] { color-scheme: dark; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+/* Portal en light-mode: override */
+.light input[type="date"] { color-scheme: light; }
+.light input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+```
+
 ### Efectos visuales del portal (desktop only)
 - `animated-background.tsx` — Gradientes animados de fondo
 - `cursor-glow.tsx` — Resplandor que sigue al cursor
@@ -736,10 +859,19 @@ NEXT_PUBLIC_SITE_URL=https://tudominio.com  (opcional, para links en emails)
     {
       "path": "/api/cron/payment-reminders",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/recurring-payments",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 9 * * 1"
     }
   ]
 }
 ```
+> Los 3 cron jobs usan autenticacion via header `Authorization: Bearer {CRON_SECRET}`. Vercel inyecta este header automaticamente.
 
 ### Supabase
 1. Crear proyecto en supabase.com
@@ -814,6 +946,23 @@ NEXT_PUBLIC_SITE_URL=https://tudominio.com  (opcional, para links en emails)
 1. Dashboard de reportes con graficas
 2. Export CSV de clientes
 3. Metricas de negocio (ingresos, conversion, tiempo de respuesta)
+
+### Fase 9: Productividad y Cobros
+1. Tabla `tareas` en Supabase (client_id, titulo, status, prioridad, due_date)
+2. Componente `tareas-list.tsx` — CRUD inline en el tab Info del cliente
+3. Tabla `pagos_recurrentes` en Supabase (dia_cobro, activo, ultimo_pago_creado)
+4. Componente `recurring-payments.tsx` — CRUD en el tab Pagos del cliente
+5. Cron `/api/cron/recurring-payments` — crea pagos diariamente segun configuracion
+6. Tabla `catalogo_servicios` + seed de ~30 servicios/paquetes (ver seccion 17)
+7. Pagina `/admin/catalogo` — CRUD del catalogo con filtros por categoria
+8. Pagina `/admin/cotizador` — cotizador rapido basado en el catalogo
+9. Columns `pago_token` y `datos_bancarios` en tabla `payments`
+10. API `/api/admin/pago-link` — genera token unico por pago pendiente
+11. Pagina publica `/pago/[token]` — cliente ve datos bancarios y confirma pago
+12. API `/api/pago/[token]` POST — confirma el pago y notifica al admin
+13. Componente `ComboboxInput` con listas de sugerencias (zonas, giros, conceptos)
+14. Cron `/api/cron/weekly-summary` — resumen semanal por email cada lunes
+15. Dark-mode styles para `input[type="date"]` en globals.css
 
 ---
 
@@ -922,5 +1071,44 @@ Al replicar, considera cambiar:
 11. Admin mueve prospecto en Pipeline: En negociacion → Ganado/Perdido
 12. Si gana → puede crear cliente desde el analisis y continuar con el CRM completo
 ```
+
+---
+
+## 17. SEED DEL CATALOGO DE SERVICIOS
+
+Al crear el proyecto ejecuta este SQL para poblar el catalogo inicial:
+
+```sql
+INSERT INTO catalogo_servicios (nombre, descripcion, precio, categoria) VALUES
+-- Marketing
+('Gestion de Redes Sociales', 'Manejo mensual de Facebook + Instagram: contenido, programacion, respuestas', 3500, 'marketing'),
+('Meta Ads (Facebook + Instagram)', 'Campanas de publicidad pagada en Meta. Incluye configuracion, creativos y reportes', 4500, 'marketing'),
+('Google Ads', 'Campanas en Google Search y Display. Incluye configuracion y optimizacion mensual', 5000, 'marketing'),
+('Email Marketing', 'Diseno y envio de newsletters y campanas de email. Hasta 5 envios por mes', 2500, 'marketing'),
+('SEO Local', 'Optimizacion de Google Business Profile + palabras clave locales', 3000, 'marketing'),
+('TikTok Ads', 'Campanas de publicidad en TikTok. Creativos + segmentacion', 4000, 'marketing'),
+-- Diseno
+('Diseno de Logotipo', 'Creacion de identidad de marca: logotipo + paleta de colores + tipografia', 4500, 'diseno'),
+('Manual de Marca', 'Guia completa de uso de marca: logo, colores, fuentes, aplicaciones', 6000, 'diseno'),
+('Diseno de Plantillas para Redes', 'Pack de 10 plantillas editables para Instagram/Facebook en Canva o Adobe', 2500, 'diseno'),
+('Fotografia de Producto', 'Sesion fotografica de productos. Hasta 20 fotos editadas', 3500, 'diseno'),
+-- Desarrollo
+('Pagina Web Basica', 'Sitio web de hasta 5 paginas. Responsive, con formulario de contacto y WhatsApp', 8000, 'desarrollo'),
+('Landing Page', 'Pagina de aterrizaje optimizada para conversiones. Incluye formulario y pixel de Meta', 5000, 'desarrollo'),
+('Tienda en Linea (E-commerce)', 'Tienda completa con carrito, pagos y gestion de inventario', 18000, 'desarrollo'),
+('Mantenimiento Web Mensual', 'Actualizaciones, backups, seguridad y soporte tecnico del sitio', 1500, 'desarrollo'),
+-- Consultoria
+('Consultoria Estrategica (1 hora)', 'Sesion de consultoria 1:1 para estrategia digital, marca o ventas', 1500, 'consultoria'),
+('Auditoria de Presencia Digital', 'Analisis completo de Google, redes sociales, sitio web y publicidad', 3000, 'consultoria'),
+-- Paquetes mensuales
+('Paquete Inicio Digital', 'Redes sociales (1 plataforma) + 8 posts/mes + reporte mensual', 4500, 'paquete'),
+('Paquete Crecimiento', 'Redes (2 plataformas) + Meta Ads + SEO local + reporte semanal', 9500, 'paquete'),
+('Paquete Dominancia Digital', 'Redes (3 plataformas) + Meta Ads + Google Ads + Email Marketing + estrategia mensual', 16000, 'paquete'),
+-- Paquetes unicos
+('Paquete Presencia Web Completa', 'Pagina web 5 paginas + logotipo + configuracion Google Business + 1 mes redes', 22000, 'paquete'),
+('Paquete Lanzamiento de Negocio', 'Todo lo de Presencia Web + Meta Ads 1 mes + estrategia digital 90 dias', 25000, 'paquete');
+```
+
+---
 
 > **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.
