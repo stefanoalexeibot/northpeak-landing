@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, FileText, FolderOpen, CreditCard, Zap } from "lucide-react";
 import Link from "next/link";
+import ComboboxInput from "@/components/ui/combobox-input";
+import { CONCEPTOS_PAGO } from "@/lib/suggestions";
 
 export default function NewClientPage() {
   const [name, setName] = useState("");
@@ -175,11 +177,12 @@ export default function NewClientPage() {
 
                 {autoInvoice && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
-                    <Input
+                    <ComboboxInput
                       value={invoiceConcept}
-                      onChange={(e) => setInvoiceConcept(e.target.value)}
+                      onChange={setInvoiceConcept}
+                      options={CONCEPTOS_PAGO}
                       placeholder="Concepto"
-                      className="bg-northpeak-bg border-northpeak-surface text-northpeak-text text-sm"
+                      className="bg-northpeak-bg border-northpeak-surface text-northpeak-text text-sm h-9"
                     />
                     <Input
                       type="number"

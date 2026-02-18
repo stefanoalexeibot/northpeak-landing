@@ -34,6 +34,8 @@ import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
 import type { Cotizacion, CotizacionPersonalizada } from "@/lib/analizador/pricing";
 import type { Pregunta } from "@/lib/analizador/cuestionario";
 import { cn } from "@/lib/utils";
+import ComboboxInput from "@/components/ui/combobox-input";
+import { ZONAS_MEXICO, GIROS_NEGOCIO } from "@/lib/suggestions";
 
 interface AnalisisRecord {
   id: string;
@@ -959,24 +961,20 @@ function AnalizadorContent() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-northpeak-text text-xs">Giro *</Label>
-                  <select
+                  <ComboboxInput
                     value={datos.giro}
-                    onChange={(e) => setDatos({ ...datos, giro: e.target.value })}
-                    className="flex h-9 w-full rounded-md border border-northpeak-surface bg-northpeak-bg px-3 py-1 text-sm text-northpeak-text"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {GIROS.map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(v) => setDatos({ ...datos, giro: v })}
+                    options={GIROS_NEGOCIO}
+                    placeholder="Ej: Restaurante, Salón de Belleza..."
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-northpeak-text text-xs">Zona / Ubicación *</Label>
-                  <Input
+                  <ComboboxInput
                     value={datos.zona}
-                    onChange={(e) => setDatos({ ...datos, zona: e.target.value })}
+                    onChange={(v) => setDatos({ ...datos, zona: v })}
+                    options={ZONAS_MEXICO}
                     placeholder="Ej: San Pedro Garza García, NL"
                     className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
                   />

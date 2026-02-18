@@ -24,6 +24,8 @@ import AIContentGenerator from "@/components/admin/ai-content-generator";
 import AIStrategyCard from "@/components/admin/ai-strategy-card";
 import TareasList from "@/components/admin/tareas-list";
 import RecurringPayments from "@/components/admin/recurring-payments";
+import ComboboxInput from "@/components/ui/combobox-input";
+import { CONCEPTOS_PAGO } from "@/lib/suggestions";
 
 interface AnalisisDigital {
   id: string;
@@ -949,7 +951,13 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
             </div>
             <div className="space-y-2">
               <Label className="text-northpeak-text">Concepto</Label>
-              <Input value={payConcept} onChange={(e) => setPayConcept(e.target.value)} placeholder="Pago mensual de servicios" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+              <ComboboxInput
+                value={payConcept}
+                onChange={setPayConcept}
+                options={CONCEPTOS_PAGO}
+                placeholder="Pago mensual de servicios"
+                className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+              />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
