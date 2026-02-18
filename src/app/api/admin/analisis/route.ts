@@ -153,6 +153,41 @@ export async function GET() {
   return NextResponse.json(mapped);
 }
 
+// DELETE: Remove a prospect
+export async function DELETE(request: Request) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  const { id } = await request.json();
+  if (!id) return NextResponse.json({ error: "Falta el id" }, { status: 400 });
+
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  // Delete related cuestionarios first (FK dependency)
+  await serviceSupabase.from("cuestionarios").delete().eq("analisis_id", id);
+  await serviceSupabase.from("tareas").delete().eq("analisis_id", id);
+  await serviceSupabase.from("ai_strategies").delete().eq("analisis_id", id);
+
+  const { error } = await serviceSupabase.from("analisis_digital").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  return NextResponse.json({ success: true });
+}
+
 // PATCH: Update etapa
 export async function PATCH(request: Request) {
   const supabase = createClient();

@@ -15,6 +15,7 @@ import {
   Filter,
   Send,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EtapaProspecto } from "@/lib/types";
@@ -92,6 +93,22 @@ export default function PipelinePage() {
       // ignore
     }
     setLoading(false);
+  }
+
+  async function deleteProspecto(id: string) {
+    if (!confirm("¿Eliminar este prospecto del pipeline?")) return;
+    // Optimistic update
+    setProspectos(prev => prev.filter(p => p.id !== id));
+    try {
+      await fetch("/api/admin/analisis", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+    } catch {
+      // Reload on failure
+      loadProspectos();
+    }
   }
 
   const updateEtapa = useCallback(async (id: string, etapa: EtapaProspecto) => {
@@ -455,6 +472,15 @@ export default function PipelinePage() {
                                   <ExternalLink className="h-3 w-3" />
                                 </Button>
                               </a>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); deleteProspecto(p.id); }}
+                                className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-red-400"
+                                title="Eliminar prospecto"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
                         </div>
