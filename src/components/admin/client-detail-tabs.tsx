@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/toast";
 import type { Client, Document, Project, MediaFile } from "@/lib/types";
 import {
-  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine, Search, ExternalLink, Link2, Copy,
+  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine, Search, ExternalLink, Link2, Copy, Check,
 } from "lucide-react";
 import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
@@ -297,7 +297,31 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   }
 
   async function deleteDocument(id: string) {
-    await supabase.from("documents").delete().eq("id", id);
+    const res = await fetch("/api/admin/delete-document", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(data.error || "Error al eliminar documento", "error");
+      return;
+    }
+    router.refresh();
+  }
+
+  async function confirmPayment(paymentId: string) {
+    const res = await fetch("/api/admin/confirm-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payment_id: paymentId }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(data.error || "Error al confirmar pago", "error");
+      return;
+    }
+    addToast("Pago confirmado como recibido", "success");
     router.refresh();
   }
 
@@ -645,15 +669,26 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                           </span>
                         </div>
                         {pay.status === "pending" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openPagoLink(pay.id)}
-                            title="Generar link de pago"
-                            className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
-                          >
-                            <Link2 className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openPagoLink(pay.id)}
+                              title="Generar link de pago"
+                              className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                            >
+                              <Link2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => confirmPayment(pay.id)}
+                              title="Confirmar pago recibido"
+                              className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                         <Button variant="ghost" size="icon" onClick={() => deletePayment(pay.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
                           <Trash2 className="h-4 w-4" />
