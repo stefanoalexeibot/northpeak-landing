@@ -643,7 +643,8 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                           <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-xs text-northpeak-text-dim">
-                              {pay.payment_method} {pay.reference_number ? `— ${pay.reference_number}` : ""}
+                              {pay.payment_method === "transfer" ? "Transferencia" : pay.payment_method === "card" ? "Tarjeta" : pay.payment_method === "cash" ? "Efectivo" : pay.payment_method === "other" ? "Otro" : pay.payment_method}
+                              {pay.reference_number ? ` — ${pay.reference_number}` : ""}
                             </p>
                             {pay.due_date && (
                               <span className="text-xs text-northpeak-text-dim">
