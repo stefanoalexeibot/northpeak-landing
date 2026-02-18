@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface PagoData {
   id: string;
@@ -69,22 +75,40 @@ export default function PagoPage() {
 
   async function handleNotify() {
     setNotifying(true);
+    let uploadedUrl: string | null = null;
+
     try {
-      const formData = new FormData();
-      if (comprobante) formData.append("comprobante", comprobante);
-
-      const res = await fetch(`/api/pago/${token}`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const json = res.ok ? await res.json().catch(() => ({})) : {};
-      setComprobanteUrl(json.comprobanteUrl || null);
-      setNotified(true);
+      // Upload file directly to Supabase Storage from browser (anon key)
+      if (comprobante && data) {
+        const ext = comprobante.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `comprobantes/${data.id}_${Date.now()}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("client-files")
+          .upload(path, comprobante, { contentType: comprobante.type, upsert: true });
+        if (!uploadError && uploadData) {
+          const { data: urlData } = supabase.storage
+            .from("client-files")
+            .getPublicUrl(path);
+          uploadedUrl = urlData.publicUrl;
+        }
+      }
     } catch {
-      // Network error — still show success to client
-      setNotified(true);
+      // Upload failed — proceed without comprobante
     }
+
+    try {
+      // Notify API with the URL (no file transfer through Next.js)
+      await fetch(`/api/pago/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comprobanteUrl: uploadedUrl }),
+      });
+    } catch {
+      // API call failed — still show success
+    }
+
+    setComprobanteUrl(uploadedUrl);
+    setNotified(true);
     setNotifying(false);
   }
 

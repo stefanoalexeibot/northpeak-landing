@@ -50,14 +50,13 @@ export async function POST(
 ) {
   const { token } = params;
 
-  // Parse form data early (body can only be read once)
-  let comprobanteFile: File | null = null;
+  // File is uploaded client-side; we receive the URL via JSON
+  let comprobanteUrl: string | null = null;
   try {
-    const formData = await request.formData();
-    const file = formData.get("comprobante") as File | null;
-    if (file && file.size > 0) comprobanteFile = file;
+    const body = await request.json();
+    comprobanteUrl = body.comprobanteUrl || null;
   } catch {
-    // No form data
+    // No body
   }
 
   // Use anon client for lookup — covered by public RLS policy
@@ -72,13 +71,10 @@ export async function POST(
     return NextResponse.json({ error: "Pago no encontrado" }, { status: 404 });
   }
 
-  let comprobanteUrl: string | null = null;
-
-  // Service role operations — best effort (don't block 200 if these fail)
+  // Service role operations — best effort
   try {
     const supabase = getServiceClient();
 
-    // Get client name
     const { data: clientData } = await supabase
       .from("clients")
       .select("name")
@@ -87,27 +83,12 @@ export async function POST(
     const clientName = clientData?.name || "Cliente";
     const amount = Number(payment.amount).toLocaleString("es-MX");
 
-    // Upload comprobante if provided
-    if (comprobanteFile) {
-      const ext = comprobanteFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `comprobantes/${payment.client_id}/${payment.id}.${ext}`;
-      const bytes = await comprobanteFile.arrayBuffer();
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("client-files")
-        .upload(path, bytes, { contentType: comprobanteFile.type, upsert: true });
-
-      if (!uploadError && uploadData) {
-        const { data: urlData } = supabase.storage
-          .from("client-files")
-          .getPublicUrl(path);
-        comprobanteUrl = urlData.publicUrl;
-
-        await supabase
-          .from("payments")
-          .update({ comprobante_url: comprobanteUrl })
-          .eq("id", payment.id);
-      }
+    // Save comprobante URL to payment record
+    if (comprobanteUrl) {
+      await supabase
+        .from("payments")
+        .update({ comprobante_url: comprobanteUrl })
+        .eq("id", payment.id);
     }
 
     // Notification (fire-and-forget)
