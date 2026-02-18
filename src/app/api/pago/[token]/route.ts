@@ -40,7 +40,7 @@ export async function GET(
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: { token: string } }
 ) {
   const supabase = getServiceClient();
@@ -60,13 +60,41 @@ export async function POST(
   const clientName = clientObj?.name || "Cliente";
   const amount = Number(payment.amount).toLocaleString("es-MX");
 
+  // Upload comprobante if provided
+  let comprobanteUrl: string | null = null;
+  try {
+    const formData = await request.formData();
+    const file = formData.get("comprobante") as File | null;
+
+    if (file && file.size > 0) {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `comprobantes/${payment.client_id}/${payment.id}.${ext}`;
+      const bytes = await file.arrayBuffer();
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("client-files")
+        .upload(path, bytes, { contentType: file.type, upsert: true });
+
+      if (!uploadError && uploadData) {
+        const { data: urlData } = supabase.storage
+          .from("client-files")
+          .getPublicUrl(path);
+        comprobanteUrl = urlData.publicUrl;
+      }
+    }
+  } catch {
+    // No file or parsing error — proceed without it
+  }
+
   await createNotification(supabase, {
     type: "payment_received",
-    title: `${clientName} notificó que pagó $${amount}`,
-    description: payment.concept,
+    title: `${clientName} notificó pago de $${amount}`,
+    description: comprobanteUrl
+      ? `${payment.concept} — Comprobante adjunto`
+      : payment.concept,
     clientId: payment.client_id,
-    link: `/admin/clients/${payment.client_id}`,
+    link: comprobanteUrl || `/admin/clients/${payment.client_id}`,
   });
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, comprobanteUrl });
 }

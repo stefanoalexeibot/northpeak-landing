@@ -171,8 +171,8 @@ export function generateQuotePDF(data: ClientFormData, quoteNumber: string): jsP
   doc.setFontSize(8.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...COLORS.text);
-  doc.text("Banco:       [Por confirmar con tu ejecutivo]", 27, y + 14);
-  doc.text("CLABE:       [Por confirmar con tu ejecutivo]", 27, y + 20);
+  doc.text("Banco:         Nu (Nubank)", 27, y + 14);
+  doc.text("CLABE:         638180010141018767", 27, y + 20);
   doc.text(`Beneficiario:  ${COMPANY.name}`, 27, y + 26);
 
   y += bboxH + 10;
