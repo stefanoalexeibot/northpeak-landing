@@ -21,6 +21,7 @@ import {
   Package,
   Calculator,
   CreditCard,
+  CalendarDays,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -28,6 +29,7 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Clientes", href: "/admin/clients", icon: Users },
   { label: "Pagos", href: "/admin/payments", icon: CreditCard },
+  { label: "Calendario", href: "/admin/calendar", icon: CalendarDays },
   { label: "Documentos", href: "/admin/documents", icon: FileText },
   { label: "Referidos", href: "/admin/referrals", icon: Gift },
   { label: "Mensajes", href: "/admin/messages", icon: MessageSquare },

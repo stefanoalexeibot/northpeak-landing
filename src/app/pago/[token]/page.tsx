@@ -2,12 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface PagoData {
   id: string;
@@ -78,18 +72,21 @@ export default function PagoPage() {
     let uploadedUrl: string | null = null;
 
     try {
-      // Upload file directly to Supabase Storage from browser (anon key)
-      if (comprobante && data) {
+      // Get a signed upload URL from the server (uses service role)
+      if (comprobante) {
         const ext = comprobante.name.split(".").pop()?.toLowerCase() || "jpg";
-        const path = `comprobantes/${data.id}_${Date.now()}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("client-files")
-          .upload(path, comprobante, { contentType: comprobante.type, upsert: true });
-        if (!uploadError && uploadData) {
-          const { data: urlData } = supabase.storage
-            .from("client-files")
-            .getPublicUrl(path);
-          uploadedUrl = urlData.publicUrl;
+        const signRes = await fetch(`/api/pago/sign-upload?token=${token}&ext=${ext}`);
+        if (signRes.ok) {
+          const { signedUrl, publicUrl } = await signRes.json();
+          // Upload directly to Supabase Storage via signed URL
+          const uploadRes = await fetch(signedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": comprobante.type },
+            body: comprobante,
+          });
+          if (uploadRes.ok) {
+            uploadedUrl = publicUrl;
+          }
         }
       }
     } catch {
@@ -97,7 +94,6 @@ export default function PagoPage() {
     }
 
     try {
-      // Notify API with the URL (no file transfer through Next.js)
       await fetch(`/api/pago/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

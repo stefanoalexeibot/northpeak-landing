@@ -1,19 +1,19 @@
 import { getClientData } from "@/lib/supabase/get-client-data";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
-import ProjectCalendar from "@/components/portal/project-calendar";
-import type { ProjectMilestone } from "@/lib/types";
+import ProjectCalendar, { type CalendarEvent } from "@/components/portal/project-calendar";
 
 export default async function CalendarPage() {
   const { supabase, client } = await getClientData();
 
-  // Get milestones for all client projects
+  const events: CalendarEvent[] = [];
+
+  // Project milestones
   const { data: projects } = await supabase
     .from("projects")
     .select("id, name")
     .eq("client_id", client.id);
 
-  let milestones: (ProjectMilestone & { project?: { id: string; name: string } })[] = [];
   if (projects && projects.length > 0) {
     const projectIds = projects.map(p => p.id);
     const { data: ms } = await supabase
@@ -22,30 +22,78 @@ export default async function CalendarPage() {
       .in("project_id", projectIds)
       .order("due_date");
 
-    milestones = (ms || []).map(m => ({
-      ...m,
-      project: projects.find(p => p.id === m.project_id),
-    }));
+    for (const m of ms || []) {
+      const proj = projects.find(p => p.id === m.project_id);
+      events.push({
+        id: `ms-${m.id}`,
+        title: m.title,
+        date: m.due_date,
+        type: "milestone",
+        completed: m.completed,
+        subtitle: proj?.name,
+      });
+    }
+
+    // Project end dates
+    const { data: projFull } = await supabase
+      .from("projects")
+      .select("id, name, end_date, status")
+      .eq("client_id", client.id)
+      .not("end_date", "is", null);
+
+    for (const p of projFull || []) {
+      if (p.end_date) {
+        events.push({
+          id: `proj-${p.id}`,
+          title: `Entrega: ${p.name}`,
+          date: p.end_date,
+          type: "project",
+          completed: p.status === "completed",
+        });
+      }
+    }
+  }
+
+  // Payments with due_date
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("id, concept, amount, status, due_date")
+    .eq("client_id", client.id)
+    .not("due_date", "is", null)
+    .order("due_date");
+
+  for (const pay of payments || []) {
+    if (pay.due_date) {
+      events.push({
+        id: `pay-${pay.id}`,
+        title: pay.concept,
+        date: pay.due_date,
+        type: "payment",
+        completed: pay.status === "completed",
+        amount: pay.amount,
+        subtitle: pay.status === "completed" ? "Pagado" : "Pendiente",
+      });
+    }
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-heading font-bold text-northpeak-text">Calendario</h1>
-        <p className="text-northpeak-text-muted mt-1">Hitos y fechas importantes de tus proyectos</p>
+        <p className="text-northpeak-text-muted mt-1">Hitos, entregas y fechas de pago</p>
       </div>
 
-      {milestones.length === 0 && (!projects || projects.length === 0) ? (
+      {events.length === 0 ? (
         <Card className="bg-northpeak-card border-northpeak-surface">
           <CardContent className="p-12 text-center">
             <CalendarDays className="h-12 w-12 text-northpeak-text-dim mx-auto mb-4" />
-            <p className="text-northpeak-text-muted">No hay hitos de proyecto registrados.</p>
+            <p className="text-northpeak-text-muted">No hay fechas registradas aún.</p>
           </CardContent>
         </Card>
       ) : (
         <Card className="bg-northpeak-card border-northpeak-surface">
           <CardContent className="p-6">
-            <ProjectCalendar milestones={milestones} />
+            <ProjectCalendar events={events} />
           </CardContent>
         </Card>
       )}
