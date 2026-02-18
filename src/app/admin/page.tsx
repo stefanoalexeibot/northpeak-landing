@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
     supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
     supabase
       .from("payments")
-      .select("id, client_id, concept, amount, due_date, clients(name)")
+      .select("id, client_id, concept, amount, due_date, clients(name, phone)")
       .eq("status", "pending")
       .not("due_date", "is", null)
       .lt("due_date", today),
@@ -51,7 +51,7 @@ export default async function AdminDashboard() {
       .eq("status", "pending"),
     supabase
       .from("payments")
-      .select("id, client_id, concept, amount, due_date, clients(name)")
+      .select("id, client_id, concept, amount, due_date, clients(name, phone)")
       .eq("status", "pending")
       .not("due_date", "is", null)
       .gte("due_date", today)
@@ -65,18 +65,19 @@ export default async function AdminDashboard() {
   const overdueCount = overduePaymentsData?.length ?? 0;
 
   const overduePayments = (overduePaymentsData ?? []).map((p) => {
-    const clientName = (p.clients as unknown as { name: string } | null)?.name || "Cliente";
+    const client = p.clients as unknown as { name: string; phone?: string } | null;
     const daysOverdue = Math.floor(
       (now.getTime() - new Date(p.due_date!).getTime()) / (1000 * 60 * 60 * 24)
     );
     return {
       id: p.id,
       client_id: p.client_id,
-      client_name: clientName,
+      client_name: client?.name || "Cliente",
       concept: p.concept,
       amount: Number(p.amount),
       due_date: p.due_date!,
       days_overdue: daysOverdue,
+      phone: client?.phone || undefined,
     };
   });
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import {
   Loader2,
@@ -11,6 +12,10 @@ import {
   Check,
   MessageCircle,
   GripVertical,
+  AlertTriangle,
+  Filter,
+  Send,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EtapaProspecto } from "@/lib/types";
@@ -27,6 +32,8 @@ interface ProspectoCard {
   contacto?: string;
   telefono?: string;
   cuestionario_token?: string;
+  vendedor?: string;
+  etapa_updated_at?: string;
   created_at: string;
 }
 
@@ -39,11 +46,23 @@ const COLUMNAS: { etapa: EtapaProspecto; label: string; color: string; dotColor:
   { etapa: "cerrado_perdido", label: "Perdidos", color: "border-red-500/30", dotColor: "bg-red-400" },
 ];
 
+const STALE_DAYS = 5;
+
 function nivelColor(nivel: string) {
   if (nivel === "CRITICO") return "text-red-400 bg-red-400/10";
   if (nivel === "BAJO") return "text-yellow-400 bg-yellow-400/10";
   if (nivel === "MEDIO") return "text-blue-400 bg-blue-400/10";
   return "text-green-400 bg-green-400/10";
+}
+
+function daysAgo(dateStr: string): number {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
+
+function isStale(p: ProspectoCard): boolean {
+  if (p.etapa === "cerrado_ganado" || p.etapa === "cerrado_perdido") return false;
+  const ref = p.etapa_updated_at || p.created_at;
+  return daysAgo(ref) >= STALE_DAYS;
 }
 
 export default function PipelinePage() {
@@ -53,6 +72,11 @@ export default function PipelinePage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverEtapa, setDragOverEtapa] = useState<string | null>(null);
+  const [vendedorFilter, setVendedorFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkMessage, setBulkMessage] = useState("");
+  const [showBulkWA, setShowBulkWA] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,11 +96,9 @@ export default function PipelinePage() {
   }
 
   const updateEtapa = useCallback(async (id: string, etapa: EtapaProspecto) => {
-    // Optimistic update
     setProspectos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, etapa } : p))
+      prev.map((p) => (p.id === id ? { ...p, etapa, etapa_updated_at: new Date().toISOString() } : p))
     );
-
     try {
       const res = await fetch("/api/admin/analisis", {
         method: "PATCH",
@@ -85,7 +107,7 @@ export default function PipelinePage() {
       });
       if (!res.ok) {
         addToast("Error al mover prospecto", "error");
-        loadProspectos(); // Revert
+        loadProspectos();
       }
     } catch {
       addToast("Error de conexión", "error");
@@ -143,6 +165,39 @@ export default function PipelinePage() {
     window.open(waUrl, "_blank");
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function sendBulkWhatsApp() {
+    const selected = prospectos.filter((p) => selectedIds.has(p.id) && p.telefono);
+    for (const p of selected) {
+      const msg = bulkMessage
+        .replace("{nombre}", p.contacto || "")
+        .replace("{negocio}", p.nombre_negocio);
+      const waUrl = `https://wa.me/${p.telefono!.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, "_blank");
+    }
+    addToast(`Abriendo ${selected.length} conversaciones`, "success");
+    setSelectedIds(new Set());
+    setShowBulkWA(false);
+    setBulkMessage("");
+  }
+
+  // Filter by vendedor
+  const vendedores = Array.from(new Set(prospectos.map((p) => p.vendedor).filter(Boolean))) as string[];
+  const filtered = vendedorFilter
+    ? prospectos.filter((p) => p.vendedor === vendedorFilter)
+    : prospectos;
+
+  // Count stale prospects
+  const staleCount = prospectos.filter(isStale).length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -152,24 +207,117 @@ export default function PipelinePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
-          Pipeline de Prospectos
-        </h1>
-        <p className="text-northpeak-text-muted mt-1 text-sm">
-          Arrastra las tarjetas entre columnas para actualizar el estado
-        </p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
+            Pipeline de Prospectos
+          </h1>
+          <p className="text-northpeak-text-muted mt-1 text-sm">
+            Arrastra las tarjetas entre columnas para actualizar el estado
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {selectedIds.size > 0 && (
+            <Button
+              size="sm"
+              onClick={() => { setShowBulkWA(true); setBulkMessage("Hola {nombre}, seguimos con la propuesta de *{negocio}* disponible. ¿Te interesa agendar una llamada?"); }}
+              className="bg-green-600 hover:bg-green-700 text-white text-xs"
+            >
+              <Send className="h-3 w-3 mr-1.5" />
+              WhatsApp ({selectedIds.size})
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "border-northpeak-surface text-northpeak-text-muted text-xs",
+              showFilters && "bg-northpeak-surface"
+            )}
+          >
+            <Filter className="h-3 w-3 mr-1.5" />
+            Filtros
+          </Button>
+        </div>
       </div>
+
+      {/* Stale alert */}
+      {staleCount > 0 && (
+        <div className="flex items-center gap-2 bg-yellow-400/5 border border-yellow-400/20 rounded-lg px-4 py-2.5">
+          <AlertTriangle className="h-4 w-4 text-yellow-400 shrink-0" />
+          <span className="text-sm text-yellow-400">
+            <strong>{staleCount}</strong> prospecto{staleCount > 1 ? "s" : ""} sin seguimiento hace {STALE_DAYS}+ días
+          </span>
+        </div>
+      )}
+
+      {/* Filters */}
+      {showFilters && (
+        <div className="flex flex-wrap gap-3 bg-northpeak-card border border-northpeak-surface rounded-lg p-3">
+          <div className="space-y-1">
+            <span className="text-xs text-northpeak-text-dim">Vendedor</span>
+            <select
+              value={vendedorFilter}
+              onChange={(e) => setVendedorFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-northpeak-surface bg-northpeak-bg px-2 text-sm text-northpeak-text"
+            >
+              <option value="">Todos</option>
+              {vendedores.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk WhatsApp modal */}
+      {showBulkWA && (
+        <div className="bg-northpeak-card border border-northpeak-surface rounded-lg p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-northpeak-text">
+              Mensaje masivo ({selectedIds.size} prospectos)
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setShowBulkWA(false)} className="text-northpeak-text-muted h-7">
+              Cancelar
+            </Button>
+          </div>
+          <p className="text-xs text-northpeak-text-dim">
+            Usa {"{nombre}"} y {"{negocio}"} como variables
+          </p>
+          <textarea
+            value={bulkMessage}
+            onChange={(e) => setBulkMessage(e.target.value)}
+            rows={3}
+            className="w-full rounded-md border border-northpeak-surface bg-northpeak-bg px-3 py-2 text-sm text-northpeak-text resize-none"
+          />
+          <Button
+            size="sm"
+            onClick={sendBulkWhatsApp}
+            className="bg-green-600 hover:bg-green-700 text-white text-xs"
+          >
+            <MessageCircle className="h-3 w-3 mr-1.5" />
+            Enviar a {selectedIds.size} prospectos
+          </Button>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
         {COLUMNAS.map((col) => {
-          const count = prospectos.filter((p) => p.etapa === col.etapa).length;
+          const count = filtered.filter((p) => p.etapa === col.etapa).length;
+          const staleInCol = filtered.filter((p) => p.etapa === col.etapa && isStale(p)).length;
           return (
-            <div key={col.etapa} className="bg-northpeak-card border border-northpeak-surface rounded-lg p-3 text-center">
+            <div key={col.etapa} className="bg-northpeak-card border border-northpeak-surface rounded-lg p-3 text-center relative">
               <div className="text-lg font-heading font-bold text-northpeak-text">{count}</div>
               <div className="text-[10px] text-northpeak-text-dim uppercase tracking-wider">{col.label}</div>
+              {staleInCol > 0 && (
+                <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow-400/20 text-yellow-400 text-[9px] font-bold px-1">
+                  {staleInCol}
+                </span>
+              )}
             </div>
           );
         })}
@@ -178,11 +326,11 @@ export default function PipelinePage() {
       {/* Kanban board */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2"
+        className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 -mx-2 px-2"
         style={{ scrollbarWidth: "thin" }}
       >
         {COLUMNAS.map((col) => {
-          const items = prospectos.filter((p) => p.etapa === col.etapa);
+          const items = filtered.filter((p) => p.etapa === col.etapa);
           const isOver = dragOverEtapa === col.etapa;
 
           return (
@@ -210,81 +358,111 @@ export default function PipelinePage() {
                     Sin prospectos
                   </div>
                 )}
-                {items.map((p) => (
-                  <Card
-                    key={p.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, p.id)}
-                    onDragEnd={handleDragEnd}
-                    className={cn(
-                      "bg-northpeak-card border-northpeak-surface cursor-grab active:cursor-grabbing transition-all",
-                      draggingId === p.id && "opacity-40 scale-95"
-                    )}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-2">
-                        <GripVertical className="h-4 w-4 text-northpeak-text-dim shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-northpeak-text truncate">
-                              {p.nombre_negocio}
-                            </span>
-                            <span
-                              className={cn(
-                                "text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0",
-                                nivelColor(p.nivel)
-                              )}
-                            >
-                              {p.score}
-                            </span>
+                {items.map((p) => {
+                  const stale = isStale(p);
+                  const selected = selectedIds.has(p.id);
+                  const daysSinceUpdate = daysAgo(p.etapa_updated_at || p.created_at);
+
+                  return (
+                    <Card
+                      key={p.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, p.id)}
+                      onDragEnd={handleDragEnd}
+                      className={cn(
+                        "bg-northpeak-card border-northpeak-surface cursor-grab active:cursor-grabbing transition-all",
+                        draggingId === p.id && "opacity-40 scale-95",
+                        stale && "border-yellow-400/30",
+                        selected && "ring-1 ring-northpeak-green"
+                      )}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-2">
+                          <div className="flex flex-col items-center gap-1 shrink-0">
+                            <GripVertical className="h-4 w-4 text-northpeak-text-dim mt-0.5" />
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              onChange={() => toggleSelect(p.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="rounded border-northpeak-surface bg-northpeak-bg text-northpeak-green focus:ring-northpeak-green h-3.5 w-3.5"
+                            />
                           </div>
-                          <p className="text-xs text-northpeak-text-muted truncate">
-                            {p.giro} · {p.zona}
-                          </p>
-                          <p className="text-[10px] text-northpeak-text-dim mt-1">
-                            {new Date(p.created_at).toLocaleDateString("es-MX", {
-                              day: "numeric",
-                              month: "short",
-                            })}
-                          </p>
-                          {/* Quick actions */}
-                          <div className="flex gap-1 mt-2">
-                            {p.cuestionario_token && (col.etapa === "nuevo" || col.etapa === "cuestionario_enviado") && (
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-northpeak-text truncate">
+                                {p.nombre_negocio}
+                              </span>
+                              <span
+                                className={cn(
+                                  "text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0",
+                                  nivelColor(p.nivel)
+                                )}
+                              >
+                                {p.score}
+                              </span>
+                            </div>
+                            <p className="text-xs text-northpeak-text-muted truncate">
+                              {p.giro} · {p.zona}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-[10px] text-northpeak-text-dim">
+                                {new Date(p.created_at).toLocaleDateString("es-MX", {
+                                  day: "numeric",
+                                  month: "short",
+                                })}
+                              </p>
+                              {p.vendedor && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-northpeak-surface text-northpeak-text-dim">
+                                  {p.vendedor}
+                                </span>
+                              )}
+                              {stale && (
+                                <span className="flex items-center gap-0.5 text-[9px] text-yellow-400">
+                                  <Clock className="h-2.5 w-2.5" />
+                                  {daysSinceUpdate}d
+                                </span>
+                              )}
+                            </div>
+                            {/* Quick actions */}
+                            <div className="flex gap-1 mt-2">
+                              {p.cuestionario_token && (col.etapa === "nuevo" || col.etapa === "cuestionario_enviado") && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); sendWhatsApp(p); }}
+                                  className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+                                  title="Enviar cuestionario por WhatsApp"
+                                >
+                                  <MessageCircle className="h-3 w-3" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={(e) => { e.stopPropagation(); sendWhatsApp(p); }}
-                                className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
-                                title="Enviar cuestionario por WhatsApp"
+                                onClick={(e) => { e.stopPropagation(); copyLink(p.report_url); }}
+                                className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-northpeak-text"
+                                title="Copiar link reporte"
                               >
-                                <MessageCircle className="h-3 w-3" />
+                                {copied === p.report_url ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                               </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); copyLink(p.report_url); }}
-                              className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-northpeak-text"
-                              title="Copiar link reporte"
-                            >
-                              {copied === p.report_url ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                            </Button>
-                            <a href={p.report_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-northpeak-green"
-                                title="Ver reporte"
-                              >
-                                <ExternalLink className="h-3 w-3" />
-                              </Button>
-                            </a>
+                              <a href={p.report_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-northpeak-green"
+                                  title="Ver reporte"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </Button>
+                              </a>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           );

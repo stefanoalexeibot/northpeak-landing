@@ -27,6 +27,7 @@ import {
   ClipboardList,
   X,
   MessageCircle,
+  CopyPlus,
 } from "lucide-react";
 import { getDefaultHallazgos } from "@/lib/analizador/scoring";
 import type { Hallazgos, DatosNegocio } from "@/lib/analizador/scoring";
@@ -293,7 +294,7 @@ function AnalizadorContent() {
       const res = await fetch("/api/admin/analisis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId }),
+        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId, vendedor: (datos as any).vendedor || null }),
       });
 
       const data = await res.json();
@@ -998,6 +999,15 @@ function AnalizadorContent() {
                     className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
                   />
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Vendedor</Label>
+                  <Input
+                    value={(datos as any).vendedor || ""}
+                    onChange={(e) => setDatos({ ...datos, vendedor: e.target.value } as any)}
+                    placeholder="Nombre del vendedor"
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1216,7 +1226,7 @@ function AnalizadorContent() {
                           })}
                         </p>
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex flex-wrap gap-1">
                         {a.cuestionario_token && a.etapa === "nuevo" && (
                           <Button
                             variant="ghost"
@@ -1228,6 +1238,25 @@ function AnalizadorContent() {
                             <MessageCircle className="h-3.5 w-3.5" />
                           </Button>
                         )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setDatos({
+                              nombre: a.nombre_negocio,
+                              giro: a.giro,
+                              zona: a.zona,
+                              contacto: a.contacto || "",
+                              telefono: a.telefono || "",
+                            } as any);
+                            setTab("form");
+                            addToast("Datos copiados — edita nombre y genera nuevo análisis", "success");
+                          }}
+                          className="text-purple-400 hover:text-purple-300 h-8"
+                          title="Duplicar análisis"
+                        >
+                          <CopyPlus className="h-3.5 w-3.5" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"

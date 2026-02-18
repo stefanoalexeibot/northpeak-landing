@@ -132,6 +132,7 @@ export type NotificationType =
   | "referral_submitted"
   | "testimonial_submitted"
   | "payment_overdue"
+  | "payment_received"
   | "file_uploaded"
   | "cuestionario_completed";
 
@@ -163,4 +164,14 @@ export interface Testimonial {
   is_approved: boolean;
   is_published: boolean;
   submitted_at: string;
+}
+
+export interface Tarea {
+  id: string;
+  client_id?: string;
+  analisis_id?: string;
+  texto: string;
+  completada: boolean;
+  fecha_limite?: string;
+  created_at: string;
 }

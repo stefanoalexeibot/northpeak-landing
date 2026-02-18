@@ -22,10 +22,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const { datos, hallazgos, client_id } = (await request.json()) as {
+  const { datos, hallazgos, client_id, vendedor } = (await request.json()) as {
     datos: DatosNegocio;
     hallazgos: Hallazgos;
     client_id?: string;
+    vendedor?: string;
   };
 
   // Calculate score
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
       cotizacion,
       report_url: urlData.publicUrl,
       client_id: client_id || null,
+      vendedor: vendedor || null,
     })
     .select()
     .single();
@@ -120,7 +122,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("analisis_digital")
-    .select("id, nombre_negocio, giro, zona, score, nivel, report_url, client_id, created_at, etapa, contacto, telefono")
+    .select("id, nombre_negocio, giro, zona, score, nivel, report_url, client_id, created_at, etapa, contacto, telefono, vendedor, etapa_updated_at")
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -174,7 +176,7 @@ export async function PATCH(request: Request) {
 
   const { error } = await supabase
     .from("analisis_digital")
-    .update({ etapa })
+    .update({ etapa, etapa_updated_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

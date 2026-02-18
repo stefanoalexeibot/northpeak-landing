@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/toast";
 import type { Client, Document, Project, MediaFile } from "@/lib/types";
 import {
-  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine, Search, ExternalLink,
+  Plus, Upload, FileText, Trash2, Download, Eye, Mail, CreditCard, CheckCircle, Clock, PenLine, Search, ExternalLink, Link2, Copy,
 } from "lucide-react";
 import type { Payment } from "@/lib/types";
 import ProjectTemplates from "@/components/admin/project-templates";
@@ -22,6 +22,8 @@ import DuplicateProject from "@/components/admin/duplicate-project";
 import ClientActivityTimeline from "@/components/admin/client-activity-timeline";
 import AIContentGenerator from "@/components/admin/ai-content-generator";
 import AIStrategyCard from "@/components/admin/ai-strategy-card";
+import TareasList from "@/components/admin/tareas-list";
+import RecurringPayments from "@/components/admin/recurring-payments";
 
 interface AnalisisDigital {
   id: string;
@@ -90,6 +92,17 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   // --- Media upload ---
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [uploadingMedia, setUploadingMedia] = useState(false);
+
+  // --- Pago link dialog ---
+  const [showPagoLinkDialog, setShowPagoLinkDialog] = useState(false);
+  const [pagoLinkPaymentId, setPagoLinkPaymentId] = useState("");
+  const [pagoLinkBanco, setPagoLinkBanco] = useState("");
+  const [pagoLinkClabe, setPagoLinkClabe] = useState("");
+  const [pagoLinkTitular, setPagoLinkTitular] = useState("");
+  const [pagoLinkReferencia, setPagoLinkReferencia] = useState("");
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // --- Invoice dialog ---
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
@@ -296,6 +309,56 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
     router.refresh();
   }
 
+  function openPagoLink(paymentId: string) {
+    setPagoLinkPaymentId(paymentId);
+    setPagoLinkBanco("");
+    setPagoLinkClabe("");
+    setPagoLinkTitular("");
+    setPagoLinkReferencia("");
+    setGeneratedLink(null);
+    setCopiedLink(false);
+    setShowPagoLinkDialog(true);
+  }
+
+  async function generatePagoLink() {
+    if (!pagoLinkBanco || !pagoLinkClabe || !pagoLinkTitular) {
+      addToast("Completa banco, CLABE y titular", "error");
+      return;
+    }
+    setGeneratingLink(true);
+    try {
+      const res = await fetch("/api/admin/pago-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          payment_id: pagoLinkPaymentId,
+          datos_bancarios: {
+            banco: pagoLinkBanco,
+            clabe: pagoLinkClabe,
+            titular: pagoLinkTitular,
+            ...(pagoLinkReferencia ? { referencia: pagoLinkReferencia } : {}),
+          },
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGeneratedLink(`${window.location.origin}/pago/${data.token}`);
+      } else {
+        addToast(data.error || "Error al generar enlace", "error");
+      }
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setGeneratingLink(false);
+  }
+
+  async function copyPagoLink() {
+    if (!generatedLink) return;
+    await navigator.clipboard.writeText(generatedLink);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  }
+
   // Load invoice data for editing
   function openInvoiceEditor() {
     const existing = documents.find(d => d.type === "invoice");
@@ -330,39 +393,47 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
         {/* INFO TAB */}
         <TabsContent value="info">
-          <Card className="bg-northpeak-card border-northpeak-surface">
-            <CardContent className="p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-northpeak-text">Nombre</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+          <div className="space-y-4">
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardContent className="p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-northpeak-text">Nombre</Label>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-northpeak-text">Empresa</Label>
+                    <Input value={company} onChange={(e) => setCompany(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-northpeak-text">Empresa</Label>
-                  <Input value={company} onChange={(e) => setCompany(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-northpeak-text-muted">Email</Label>
+                    <Input value={client.email} disabled className="bg-northpeak-bg border-northpeak-surface text-northpeak-text-dim" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-northpeak-text">Teléfono</Label>
+                    <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-northpeak-text-muted">Email</Label>
-                  <Input value={client.email} disabled className="bg-northpeak-bg border-northpeak-surface text-northpeak-text-dim" />
+                <div className="flex gap-2">
+                  <Button onClick={saveInfo} disabled={saving} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
+                    {saving ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                  <Button onClick={resendWelcomeEmail} disabled={sendingEmail} variant="outline" className="border-northpeak-surface text-northpeak-text-muted">
+                    <Mail className="h-4 w-4 mr-2" />
+                    {sendingEmail ? "Enviando..." : "Reenviar email"}
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-northpeak-text">Teléfono</Label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={saveInfo} disabled={saving} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
-                  {saving ? "Guardando..." : "Guardar cambios"}
-                </Button>
-                <Button onClick={resendWelcomeEmail} disabled={sendingEmail} variant="outline" className="border-northpeak-surface text-northpeak-text-muted">
-                  <Mail className="h-4 w-4 mr-2" />
-                  {sendingEmail ? "Enviando..." : "Reenviar email"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardContent className="p-6">
+                <TareasList clientId={client.id} />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* DOCUMENTS TAB */}
@@ -519,67 +590,86 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
         {/* PAYMENTS TAB */}
         <TabsContent value="payments">
-          <Card className="bg-northpeak-card border-northpeak-surface">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-northpeak-text font-heading">Pagos</CardTitle>
-              <Button onClick={() => setShowPaymentDialog(true)} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90 text-xs">
-                <Plus className="h-3 w-3 mr-1" />
-                Registrar pago
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {payments.length === 0 ? (
-                <p className="text-northpeak-text-muted text-sm">No hay pagos registrados.</p>
-              ) : (
-                <div className="space-y-2">
-                  {payments.map((pay) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const dueDate = pay.due_date ? new Date(pay.due_date + "T00:00:00") : null;
-                    const isOverdue = dueDate && dueDate < today && pay.status !== "completed";
-                    const isUpcoming = dueDate && !isOverdue && dueDate.getTime() - today.getTime() < 7 * 86400000 && pay.status !== "completed";
-                    return (
-                    <div key={pay.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
-                      <CreditCard className="h-5 w-5 text-northpeak-green shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-xs text-northpeak-text-dim">
-                            {pay.payment_method} {pay.reference_number ? `— ${pay.reference_number}` : ""}
-                          </p>
-                          {pay.due_date && (
-                            <span className="text-xs text-northpeak-text-dim">
-                              Vence: {new Date(pay.due_date + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                            </span>
-                          )}
-                          {isOverdue && (
-                            <span className="text-[10px] font-medium text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">
-                              Vencido
-                            </span>
-                          )}
-                          {isUpcoming && (
-                            <span className="text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
-                              Próximo
-                            </span>
-                          )}
+          <div className="space-y-4">
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-northpeak-text font-heading">Pagos</CardTitle>
+                <Button onClick={() => setShowPaymentDialog(true)} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90 text-xs">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Registrar pago
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {payments.length === 0 ? (
+                  <p className="text-northpeak-text-muted text-sm">No hay pagos registrados.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {payments.map((pay) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const dueDate = pay.due_date ? new Date(pay.due_date + "T00:00:00") : null;
+                      const isOverdue = dueDate && dueDate < today && pay.status !== "completed";
+                      const isUpcoming = dueDate && !isOverdue && dueDate.getTime() - today.getTime() < 7 * 86400000 && pay.status !== "completed";
+                      return (
+                      <div key={pay.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
+                        <CreditCard className="h-5 w-5 text-northpeak-green shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-xs text-northpeak-text-dim">
+                              {pay.payment_method} {pay.reference_number ? `— ${pay.reference_number}` : ""}
+                            </p>
+                            {pay.due_date && (
+                              <span className="text-xs text-northpeak-text-dim">
+                                Vence: {new Date(pay.due_date + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                              </span>
+                            )}
+                            {isOverdue && (
+                              <span className="text-[10px] font-medium text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">
+                                Vencido
+                              </span>
+                            )}
+                            {isUpcoming && (
+                              <span className="text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
+                                Próximo
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-northpeak-text">${Number(pay.amount).toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
+                          <span className={`text-xs font-medium ${pay.status === "completed" ? "text-northpeak-green" : pay.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
+                            {pay.status === "completed" ? "Pagado" : pay.status === "pending" ? "Pendiente" : pay.status === "failed" ? "Fallido" : "Reembolsado"}
+                          </span>
+                        </div>
+                        {pay.status === "pending" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openPagoLink(pay.id)}
+                            title="Generar link de pago"
+                            className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                          >
+                            <Link2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => deletePayment(pay.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-northpeak-text">${Number(pay.amount).toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
-                        <span className={`text-xs font-medium ${pay.status === "completed" ? "text-northpeak-green" : pay.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
-                          {pay.status === "completed" ? "Pagado" : pay.status === "pending" ? "Pendiente" : pay.status === "failed" ? "Fallido" : "Reembolsado"}
-                        </span>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => deletePayment(pay.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardContent className="p-6">
+                <RecurringPayments clientId={client.id} />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* ACTIVITY TAB */}
@@ -893,6 +983,66 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               {savingPayment ? "Guardando..." : "Registrar pago"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PAGO LINK DIALOG */}
+      <Dialog open={showPagoLinkDialog} onOpenChange={(open) => { setShowPagoLinkDialog(open); if (!open) setGeneratedLink(null); }}>
+        <DialogContent className="bg-northpeak-card border-northpeak-surface max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-northpeak-text">Generar link de pago</DialogTitle>
+          </DialogHeader>
+          {!generatedLink ? (
+            <div className="space-y-4">
+              <p className="text-xs text-northpeak-text-muted">El cliente verá estos datos bancarios en su enlace de pago.</p>
+              <div className="space-y-2">
+                <Label className="text-northpeak-text">Banco *</Label>
+                <Input value={pagoLinkBanco} onChange={(e) => setPagoLinkBanco(e.target.value)} placeholder="Ej: BBVA, Banorte, HSBC" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-northpeak-text">CLABE interbancaria *</Label>
+                <Input value={pagoLinkClabe} onChange={(e) => setPagoLinkClabe(e.target.value)} placeholder="18 dígitos" maxLength={18} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text font-mono" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-northpeak-text">Titular de la cuenta *</Label>
+                <Input value={pagoLinkTitular} onChange={(e) => setPagoLinkTitular(e.target.value)} placeholder="Nombre del titular" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-northpeak-text">Referencia (opcional)</Label>
+                <Input value={pagoLinkReferencia} onChange={(e) => setPagoLinkReferencia(e.target.value)} placeholder="Ej: NP-2024-001" className="bg-northpeak-bg border-northpeak-surface text-northpeak-text" />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowPagoLinkDialog(false)} className="border-northpeak-surface text-northpeak-text-muted">Cancelar</Button>
+                <Button onClick={generatePagoLink} disabled={generatingLink || !pagoLinkBanco || !pagoLinkClabe || !pagoLinkTitular} className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
+                  <Link2 className="h-3.5 w-3.5 mr-1.5" />
+                  {generatingLink ? "Generando..." : "Generar enlace"}
+                </Button>
+              </DialogFooter>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-northpeak-bg p-4 space-y-2">
+                <p className="text-xs text-northpeak-text-muted">Enlace generado — comparte con el cliente:</p>
+                <p className="text-sm font-mono text-northpeak-green break-all">{generatedLink}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={copyPagoLink} className="flex-1 bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90">
+                  <Copy className="h-3.5 w-3.5 mr-1.5" />
+                  {copiedLink ? "Copiado" : "Copiar enlace"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(generatedLink, "_blank")}
+                  className="border-northpeak-surface text-northpeak-text-muted hover:bg-northpeak-surface"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <Button variant="ghost" onClick={() => setShowPagoLinkDialog(false)} className="w-full text-northpeak-text-muted">
+                Cerrar
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
