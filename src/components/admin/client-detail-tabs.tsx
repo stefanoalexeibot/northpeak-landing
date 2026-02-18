@@ -696,6 +696,17 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                             {pay.status === "completed" ? "Pagado" : pay.status === "pending" ? "Pendiente" : pay.status === "failed" ? "Fallido" : "Reembolsado"}
                           </span>
                         </div>
+                        {pay.comprobante_url && (
+                          <a
+                            href={pay.comprobante_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ver comprobante"
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-northpeak-green hover:bg-northpeak-green/10 transition-colors"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        )}
                         {pay.status === "pending" && (
                           <>
                             <Button

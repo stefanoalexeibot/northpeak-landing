@@ -115,6 +115,8 @@ export interface Payment {
   due_date?: string;
   paid_at?: string;
   created_at: string;
+  pago_token?: string;
+  comprobante_url?: string;
 }
 
 export interface ProjectMilestone {

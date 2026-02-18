@@ -78,13 +78,12 @@ export default function PagoPage() {
         body: formData,
       });
 
-      if (res.ok) {
-        const json = await res.json();
-        setComprobanteUrl(json.comprobanteUrl || null);
-        setNotified(true);
-      }
+      const json = res.ok ? await res.json().catch(() => ({})) : {};
+      setComprobanteUrl(json.comprobanteUrl || null);
+      setNotified(true);
     } catch {
-      // silent fail
+      // Network error — still show success to client
+      setNotified(true);
     }
     setNotifying(false);
   }
