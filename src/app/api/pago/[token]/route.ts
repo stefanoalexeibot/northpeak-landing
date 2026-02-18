@@ -25,15 +25,13 @@ export async function GET(
 
   const { data: payment, error } = await supabase
     .from("payments")
-    .select("id, concept, amount, status, datos_bancarios, due_date, client_id, clients(name)")
+    .select("id, concept, amount, status, datos_bancarios, due_date, client_id")
     .eq("pago_token", token)
     .single();
 
   if (error || !payment) {
     return NextResponse.json({ error: "Pago no encontrado" }, { status: 404 });
   }
-
-  const clientObj = payment.clients as unknown as { name: string } | null;
 
   return NextResponse.json({
     id: payment.id,
@@ -42,7 +40,7 @@ export async function GET(
     status: payment.status,
     datos_bancarios: payment.datos_bancarios,
     due_date: payment.due_date,
-    client_name: clientObj?.name || "Cliente",
+    client_name: "Cliente",
   });
 }
 
