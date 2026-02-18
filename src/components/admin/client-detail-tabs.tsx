@@ -171,7 +171,16 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   }
 
   async function deletePayment(id: string) {
-    await supabase.from("payments").delete().eq("id", id);
+    const res = await fetch("/api/admin/delete-payment", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(data.error || "Error al eliminar pago", "error");
+      return;
+    }
     router.refresh();
   }
 
@@ -326,12 +335,30 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   }
 
   async function deleteMedia(id: string) {
-    await supabase.from("media").delete().eq("id", id);
+    const res = await fetch("/api/admin/delete-media", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(data.error || "Error al eliminar archivo", "error");
+      return;
+    }
     router.refresh();
   }
 
   async function deleteProject(id: string) {
-    await supabase.from("projects").delete().eq("id", id);
+    const res = await fetch("/api/admin/delete-project", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(data.error || "Error al eliminar proyecto", "error");
+      return;
+    }
     router.refresh();
   }
 
