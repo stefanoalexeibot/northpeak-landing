@@ -70,6 +70,7 @@ export interface DatosNegocio {
   zona: string;
   contacto: string;
   telefono: string;
+  vendedor?: string;
 }
 
 export function calcularScore(h: Hallazgos): number {

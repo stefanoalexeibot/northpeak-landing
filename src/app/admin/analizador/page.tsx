@@ -62,31 +62,6 @@ const ETAPA_CONFIG: Record<string, { label: string; color: string; bg: string }>
   cerrado_perdido: { label: "Perdido", color: "text-red-400", bg: "bg-red-400/10" },
 };
 
-const GIROS = [
-  "Restaurante",
-  "Cafetería",
-  "Salón de Belleza",
-  "Salón de Uñas",
-  "Barbería",
-  "Gimnasio / Fitness",
-  "Consultorio Médico",
-  "Consultorio Dental",
-  "Veterinaria",
-  "Tienda de Ropa",
-  "Tienda en línea",
-  "Agencia de Marketing",
-  "Despacho Contable",
-  "Despacho Legal",
-  "Inmobiliaria",
-  "Constructora",
-  "Taller Mecánico",
-  "Escuela / Academia",
-  "Spa / Wellness",
-  "Fotografía",
-  "Panadería / Repostería",
-  "Floristería",
-  "Otro",
-];
 
 function Toggle({
   value,
@@ -296,7 +271,7 @@ function AnalizadorContent() {
       const res = await fetch("/api/admin/analisis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId, vendedor: (datos as any).vendedor || null }),
+        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId, vendedor: datos.vendedor || null }),
       });
 
       const data = await res.json();
@@ -1000,8 +975,8 @@ function AnalizadorContent() {
                 <div className="space-y-1.5">
                   <Label className="text-northpeak-text text-xs">Vendedor</Label>
                   <Input
-                    value={(datos as any).vendedor || ""}
-                    onChange={(e) => setDatos({ ...datos, vendedor: e.target.value } as any)}
+                    value={datos.vendedor || ""}
+                    onChange={(e) => setDatos({ ...datos, vendedor: e.target.value })}
                     placeholder="Nombre del vendedor"
                     className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
                   />
@@ -1246,7 +1221,7 @@ function AnalizadorContent() {
                               zona: a.zona,
                               contacto: a.contacto || "",
                               telefono: a.telefono || "",
-                            } as any);
+                            });
                             setTab("form");
                             addToast("Datos copiados — edita nombre y genera nuevo análisis", "success");
                           }}

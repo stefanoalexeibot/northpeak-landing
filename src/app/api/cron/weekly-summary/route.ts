@@ -16,7 +16,6 @@ export async function GET(request: Request) {
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const today = now.toISOString().split("T")[0];
 
   const [
