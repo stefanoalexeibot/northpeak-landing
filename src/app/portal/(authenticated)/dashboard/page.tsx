@@ -8,6 +8,7 @@ import {
   Share2, MapPin, Star, UserCheck, Globe, BarChart2,
 } from "lucide-react";
 import DashboardQuickLinks from "@/components/portal/dashboard-quick-links";
+import DeliverableQuickApprove from "@/components/portal/deliverable-quick-approve";
 
 function timeAgo(dateStr: string): string {
   const now = new Date();
@@ -109,7 +110,19 @@ export default async function PortalDashboard() {
   const projectNameMap: Record<string, string> = {};
   (allProjects ?? []).forEach((p) => { projectNameMap[p.id] = p.name; });
 
-  const [{ data: upcomingDeliverables }, { data: latestResultados }] = await Promise.all([
+  // Current month bounds (Monterrey timezone)
+  const monthStart = new Date(new Date().toLocaleDateString("en-CA", { timeZone: "America/Monterrey" }) + "T00:00:00");
+  monthStart.setDate(1);
+  const monthStartStr = monthStart.toLocaleDateString("en-CA");
+  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+  const monthEndStr = monthEnd.toLocaleDateString("en-CA");
+
+  const [
+    { data: upcomingDeliverables },
+    { data: latestResultados },
+    { data: monthDeliverables },
+    { data: reviewDeliverables },
+  ] = await Promise.all([
     projectIds.length > 0
       ? supabase
           .from("deliverables")
@@ -127,9 +140,40 @@ export default async function PortalDashboard() {
       .order("mes", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(6),
+    projectIds.length > 0
+      ? supabase
+          .from("deliverables")
+          .select("id, status")
+          .in("project_id", projectIds)
+          .not("scheduled_date", "is", null)
+          .gte("scheduled_date", monthStartStr)
+          .lte("scheduled_date", monthEndStr)
+      : Promise.resolve({ data: [] as { id: string; status: string }[] }),
+    projectIds.length > 0
+      ? supabase
+          .from("deliverables")
+          .select("id, name, project_id")
+          .in("project_id", projectIds)
+          .eq("status", "review")
+          .or("client_approved.is.null,client_approved.eq.false")
+          .order("created_at", { ascending: true })
+          .limit(5)
+      : Promise.resolve({ data: [] as { id: string; name: string; project_id: string }[] }),
   ]);
 
   const hasUnsignedContract = contractDoc && !contractDoc.signed;
+
+  const monthTotal = (monthDeliverables ?? []).length;
+  const monthDone = (monthDeliverables ?? []).filter((d) => d.status === "completed").length;
+  const monthPct = monthTotal > 0 ? Math.round((monthDone / monthTotal) * 100) : 0;
+
+  // Map review deliverables with project names
+  const reviewWithProject = (reviewDeliverables ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    project_id: d.project_id,
+    project_name: projectNameMap[d.project_id] ?? "Proyecto",
+  }));
 
   const quickLinks = [
     { label: "Contrato",    href: "/portal/contract",  iconName: "FileText",     color: "text-blue-400" },
@@ -200,6 +244,51 @@ export default async function PortalDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Monthly progress */}
+      {monthTotal > 0 && (
+        <Card className="bg-northpeak-card border-northpeak-surface">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-medium text-northpeak-text-muted uppercase tracking-wider">
+                  Progreso del mes
+                </p>
+                <p className="text-sm text-northpeak-text mt-0.5">
+                  {monthDone} de {monthTotal} publicaciones completadas
+                </p>
+              </div>
+              <span className="font-mono font-bold text-northpeak-green text-lg">{monthPct}%</span>
+            </div>
+            <div className="h-2 bg-northpeak-surface rounded-full overflow-hidden">
+              <div
+                className="h-full bg-northpeak-green rounded-full transition-all duration-700"
+                style={{ width: `${monthPct}%` }}
+              />
+            </div>
+            {monthDone < monthTotal && (
+              <p className="text-[11px] text-northpeak-text-dim mt-2">
+                {monthTotal - monthDone} pendientes para terminar el mes
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pending approvals */}
+      {reviewWithProject.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-northpeak-text-muted uppercase tracking-wider">
+              Pendiente de tu aprobación
+            </h2>
+            <Link href="/portal/projects" className="text-xs text-northpeak-green hover:text-northpeak-green/80 flex items-center gap-1">
+              Ver proyectos <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <DeliverableQuickApprove deliverables={reviewWithProject} />
+        </div>
+      )}
 
       {/* Projects progress */}
       {projects && projects.length > 0 && (

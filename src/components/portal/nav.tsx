@@ -21,6 +21,7 @@ import {
   CreditCard,
   CalendarDays,
   TrendingUp,
+  FileSearch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ThemeToggle from "@/components/portal/theme-toggle";
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { label: "Inicio", href: "/portal/dashboard", icon: LayoutDashboard },
   { label: "Contrato", href: "/portal/contract", icon: FileText, badgeKey: "contracts" },
   { label: "Bienvenida", href: "/portal/welcome", icon: HandHeart },
+  { label: "Propuesta", href: "/portal/propuesta", icon: FileSearch },
   { label: "Nota de venta", href: "/portal/invoice", icon: Receipt },
   { label: "Proyectos", href: "/portal/projects", icon: FolderOpen },
   { label: "Archivos", href: "/portal/files", icon: Image, badgeKey: "files" },
