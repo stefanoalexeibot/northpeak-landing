@@ -7,7 +7,6 @@ import {
   Check,
   TrendingUp,
   MapPin,
-  Users,
   Zap,
   BarChart2,
   MessageSquare,
