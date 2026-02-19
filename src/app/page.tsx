@@ -10,6 +10,10 @@ import {
 import FaqAccordion from "@/components/landing/faq-accordion";
 import RoiCalculator from "@/components/landing/roi-calculator";
 import FadeIn from "@/components/landing/fade-in";
+import AnimatedCounter from "@/components/landing/animated-counter";
+import ChatbotDemo from "@/components/landing/chatbot-demo";
+import QuickCaptureForm from "@/components/landing/quick-capture-form";
+import MobileNav from "@/components/landing/mobile-nav";
 import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
@@ -19,6 +23,21 @@ export const metadata: Metadata = {
   title: "NorthPeak — IA para Incrementar Ventas · Monterrey",
   description:
     "Infraestructura de inteligencia artificial para captar leads, calificarlos automáticamente y cerrar más ventas. Negocios en Monterrey que venden en piloto automático.",
+  openGraph: {
+    title: "NorthPeak — La IA que vende. Sin parar.",
+    description:
+      "Construimos la infraestructura de IA que tu negocio necesita para captar leads, calificarlos automáticamente y cerrar más ventas — sin contratar más personal.",
+    url: "https://northpeak.mx",
+    siteName: "NorthPeak",
+    locale: "es_MX",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "NorthPeak — IA para ventas" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NorthPeak — La IA que vende. Sin parar.",
+    description: "Infraestructura de IA para incrementar ventas en Monterrey.",
+  },
 };
 
 // ── Static data ──────────────────────────────────────────────────────────────
@@ -277,13 +296,16 @@ export default async function LandingPage() {
               <Link href="/portal/dashboard" className="hover:text-northpeak-text transition-colors">Portal</Link>
             </nav>
 
-            <Link
-              href="/analizar"
-              className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-bold hover:bg-northpeak-green/90 transition-all"
-            >
-              Analizar mi negocio
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/analizar"
+                className="hidden md:flex group items-center gap-2 px-4 py-2 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-bold hover:bg-northpeak-green/90 transition-all"
+              >
+                Analizar mi negocio
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <MobileNav />
+            </div>
           </div>
         </header>
 
@@ -335,15 +357,20 @@ export default async function LandingPage() {
               </a>
             </div>
 
+            {/* Quick capture form */}
+            <div className="mb-10">
+              <QuickCaptureForm />
+            </div>
+
             {/* Floating proof chips */}
             <div className="flex flex-wrap gap-3">
               {[
-                { icon: Bot, val: "+40 empresas", sub: "automatizadas con IA", color: "text-northpeak-green" },
-                { icon: TrendingUp, val: "3.2× más ventas", sub: "promedio de clientes", color: "text-blue-400" },
-                { icon: Star, val: "4.9★ satisfacción", sub: "clientes activos", color: "text-yellow-400" },
+                { icon: Bot, val: <><AnimatedCounter to={40} prefix="+" />  empresas</>, sub: "automatizadas con IA", color: "text-northpeak-green", key: "empresas" },
+                { icon: TrendingUp, val: <><AnimatedCounter to={3.2} decimals={1} suffix="×" /> más ventas</>, sub: "promedio de clientes", color: "text-blue-400", key: "ventas" },
+                { icon: Star, val: <><AnimatedCounter to={4.9} decimals={1} suffix="★" /> satisfacción</>, sub: "clientes activos", color: "text-yellow-400", key: "rating" },
               ].map((chip) => (
                 <div
-                  key={chip.val}
+                  key={chip.key}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-xl border border-northpeak-surface bg-northpeak-card/80 backdrop-blur-sm"
                 >
                   <chip.icon className={`h-4 w-4 shrink-0 ${chip.color}`} />
@@ -353,6 +380,57 @@ export default async function LandingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Chatbot Demo ─────────────────────────────────────── */}
+        <section className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+              {/* Left: context */}
+              <FadeIn direction="left">
+                <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Demo en vivo</p>
+                <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight leading-tight mb-5">
+                  Tu agente de IA.<br />
+                  <span className="text-northpeak-green">En acción.</span>
+                </h2>
+                <p className="text-northpeak-text-muted leading-relaxed mb-8 max-w-md">
+                  Así responde tu agente en WhatsApp: atiende, califica y agenda citas — sin que muevas un dedo, a cualquier hora del día.
+                </p>
+
+                <ul className="space-y-4 mb-10">
+                  {[
+                    { icon: Bot, text: "Atiende el 100% de los mensajes en segundos" },
+                    { icon: Search, text: "Califica leads con preguntas inteligentes" },
+                    { icon: Settings2, text: "Agenda citas y conecta con tu operación" },
+                    { icon: Clock, text: "Opera 24/7 sin costo adicional por hora" },
+                  ].map((item) => (
+                    <li key={item.text} className="flex items-start gap-3">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-northpeak-green/10 border border-northpeak-green/20 mt-0.5">
+                        <item.icon className="h-3.5 w-3.5 text-northpeak-green" />
+                      </div>
+                      <span className="text-sm text-northpeak-text-muted leading-relaxed">{item.text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/analizar"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-northpeak-green text-northpeak-bg font-bold text-sm hover:bg-northpeak-green/90 transition-all hover:scale-[1.02]"
+                >
+                  <Zap className="h-4 w-4" />
+                  Quiero este agente en mi negocio
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </FadeIn>
+
+              {/* Right: phone demo */}
+              <FadeIn delay={0.15}>
+                <ChatbotDemo />
+              </FadeIn>
+
             </div>
           </div>
         </section>
@@ -776,7 +854,7 @@ export default async function LandingPage() {
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <a
-                href="https://wa.me/528110000000"
+                href="https://wa.me/528121980008"
                 target="_blank"
                 rel="noreferrer"
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted font-medium text-base hover:border-northpeak-green/30 hover:text-northpeak-text transition-all"
@@ -829,7 +907,7 @@ export default async function LandingPage() {
               <div>
                 <p className="font-mono text-[10px] tracking-[0.15em] text-northpeak-text-dim uppercase mb-4">Contacto</p>
                 <div className="space-y-3">
-                  <a href="https://wa.me/528110000000" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-sm text-northpeak-text-muted hover:text-northpeak-green transition-colors">
+                  <a href="https://wa.me/528121980008" target="_blank" rel="noreferrer" className="flex items-center gap-2.5 text-sm text-northpeak-text-muted hover:text-northpeak-green transition-colors">
                     <Phone className="h-4 w-4" />
                     WhatsApp
                   </a>
