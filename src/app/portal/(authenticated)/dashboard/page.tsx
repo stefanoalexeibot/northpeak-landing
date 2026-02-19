@@ -216,8 +216,8 @@ export default async function PortalDashboard() {
             {projects.map((project) => {
               const deliverables = (project.deliverables as { id: string; status: string }[]) ?? [];
               const total = deliverables.length;
-              const approved = deliverables.filter(d => d.status === "approved").length;
-              const inReview = deliverables.filter(d => d.status === "pending_approval").length;
+              const approved = deliverables.filter(d => d.status === "completed").length;
+              const inReview = deliverables.filter(d => d.status === "review").length;
               const pct = total > 0 ? Math.round((approved / total) * 100) : 0;
               const statusCfg = STATUS_LABEL[project.status] ?? { label: project.status, color: "text-northpeak-text-muted" };
 

@@ -5,12 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import TiltCard from "@/components/portal/tilt-card";
 import {
   FileText, HandHeart, Receipt, FolderOpen,
-  Image, Gift, MessageSquare,
+  Image, Gift, MessageSquare, CreditCard, CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
-  FileText, HandHeart, Receipt, FolderOpen, Image, Gift, MessageSquare,
+  FileText, HandHeart, Receipt, FolderOpen, Image, Gift, MessageSquare, CreditCard, CalendarDays,
 };
 
 interface QuickLink {

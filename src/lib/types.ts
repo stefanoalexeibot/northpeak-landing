@@ -60,6 +60,10 @@ export interface Deliverable {
   description?: string;
   status: DeliverableStatus;
   order_index: number;
+  scheduled_date?: string | null;
+  client_approved?: boolean | null;
+  client_feedback?: string | null;
+  approved_at?: string | null;
   created_at: string;
 }
 
@@ -136,7 +140,8 @@ export type NotificationType =
   | "payment_overdue"
   | "payment_received"
   | "file_uploaded"
-  | "cuestionario_completed";
+  | "cuestionario_completed"
+  | "deliverable_approved";
 
 export type EtapaProspecto =
   | "nuevo"

@@ -135,7 +135,7 @@ export default function AdminPaymentsPage() {
     await fetch("/api/admin/confirm-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ payment_id: id }),
     });
     setConfirming(null);
     loadPayments();

@@ -72,7 +72,7 @@ export async function POST(
 
   // Notify admin
   await createNotification(supabase, {
-    type: "contract_signed",
+    type: "deliverable_approved",
     title: approved
       ? `${client.name} aprobó: "${deliverable.name}"`
       : `${client.name} solicitó cambios en: "${deliverable.name}"`,
