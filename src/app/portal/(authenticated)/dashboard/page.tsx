@@ -2,9 +2,9 @@ import { getClientData } from "@/lib/supabase/get-client-data";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import {
-  FileText, FolderOpen, Image, Gift, MessageSquare,
+  ImageIcon, MessageSquare,
   CreditCard, ChevronRight, CheckCircle2, Clock,
-  AlertCircle, ArrowRight, CalendarDays,
+  AlertCircle, ArrowRight,
 } from "lucide-react";
 import DashboardQuickLinks from "@/components/portal/dashboard-quick-links";
 
@@ -310,7 +310,7 @@ export default async function PortalDashboard() {
                       <img src={file.file_url} alt={file.name} className="w-full h-20 object-cover" />
                     ) : (
                       <div className="w-full h-20 bg-northpeak-surface flex items-center justify-center">
-                        <Image className="h-6 w-6 text-northpeak-text-dim" />
+                        <ImageIcon className="h-6 w-6 text-northpeak-text-dim" />
                       </div>
                     )}
                     <CardContent className="p-2.5">
