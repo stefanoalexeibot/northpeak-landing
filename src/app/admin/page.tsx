@@ -79,8 +79,8 @@ export default async function AdminDashboard() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const today = now.toISOString().split("T")[0];
-  const in7days = new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0];
+  const today = now.toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
+  const in7days = new Date(now.getTime() + 7 * 86400000).toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
 
   const [
     { data: monthlyPayments },
@@ -166,7 +166,7 @@ export default async function AdminDashboard() {
               {dateStr}
             </p>
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
-              {getGreeting()}, Brandon
+              {getGreeting()}, Alejandro
             </h1>
             <p className="text-northpeak-text-muted mt-1 text-sm">
               {activeClients ?? 0} clientes activos · {prospectoActivos} prospectos en curso

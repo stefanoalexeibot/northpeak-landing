@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "brandon@northpeakdigital.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "alejandro@northpeakdigital.com";
 
 export async function notifyAdmin({ subject, body }: { subject: string; body: string }) {
   if (!process.env.RESEND_API_KEY) return { success: false, error: "No RESEND_API_KEY" };

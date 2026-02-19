@@ -74,10 +74,8 @@ const RESULTADO_COLOR: Record<string, string> = {
 export default async function PortalDashboard() {
   const { supabase, client } = await getClientData();
 
-  const today = new Date().toISOString().split("T")[0];
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrow = tomorrowDate.toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
+  const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
 
   const [
     { count: projectCount },
