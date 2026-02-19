@@ -193,6 +193,7 @@ function AnalizadorContent() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [tab, setTab] = useState<"form" | "history">("form");
   const [aiLoading, setAiLoading] = useState(false);
+  const [vendedoresOpts, setVendedoresOpts] = useState<string[]>([]);
 
   // Form state
   const [datos, setDatos] = useState<DatosNegocio>({
@@ -223,6 +224,12 @@ function AnalizadorContent() {
 
   useEffect(() => {
     loadHistory();
+    fetch("/api/admin/vendedores")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Array<{ nombre: string; activo: boolean }>) =>
+        setVendedoresOpts(data.filter((v) => v.activo).map((v) => v.nombre))
+      )
+      .catch(() => {});
   }, []);
 
   async function loadHistory() {
@@ -974,12 +981,25 @@ function AnalizadorContent() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-northpeak-text text-xs">Vendedor</Label>
-                  <Input
-                    value={datos.vendedor || ""}
-                    onChange={(e) => setDatos({ ...datos, vendedor: e.target.value })}
-                    placeholder="Nombre del vendedor"
-                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
-                  />
+                  {vendedoresOpts.length > 0 ? (
+                    <select
+                      value={datos.vendedor || ""}
+                      onChange={(e) => setDatos({ ...datos, vendedor: e.target.value })}
+                      className="flex w-full h-9 rounded-md border border-northpeak-surface bg-northpeak-bg px-3 text-sm text-northpeak-text"
+                    >
+                      <option value="">Sin asignar</option>
+                      {vendedoresOpts.map((v) => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      value={datos.vendedor || ""}
+                      onChange={(e) => setDatos({ ...datos, vendedor: e.target.value })}
+                      placeholder="Nombre del vendedor"
+                      className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                    />
+                  )}
                 </div>
               </div>
             </CardContent>

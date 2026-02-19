@@ -16,7 +16,11 @@ import {
   Send,
   Clock,
   Trash2,
+  UserPlus,
+  X,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { EtapaProspecto } from "@/lib/types";
 
@@ -35,6 +39,7 @@ interface ProspectoCard {
   vendedor?: string;
   etapa_updated_at?: string;
   created_at: string;
+  client_id?: string | null;
 }
 
 const COLUMNAS: { etapa: EtapaProspecto; label: string; color: string; dotColor: string }[] = [
@@ -78,6 +83,11 @@ export default function PipelinePage() {
   const [bulkMessage, setBulkMessage] = useState("");
   const [showBulkWA, setShowBulkWA] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Convert prospecto → client modal
+  const [convertingProspecto, setConvertingProspecto] = useState<ProspectoCard | null>(null);
+  const [convertForm, setConvertForm] = useState({ nombre: "", empresa: "", telefono: "", email: "", password: "", autoContract: false, autoProject: false });
+  const [converting, setConverting] = useState(false);
 
   useEffect(() => {
     loadProspectos();
@@ -203,6 +213,74 @@ export default function PipelinePage() {
     setSelectedIds(new Set());
     setShowBulkWA(false);
     setBulkMessage("");
+  }
+
+  function openConvertModal(p: ProspectoCard) {
+    setConvertingProspecto(p);
+    setConvertForm({
+      nombre: p.contacto || "",
+      empresa: p.nombre_negocio || "",
+      telefono: p.telefono || "",
+      email: "",
+      password: "",
+      autoContract: false,
+      autoProject: false,
+    });
+  }
+
+  async function handleConvert() {
+    if (!convertingProspecto) return;
+    if (!convertForm.email || !convertForm.password) {
+      addToast("Email y contraseña son requeridos", "error");
+      return;
+    }
+    setConverting(true);
+    try {
+      const clientRes = await fetch("/api/admin/create-client", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: convertForm.nombre || convertingProspecto.nombre_negocio,
+          email: convertForm.email,
+          company: convertForm.empresa,
+          phone: convertForm.telefono,
+          password: convertForm.password,
+          onboarding: {
+            autoContract: convertForm.autoContract,
+            autoProject: convertForm.autoProject,
+            projectName: `Proyecto ${convertForm.empresa || convertForm.nombre}`,
+          },
+        }),
+      });
+      const clientData = await clientRes.json();
+      if (!clientRes.ok) {
+        addToast(clientData.error || "Error al crear cliente", "error");
+        setConverting(false);
+        return;
+      }
+      const newClientId = clientData.clientId;
+
+      // Update analisis with client_id and move to cerrado_ganado
+      await fetch("/api/admin/analisis", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: convertingProspecto.id, etapa: "cerrado_ganado", client_id: newClientId }),
+      });
+
+      setProspectos((prev) =>
+        prev.map((p) =>
+          p.id === convertingProspecto.id
+            ? { ...p, client_id: newClientId, etapa: "cerrado_ganado", etapa_updated_at: new Date().toISOString() }
+            : p
+        )
+      );
+
+      addToast("Cliente creado exitosamente", "success");
+      setConvertingProspecto(null);
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setConverting(false);
   }
 
   // Filter by vendedor
@@ -472,6 +550,31 @@ export default function PipelinePage() {
                                   <ExternalLink className="h-3 w-3" />
                                 </Button>
                               </a>
+                              {p.client_id ? (
+                                <a
+                                  href={`/admin/clients/${p.client_id}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-1.5 text-[9px] text-northpeak-green bg-northpeak-green/10 hover:bg-northpeak-green/20 rounded"
+                                    title="Ver cliente"
+                                  >
+                                    Cliente
+                                  </Button>
+                                </a>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); openConvertModal(p); }}
+                                  className="h-6 w-6 p-0 text-northpeak-text-dim hover:text-northpeak-green"
+                                  title="Convertir a cliente"
+                                >
+                                  <UserPlus className="h-3 w-3" />
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -493,6 +596,123 @@ export default function PipelinePage() {
           );
         })}
       </div>
+
+      {/* Convert prospecto → client modal */}
+      {convertingProspecto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="bg-northpeak-card border border-northpeak-surface rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-northpeak-surface">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-northpeak-green" />
+                <span className="font-heading font-semibold text-northpeak-text">
+                  Convertir a cliente
+                </span>
+              </div>
+              <button
+                onClick={() => setConvertingProspecto(null)}
+                className="text-northpeak-text-muted hover:text-northpeak-text"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-xs text-northpeak-text-muted">
+                Se creará un nuevo cliente con acceso al portal. El prospecto se moverá a <strong className="text-northpeak-text">Ganados</strong>.
+              </p>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Nombre del contacto</Label>
+                  <Input
+                    value={convertForm.nombre}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, nombre: e.target.value }))}
+                    placeholder="Juan García"
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Empresa / Negocio</Label>
+                  <Input
+                    value={convertForm.empresa}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, empresa: e.target.value }))}
+                    placeholder="Nombre del negocio"
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Teléfono</Label>
+                  <Input
+                    value={convertForm.telefono}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, telefono: e.target.value }))}
+                    placeholder="+52 81 ..."
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Email * (acceso al portal)</Label>
+                  <Input
+                    type="email"
+                    value={convertForm.email}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, email: e.target.value }))}
+                    placeholder="cliente@correo.com"
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Contraseña temporal *</Label>
+                  <Input
+                    type="password"
+                    value={convertForm.password}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, password: e.target.value }))}
+                    placeholder="Mínimo 6 caracteres"
+                    className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-medium text-northpeak-text">Automatización</p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={convertForm.autoContract}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, autoContract: e.target.checked }))}
+                    className="rounded border-northpeak-surface bg-northpeak-bg text-northpeak-green h-4 w-4"
+                  />
+                  <span className="text-sm text-northpeak-text">Crear contrato automáticamente</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={convertForm.autoProject}
+                    onChange={(e) => setConvertForm((f) => ({ ...f, autoProject: e.target.checked }))}
+                    className="rounded border-northpeak-surface bg-northpeak-bg text-northpeak-green h-4 w-4"
+                  />
+                  <span className="text-sm text-northpeak-text">Crear proyecto automáticamente</span>
+                </label>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleConvert}
+                  disabled={converting}
+                  className="flex-1 bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
+                >
+                  {converting ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creando...</>
+                  ) : (
+                    <><UserPlus className="h-4 w-4 mr-2" />Crear cliente</>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setConvertingProspecto(null)}
+                  className="border-northpeak-surface text-northpeak-text-muted"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

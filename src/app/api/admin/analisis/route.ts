@@ -204,14 +204,28 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const { id, etapa } = await request.json();
-  if (!id || !etapa) {
-    return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+  const body = await request.json();
+  const { id, etapa, client_id } = body;
+  if (!id) {
+    return NextResponse.json({ error: "Falta el id" }, { status: 400 });
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (etapa) {
+    updates.etapa = etapa;
+    updates.etapa_updated_at = new Date().toISOString();
+  }
+  if (client_id !== undefined) {
+    updates.client_id = client_id;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
   }
 
   const { error } = await supabase
     .from("analisis_digital")
-    .update({ etapa, etapa_updated_at: new Date().toISOString() })
+    .update(updates)
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
