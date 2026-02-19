@@ -523,7 +523,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-northpeak-text truncate">{doc.title}</p>
                           <div className="flex items-center gap-2">
-                            <p className="text-xs text-northpeak-text-dim capitalize">{doc.type === "invoice" ? "Nota de venta" : doc.type === "contract" ? "Contrato" : "Bienvenida"}</p>
+                            <p className="text-xs text-northpeak-text-dim capitalize">{doc.type === "invoice" ? "Nota de venta" : doc.type === "contract" ? "Contrato" : doc.type === "proposal" ? "Propuesta comercial" : "Bienvenida"}</p>
                             {doc.type === "contract" && (
                               doc.signed ? (
                                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-northpeak-green bg-northpeak-green/10 px-1.5 py-0.5 rounded-full">
@@ -941,6 +941,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
               <Select value={docType} onChange={(e) => setDocType(e.target.value)} className="bg-northpeak-bg border-northpeak-surface text-northpeak-text">
                 <option value="contract">Contrato</option>
                 <option value="welcome">Bienvenida</option>
+                <option value="proposal">Propuesta comercial</option>
                 <option value="invoice">Nota de venta</option>
               </Select>
             </div>

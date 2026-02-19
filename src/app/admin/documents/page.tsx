@@ -156,7 +156,7 @@ export default function AdminDocumentsPage() {
       const docMappings = [
         { keyword: "bienvenida", type: "welcome", title: "Documento de Bienvenida" },
         { keyword: "contrato", type: "contract", title: "Contrato de Prestacion de Servicios" },
-        { keyword: "propuesta", type: "welcome", title: "Propuesta Comercial" },
+        { keyword: "propuesta", type: "proposal", title: "Propuesta Comercial" },
         { keyword: "cotizacion", type: "invoice", title: "Cotizacion" },
       ];
 

@@ -22,7 +22,7 @@ export interface Client {
   created_at: string;
 }
 
-export type DocumentType = "contract" | "welcome" | "invoice";
+export type DocumentType = "contract" | "welcome" | "invoice" | "proposal";
 
 export interface Document {
   id: string;
