@@ -5,7 +5,7 @@ import {
   ArrowRight, Star, Check, MapPin, Zap, MessageSquare,
   Bot, Target, Layers, Search, Settings2, Rocket,
   TrendingUp, BarChart2, Clock, LayoutDashboard, Shield,
-  ChevronRight, Phone, Mail,
+  ChevronRight, Phone, Mail, Globe, Workflow, FileSearch, Sparkles, Timer,
 } from "lucide-react";
 import FaqAccordion from "@/components/landing/faq-accordion";
 import RoiCalculator from "@/components/landing/roi-calculator";
@@ -178,6 +178,67 @@ const differentiators = [
   },
 ];
 
+const oneTimeServices = [
+  {
+    Icon: Globe,
+    name: "Sitio Web con IA Integrada",
+    price: "$12,900",
+    description: "Landing page profesional + chatbot de IA integrado que atiende y califica visitantes en tiempo real.",
+    features: ["Diseño premium responsive", "Chatbot IA personalizado", "Formularios automatizados", "Entrega en 7 días"],
+    color: "text-blue-400",
+    bg: "bg-blue-400/10",
+    border: "border-blue-500/20",
+  },
+  {
+    Icon: Bot,
+    name: "Setup Agente IA en WhatsApp",
+    price: "$8,500",
+    description: "Configuración completa de tu agente de IA en WhatsApp Business. Listo para atender leads desde el día 1.",
+    features: ["Flujos de conversación a medida", "Integración con tu CRM", "Capacitación de la IA con tu negocio", "Soporte 30 días post-entrega"],
+    color: "text-purple-400",
+    bg: "bg-purple-400/10",
+    border: "border-purple-500/20",
+  },
+  {
+    Icon: Workflow,
+    name: "Automatización de Pipeline",
+    price: "$6,500",
+    description: "Setup de CRM + automatizaciones de seguimiento + integraciones entre tus herramientas actuales.",
+    features: ["CRM configurado a tu proceso", "Automatizaciones de seguimiento", "Notificaciones y alertas", "Integraciones llave en mano"],
+    color: "text-yellow-400",
+    bg: "bg-yellow-400/10",
+    border: "border-yellow-500/20",
+  },
+  {
+    Icon: FileSearch,
+    name: "Auditoría de Ventas Digital",
+    price: "$2,500",
+    description: "Análisis profundo de dónde se pierden tus leads hoy y plan de acción concreto para cerrar más.",
+    features: ["Diagnóstico de pipeline completo", "Análisis de competencia", "Plan de acción priorizado", "Sesión de presentación incluida"],
+    color: "text-northpeak-green",
+    bg: "bg-northpeak-green/10",
+    border: "border-northpeak-green/20",
+  },
+];
+
+const superOffer = {
+  badge: "OFERTA DE LANZAMIENTO",
+  name: "Kit Lanzamiento IA",
+  tagline: "Todo lo que necesitas para empezar a vender con IA. Un solo pago. Sin mensualidades.",
+  price: "$24,900",
+  originalPrice: "$39,400",
+  savings: "Ahorras $14,500",
+  deadline: "Solo 5 lugares disponibles este mes",
+  includes: [
+    { Icon: Globe, label: "Sitio web con IA integrada" },
+    { Icon: Bot, label: "Agente IA en WhatsApp configurado" },
+    { Icon: Workflow, label: "Pipeline automatizado + CRM" },
+    { Icon: Target, label: "Campaña de publicidad lanzada" },
+    { Icon: FileSearch, label: "Auditoría inicial + estrategia" },
+    { Icon: Timer, label: "30 días de soporte post-entrega" },
+  ],
+};
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function LandingPage() {
@@ -205,11 +266,12 @@ export default async function LandingPage() {
           <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
             <Link href="/">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="NorthPeak Digital" className="h-7" />
+              <img src="/logo.png" alt="NorthPeak Digital" className="h-10" />
             </Link>
 
             <nav className="hidden md:flex items-center gap-8 text-sm text-northpeak-text-muted">
               <a href="#servicios" className="hover:text-northpeak-text transition-colors">Soluciones</a>
+              <a href="#pago-unico" className="hover:text-northpeak-text transition-colors">Pago único</a>
               <a href="#casos" className="hover:text-northpeak-text transition-colors">Resultados</a>
               <a href="#preguntas" className="hover:text-northpeak-text transition-colors">FAQ</a>
               <Link href="/portal/dashboard" className="hover:text-northpeak-text transition-colors">Portal</Link>
@@ -358,6 +420,128 @@ export default async function LandingPage() {
                 </TiltCard>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── One-Time Services + Super Offer ──────────────────── */}
+        <section id="pago-unico" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface bg-northpeak-card/40">
+          <div className="max-w-6xl mx-auto">
+
+            {/* Super Offer — top banner */}
+            <FadeIn className="mb-16">
+              <div className="relative rounded-3xl overflow-hidden border border-northpeak-green/40 bg-gradient-to-br from-northpeak-green/10 via-northpeak-card to-northpeak-bg p-8 sm:p-10">
+                {/* Glow */}
+                <div className="pointer-events-none absolute -top-20 -left-10 h-64 w-64 rounded-full bg-northpeak-green/20 blur-[80px]" />
+                <div className="pointer-events-none absolute -bottom-10 right-0 h-48 w-48 rounded-full bg-northpeak-green/10 blur-[60px]" />
+
+                <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                  {/* Left: info */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-5">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-northpeak-green text-northpeak-bg text-[11px] font-bold font-mono tracking-wider">
+                        <Sparkles className="h-3 w-3" />
+                        {superOffer.badge}
+                      </span>
+                      <span className="text-xs text-northpeak-text-dim font-mono flex items-center gap-1">
+                        <Timer className="h-3 w-3 text-yellow-400" />
+                        {superOffer.deadline}
+                      </span>
+                    </div>
+
+                    <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-northpeak-text tracking-tight leading-tight mb-3">
+                      {superOffer.name}
+                    </h2>
+                    <p className="text-northpeak-text-muted leading-relaxed mb-6 max-w-md">
+                      {superOffer.tagline}
+                    </p>
+
+                    <div className="flex items-end gap-4 mb-8">
+                      <p className="font-heading font-extrabold text-5xl text-northpeak-green leading-none">
+                        {superOffer.price}
+                      </p>
+                      <div>
+                        <p className="font-mono text-northpeak-text-dim line-through text-lg">{superOffer.originalPrice}</p>
+                        <p className="text-northpeak-green text-sm font-bold font-mono">{superOffer.savings}</p>
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/analizar"
+                      className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-northpeak-green text-northpeak-bg font-bold text-base hover:bg-northpeak-green/90 transition-all hover:scale-[1.02] shadow-[0_8px_40px_rgba(0,229,160,0.35)]"
+                    >
+                      <Zap className="h-4 w-4" />
+                      Quiero este paquete
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <p className="mt-3 text-xs text-northpeak-text-dim">
+                      Pago único. Sin mensualidades. Sin contratos.
+                    </p>
+                  </div>
+
+                  {/* Right: what's included */}
+                  <div className="rounded-2xl border border-northpeak-surface bg-northpeak-bg/60 backdrop-blur-sm p-6">
+                    <p className="font-mono text-[10px] tracking-[0.15em] text-northpeak-green uppercase mb-5">Incluye todo esto</p>
+                    <ul className="space-y-3.5">
+                      {superOffer.includes.map((item) => (
+                        <li key={item.label} className="flex items-center gap-3">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-northpeak-green/15 border border-northpeak-green/20">
+                            <item.Icon className="h-3.5 w-3.5 text-northpeak-green" />
+                          </div>
+                          <span className="text-sm text-northpeak-text">{item.label}</span>
+                          <Check className="h-4 w-4 text-northpeak-green ml-auto shrink-0" />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+
+            {/* One-time services grid */}
+            <FadeIn>
+              <div className="mb-10">
+                <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-3">— Servicios sueltos · Pago único</p>
+                <h3 className="font-heading font-bold text-3xl sm:text-4xl text-northpeak-text tracking-tight">
+                  O elige solo lo que necesitas.
+                </h3>
+              </div>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {oneTimeServices.map((svc, i) => (
+                <FadeIn key={svc.name} delay={i * 0.07}>
+                  <TiltCard intensity={8} className={`rounded-2xl border ${svc.border} bg-northpeak-card flex flex-col gap-4 p-5 h-full`}>
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${svc.bg}`}>
+                      <svc.Icon className={`h-5 w-5 ${svc.color}`} />
+                    </div>
+                    <div>
+                      <h4 className="font-heading font-bold text-base text-northpeak-text leading-snug mb-1">{svc.name}</h4>
+                      <p className={`font-mono font-bold text-xl ${svc.color}`}>
+                        {svc.price}
+                        <span className="text-northpeak-text-dim text-xs font-normal ml-1">pago único</span>
+                      </p>
+                    </div>
+                    <p className="text-sm text-northpeak-text-muted leading-relaxed">{svc.description}</p>
+                    <ul className="space-y-1.5 flex-1">
+                      {svc.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-northpeak-text-muted">
+                          <Check className={`h-3 w-3 shrink-0 ${svc.color}`} />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/analizar"
+                      className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all border border-northpeak-surface text-northpeak-text-muted hover:border-northpeak-green/30 hover:text-northpeak-text`}
+                    >
+                      Cotizar
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </TiltCard>
+                </FadeIn>
+              ))}
+            </div>
+
           </div>
         </section>
 
@@ -611,7 +795,7 @@ export default async function LandingPage() {
               {/* Brand */}
               <div className="space-y-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="NorthPeak Digital" className="h-7" />
+                <img src="/logo.png" alt="NorthPeak Digital" className="h-10" />
                 <p className="text-sm text-northpeak-text-muted leading-relaxed max-w-xs">
                   Infraestructura de IA para incrementar ventas. Negocios en Monterrey que venden en piloto automático.
                 </p>
@@ -627,6 +811,7 @@ export default async function LandingPage() {
                 <div className="space-y-2.5">
                   {[
                     { label: "Soluciones", href: "#servicios" },
+                    { label: "Pago único", href: "#pago-unico" },
                     { label: "Resultados", href: "#casos" },
                     { label: "Preguntas frecuentes", href: "#preguntas" },
                     { label: "Diagnóstico gratuito", href: "/analizar" },
