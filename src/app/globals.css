@@ -158,6 +158,18 @@ input.np-slider::-moz-range-thumb:hover {
   box-shadow: 0 0 0 6px rgba(0, 229, 160, 0.25);
 }
 
+/* Marquee animation */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .gpu-accelerated,

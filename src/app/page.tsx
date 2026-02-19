@@ -14,6 +14,8 @@ import AnimatedCounter from "@/components/landing/animated-counter";
 import ChatbotDemo from "@/components/landing/chatbot-demo";
 import QuickCaptureForm from "@/components/landing/quick-capture-form";
 import MobileNav from "@/components/landing/mobile-nav";
+import HeroLiveFeed from "@/components/landing/hero-live-feed";
+import StatsMarquee from "@/components/landing/stats-marquee";
 import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
@@ -45,7 +47,8 @@ export const metadata: Metadata = {
 const caseStudies = [
   {
     industry: "Restaurante · San Pedro GG",
-    bigStat: "+1,920",
+    bigStat: 1920,
+    bigStatPrefix: "+",
     bigLabel: "seguidores + reservaciones IA",
     timeframe: "en 5 meses",
     description: "Sin sistema de captación. Con IA de contenido + agente de reservaciones por WhatsApp logramos crecimiento orgánico y automatizamos el 80% de las reservas.",
@@ -61,7 +64,8 @@ const caseStudies = [
   },
   {
     industry: "Clínica Dental · MTY Centro",
-    bigStat: "#2",
+    bigStat: 2,
+    bigStatPrefix: "#",
     bigLabel: "en Google Maps",
     timeframe: "en 3 meses",
     description: "Solo 8 reseñas y cero pipeline digital. Implementamos captación automatizada + agente de citas por IA. Hoy el 60% de citas llegan sin intervención humana.",
@@ -77,7 +81,8 @@ const caseStudies = [
   },
   {
     industry: "Constructora · Cumbres, NL",
-    bigStat: "22",
+    bigStat: 22,
+    bigStatPrefix: "",
     bigLabel: "leads calificados por IA",
     timeframe: "en el primer mes",
     description: "Necesitaban prospectos con poder adquisitivo real. Agente de IA en WhatsApp calificó leads automáticamente. CPL 42% por debajo del promedio de la industria.",
@@ -317,7 +322,8 @@ export default async function LandingPage() {
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-northpeak-green/25 to-transparent" />
           </div>
 
-          <div className="relative max-w-6xl mx-auto w-full">
+          <div className="relative max-w-6xl mx-auto w-full grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-12 xl:gap-16 items-center">
+          <div>
             {/* Badge */}
             <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-northpeak-green/25 bg-northpeak-green/8">
               <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse shrink-0" />
@@ -382,7 +388,17 @@ export default async function LandingPage() {
               ))}
             </div>
           </div>
+
+          {/* Right: live feed panel (desktop only) */}
+          <div className="hidden xl:flex items-center justify-center">
+            <HeroLiveFeed />
+          </div>
+
+          </div>
         </section>
+
+        {/* ── Stats marquee ─────────────────────────────────────── */}
+        <StatsMarquee />
 
         {/* ── Chatbot Demo ─────────────────────────────────────── */}
         <section className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
@@ -657,7 +673,9 @@ export default async function LandingPage() {
                     <p className={`font-mono text-[10px] tracking-[0.15em] uppercase ${cs.accent}`}>{cs.industry}</p>
 
                     <div>
-                      <p className={`font-heading font-extrabold text-5xl leading-none ${cs.accent} mb-1`}>{cs.bigStat}</p>
+                      <p className={`font-heading font-extrabold text-5xl leading-none ${cs.accent} mb-1`}>
+                      <AnimatedCounter to={cs.bigStat} prefix={cs.bigStatPrefix} duration={1.5} />
+                    </p>
                       <p className="text-northpeak-text font-semibold text-lg leading-tight">{cs.bigLabel}</p>
                       <p className="text-northpeak-text-muted text-sm">{cs.timeframe}</p>
                     </div>
@@ -943,6 +961,19 @@ export default async function LandingPage() {
         </footer>
 
       </div>{/* /z-10 wrapper */}
+
+      {/* ── WhatsApp floating button ──────────────────────────── */}
+      <a
+        href="https://wa.me/528121980008"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Escribir por WhatsApp"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_4px_24px_rgba(37,211,102,0.45)] hover:scale-110 hover:shadow-[0_6px_32px_rgba(37,211,102,0.6)] transition-all"
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </div>
   );
 }
