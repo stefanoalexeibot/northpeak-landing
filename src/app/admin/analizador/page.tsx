@@ -520,6 +520,19 @@ function AnalizadorContent() {
             </p>
           )}
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const url = `${window.location.origin}/analizar`;
+            navigator.clipboard.writeText(url);
+            addToast("Link público copiado al portapapeles", "success");
+          }}
+          className="border-northpeak-surface text-northpeak-text-muted hover:text-northpeak-text"
+        >
+          <Copy className="h-3.5 w-3.5 mr-1.5" />
+          Link autodiagnóstico
+        </Button>
       </div>
 
       {/* Tabs */}
