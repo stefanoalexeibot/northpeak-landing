@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import {
-  ArrowRight,
-  Star,
-  Check,
-  TrendingUp,
-  MapPin,
-  Zap,
-  BarChart2,
-  MessageSquare,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowRight, Star, Check, MapPin, Zap, MessageSquare, BarChart2 } from "lucide-react";
 import FaqAccordion from "@/components/landing/faq-accordion";
 import RoiCalculator from "@/components/landing/roi-calculator";
 
@@ -21,154 +11,97 @@ export const metadata: Metadata = {
     "Agencia de marketing digital para restaurantes, clínicas y negocios locales en Monterrey. Redes sociales, publicidad y posicionamiento local con resultados medibles.",
 };
 
-// ── Static data ─────────────────────────────────────────────────────────────
-
-const stats = [
-  { value: "+50", label: "negocios impactados" },
-  { value: "3.2x", label: "crecimiento promedio" },
-  { value: "$2.4M", label: "en ventas generadas" },
-  { value: "4.9★", label: "satisfacción promedio" },
-];
+// ── Data ────────────────────────────────────────────────────────────────────
 
 const caseStudies = [
   {
-    client: "El Mezquite",
-    industry: "Restaurante — San Pedro Garza García",
-    headline: "De 180 a 2,100 seguidores en 5 meses",
-    description:
-      "Sin presencia real en Instagram. Con estrategia de Reels y contenido local logramos un crecimiento orgánico sostenido y reservaciones récord.",
-    tags: ["Instagram", "Reels", "Contenido local"],
-    metrics: [
-      { label: "Nuevos seguidores", value: "+1,920" },
-      { label: "Aumento en reservaciones", value: "+34%" },
-      { label: "Alcance en Reels", value: "4.8M" },
-    ],
-    color: "from-purple-500/10 to-pink-500/5",
+    industry: "Restaurante · San Pedro GG",
+    headline: "De 180 a 2,100\nseguidores",
+    sub: "en 5 meses",
+    description: "Sin presencia en Instagram. Con Reels y contenido local logramos crecimiento orgánico sostenido y reservaciones récord.",
+    tags: ["Instagram", "Reels", "Contenido"],
+    metrics: [{ label: "Nuevos seguidores", value: "+1,920" }, { label: "Reservaciones", value: "+34%" }, { label: "Alcance Reels", value: "4.8M" }],
     accent: "text-purple-400",
-    border: "border-purple-500/20",
+    glow: "bg-purple-500/8",
+    border: "from-purple-500/30 via-transparent to-transparent",
   },
   {
-    client: "Clínica Dental Sonrisa Plus",
-    industry: "Salud — Monterrey Centro",
-    headline: "De invisible a #2 en Google Maps",
-    description:
-      "Solo 8 reseñas y sin optimización en Google. En 3 meses llegamos al top 3 en búsquedas de dentistas en su zona y duplicamos citas semanales.",
+    industry: "Clínica Dental · MTY Centro",
+    headline: "De invisible\na #2 en Google",
+    sub: "en 3 meses",
+    description: "Solo 8 reseñas y sin optimización. En 90 días llegamos al top 3 en búsquedas locales y duplicamos citas semanales.",
     tags: ["Google Maps", "SEO Local", "Reseñas"],
-    metrics: [
-      { label: "Reseñas", value: "8 → 142" },
-      { label: "Posición Google", value: "#2" },
-      { label: "Nuevas citas/semana", value: "+58%" },
-    ],
-    color: "from-blue-500/10 to-cyan-500/5",
+    metrics: [{ label: "Reseñas", value: "8→142" }, { label: "Posición", value: "#2 MTY" }, { label: "Citas/semana", value: "+58%" }],
     accent: "text-blue-400",
-    border: "border-blue-500/20",
+    glow: "bg-blue-500/8",
+    border: "from-blue-500/30 via-transparent to-transparent",
   },
   {
-    client: "Constructora Novo",
-    industry: "Desarrolladora — Nuevo León",
-    headline: "22 leads calificados en el primer mes",
-    description:
-      "Necesitaban prospectos con poder adquisitivo real para proyectos residenciales. Con Meta Ads + WhatsApp Business logramos CPL por debajo de la industria.",
-    tags: ["Meta Ads", "WhatsApp Business", "Segmentación"],
-    metrics: [
-      { label: "Leads/mes", value: "22" },
-      { label: "Costo por lead", value: "$168 MXN" },
-      { label: "Ventas cerradas", value: "3" },
-    ],
-    color: "from-green-500/10 to-emerald-500/5",
+    industry: "Constructora · Cumbres, NL",
+    headline: "22 leads\ncalificados",
+    sub: "en el primer mes",
+    description: "Necesitaban prospectos con poder adquisitivo real. Con Meta Ads + WhatsApp logramos un CPL por debajo de la industria.",
+    tags: ["Meta Ads", "WhatsApp Biz", "Segmentación"],
+    metrics: [{ label: "Leads/mes", value: "22" }, { label: "Costo por lead", value: "$168" }, { label: "Ventas cerradas", value: "3" }],
     accent: "text-northpeak-green",
-    border: "border-northpeak-green/20",
+    glow: "bg-northpeak-green/8",
+    border: "from-northpeak-green/30 via-transparent to-transparent",
   },
 ];
 
 const services = [
   {
-    name: "Gestión de Redes Sociales",
-    price: "desde $4,500/mes",
-    description: "Creamos y publicamos contenido profesional que conecta con tu cliente local.",
-    includes: [
-      "Instagram + Facebook",
-      "12-16 posts mensuales",
-      "Diseño + copywriting",
-      "Reels y stories",
-      "Reporte mensual",
-    ],
+    num: "01",
+    name: "Gestión de Redes",
+    price: "$4,500",
+    period: "/mes",
+    description: "Contenido que conecta con tu cliente local en Instagram y Facebook.",
+    includes: ["12–16 posts mensuales", "Diseño + copywriting", "Reels y stories", "Reporte mensual"],
     color: "text-purple-400",
-    bg: "bg-purple-400/10",
+    ring: "ring-purple-500/20",
   },
   {
+    num: "02",
     name: "Posicionamiento Local",
-    price: "desde $3,500/mes",
-    description: "Domina Google Maps y aparece primero cuando alguien busca tu negocio.",
-    includes: [
-      "Google Business Profile",
-      "Estrategia de reseñas",
-      "SEO local",
-      "Fotos y actualización",
-      "Reportes de posición",
-    ],
+    price: "$3,500",
+    period: "/mes",
+    description: "Domina Google Maps y aparece primero cuando te buscan.",
+    includes: ["Google Business Profile", "Estrategia de reseñas", "SEO local", "Reportes de posición"],
     color: "text-blue-400",
-    bg: "bg-blue-400/10",
+    ring: "ring-blue-500/20",
   },
   {
+    num: "03",
     name: "Publicidad Digital",
-    price: "desde $6,000/mes",
-    description: "Anuncios en Meta y Google que traen clientes reales, no solo clics.",
-    includes: [
-      "Meta Ads (FB + Instagram)",
-      "Google Ads",
-      "Retargeting",
-      "Segmentación por zona",
-      "Reportes semanales",
-    ],
+    price: "$6,000",
+    period: "/mes",
+    description: "Anuncios en Meta y Google que traen clientes, no solo clics.",
+    includes: ["Meta Ads (FB + IG)", "Google Ads", "Retargeting por zona", "Reportes semanales"],
     color: "text-yellow-400",
-    bg: "bg-yellow-400/10",
-    highlight: true,
+    ring: "ring-yellow-500/20",
+    featured: true,
   },
   {
-    name: "Estrategia Digital Completa",
-    price: "desde $12,000/mes",
-    description: "Todo integrado: redes, publicidad, posicionamiento y portal exclusivo.",
-    includes: [
-      "Todo lo anterior incluido",
-      "Estrategia mensual",
-      "Sesión de resultados",
-      "Portal de cliente",
-      "WhatsApp directo con tu equipo",
-    ],
+    num: "04",
+    name: "Estrategia Completa",
+    price: "$12,000",
+    period: "/mes",
+    description: "Todo integrado: redes, publicidad, posicionamiento y portal de cliente.",
+    includes: ["Todo lo anterior", "Estrategia mensual", "Sesión de resultados", "Portal exclusivo"],
     color: "text-northpeak-green",
-    bg: "bg-northpeak-green/10",
+    ring: "ring-northpeak-green/20",
   },
 ];
 
 const steps = [
-  {
-    number: "01",
-    title: "Analizamos tu presencia",
-    description:
-      "Hacemos un diagnóstico gratuito y honesto de tu situación actual: redes, Google Maps, sitio web y publicidad. Sin vender aire.",
-    icon: BarChart2,
-  },
-  {
-    number: "02",
-    title: "Diseñamos tu estrategia",
-    description:
-      "Creamos un plan específico para tu negocio, tu zona y tu competencia en Monterrey. No plantillas genéricas.",
-    icon: MapPin,
-  },
-  {
-    number: "03",
-    title: "Ejecutamos y medimos",
-    description:
-      "Publicamos, lanzamos anuncios y gestionamos tu presencia. Tú ves cada resultado desde tu portal en tiempo real.",
-    icon: TrendingUp,
-  },
+  { num: "01", title: "Analizamos", description: "Diagnóstico gratuito y honesto de tu presencia digital actual. Sin vender aire." },
+  { num: "02", title: "Estrategia", description: "Un plan hecho a la medida de tu negocio, tu zona y tu competencia en Monterrey." },
+  { num: "03", title: "Resultados", description: "Publicamos, medimos y te reportamos todo desde tu portal de cliente en tiempo real." },
 ];
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
 export default async function LandingPage() {
-  // Fetch published testimonials (requires RLS policy: anon SELECT WHERE is_published=true)
   const supabase = createClient();
   const { data: testimonials } = await supabase
     .from("testimonials")
@@ -178,225 +111,272 @@ export default async function LandingPage() {
     .limit(6);
 
   return (
-    <div className="min-h-screen bg-northpeak-bg text-northpeak-text">
+    <div className="min-h-screen bg-northpeak-bg text-northpeak-text overflow-x-hidden">
 
-      {/* ── Nav ── */}
-      <header className="sticky top-0 z-50 border-b border-northpeak-surface bg-northpeak-bg/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      {/* ── Nav ────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-northpeak-bg/70 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
           <Link href="/">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="NorthPeak Digital" className="h-7" />
+            <img src="/logo.png" alt="NorthPeak" className="h-7" />
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-northpeak-text-muted">
-            <a href="#casos" className="hover:text-northpeak-text transition-colors">Casos de éxito</a>
-            <a href="#servicios" className="hover:text-northpeak-text transition-colors">Servicios</a>
-            <a href="#preguntas" className="hover:text-northpeak-text transition-colors">Preguntas</a>
+
+          <nav className="hidden md:flex items-center gap-8">
+            {["#casos", "#servicios", "#preguntas"].map((href, i) => (
+              <a key={href} href={href} className="text-sm text-northpeak-text-muted hover:text-northpeak-text transition-colors tracking-wide">
+                {["Casos", "Servicios", "FAQ"][i]}
+              </a>
+            ))}
           </nav>
+
           <div className="flex items-center gap-3">
-            <Link
-              href="/portal/dashboard"
-              className="hidden sm:block text-sm text-northpeak-text-muted hover:text-northpeak-text transition-colors"
-            >
+            <Link href="/portal/dashboard" className="hidden sm:block text-sm text-northpeak-text-dim hover:text-northpeak-text-muted transition-colors">
               Portal
             </Link>
             <Link
               href="/analizar"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-semibold hover:bg-northpeak-green/90 transition-colors"
+              className="group flex items-center gap-2 px-4 py-2 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-bold hover:bg-northpeak-green/90 transition-all"
             >
               Analizar mi negocio
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden pt-20 pb-24 px-4 sm:px-6">
-        {/* Background glows */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-northpeak-green/5 blur-3xl animate-gradient-shift-1" />
-          <div className="absolute top-20 right-1/4 h-64 w-64 rounded-full bg-blue-500/5 blur-3xl animate-gradient-shift-2" />
+      {/* ── Hero ───────────────────────────────────────────────── */}
+      <section className="relative min-h-[90vh] flex items-center px-5 sm:px-8 py-20 overflow-hidden">
+        {/* Ambient background */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute top-[-20%] left-[10%] h-[600px] w-[600px] rounded-full bg-northpeak-green/6 blur-[120px] animate-gradient-shift-1" />
+          <div className="absolute top-[30%] right-[5%] h-[400px] w-[400px] rounded-full bg-blue-500/5 blur-[100px] animate-gradient-shift-2" />
+          <div className="absolute bottom-0 left-1/2 h-px w-full bg-gradient-to-r from-transparent via-northpeak-green/20 to-transparent" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-northpeak-green/20 bg-northpeak-green/5 text-northpeak-green text-xs font-medium mb-8">
-            <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse" />
-            Agencia de marketing digital — Monterrey, N.L.
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-northpeak-text leading-tight mb-6">
-            Tu negocio en internet.{" "}
-            <span className="text-northpeak-green">En serio.</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-northpeak-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-            Ayudamos a restaurantes, clínicas y negocios locales en Monterrey a ganar clientes
-            por internet — con estrategia, resultados medibles y sin vender humo.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/analizar"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-northpeak-green text-northpeak-bg text-base font-bold hover:bg-northpeak-green/90 transition-all hover:scale-105 shadow-lg shadow-northpeak-green/20"
-            >
-              <Zap className="h-4 w-4" />
-              Analiza tu presencia gratis
-            </Link>
-            <a
-              href="#casos"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted text-base font-medium hover:border-northpeak-green/30 hover:text-northpeak-text transition-colors"
-            >
-              Ver casos de éxito
-              <ChevronRight className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="py-10 px-4 sm:px-6 border-y border-northpeak-surface bg-northpeak-card">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-3xl font-heading font-bold text-northpeak-green mb-1">{stat.value}</p>
-              <p className="text-sm text-northpeak-text-muted">{stat.label}</p>
+        <div className="relative max-w-6xl mx-auto w-full grid lg:grid-cols-[1fr_auto] gap-12 items-center">
+          <div>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-northpeak-green/25 bg-northpeak-green/8 px-4 py-1.5 mb-8">
+              <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse" />
+              <span className="font-mono text-[11px] tracking-[0.15em] text-northpeak-green uppercase">
+                Agencia Digital · Monterrey, N.L.
+              </span>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* ── Case Studies ── */}
-      <section id="casos" className="py-20 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-              Resultados reales
+            {/* Headline */}
+            <h1 className="font-heading font-extrabold leading-[0.92] tracking-tight mb-6">
+              <span className="block text-[clamp(3.5rem,10vw,7rem)] text-northpeak-text">
+                Tu negocio
+              </span>
+              <span className="block text-[clamp(3.5rem,10vw,7rem)] text-northpeak-text">
+                en internet.
+              </span>
+              <span className="block text-[clamp(3.5rem,10vw,7rem)] text-northpeak-green">
+                En serio.
+              </span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-northpeak-text-muted max-w-xl leading-relaxed mb-10">
+              Ayudamos a restaurantes, clínicas y negocios locales en Monterrey a ganar clientes
+              por internet — con estrategia real y resultados medibles.
             </p>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
-              No prometemos, demostramos
-            </h2>
-            <p className="text-northpeak-text-muted max-w-xl mx-auto">
-              Negocios en Monterrey que transformaron su presencia digital con NorthPeak.
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/analizar"
+                className="group flex items-center gap-2 px-7 py-3.5 rounded-xl bg-northpeak-green text-northpeak-bg font-bold text-base hover:bg-northpeak-green/90 transition-all hover:scale-[1.02] shadow-[0_8px_32px_rgba(0,229,160,0.25)]"
+              >
+                <Zap className="h-4 w-4" />
+                Analiza tu presencia gratis
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <a
+                href="#casos"
+                className="flex items-center gap-2 px-7 py-3.5 rounded-xl border border-northpeak-surface text-northpeak-text-muted font-medium text-base hover:border-northpeak-green/30 hover:text-northpeak-text transition-all"
+              >
+                Ver resultados reales
+              </a>
+            </div>
+
+            <p className="mt-5 text-xs text-northpeak-text-dim font-mono tracking-wide">
+              Gratis · Sin registro · Resultados en 5 min
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Floating proof cards */}
+          <div className="hidden lg:flex flex-col gap-3 w-56">
+            {[
+              { val: "+1,920", label: "seguidores nuevos", sub: "Restaurante · 5 meses", color: "text-purple-400" },
+              { val: "#2", label: "Google Maps", sub: "Clínica dental · 3 meses", color: "text-blue-400" },
+              { val: "22", label: "leads calificados", sub: "Constructora · 1 mes", color: "text-northpeak-green" },
+            ].map((card) => (
+              <div key={card.val} className="rounded-xl border border-northpeak-surface bg-northpeak-card/80 backdrop-blur p-4">
+                <p className={`font-mono font-bold text-2xl ${card.color} leading-none mb-0.5`}>{card.val}</p>
+                <p className="text-xs font-medium text-northpeak-text">{card.label}</p>
+                <p className="text-[10px] text-northpeak-text-dim mt-1">{card.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stats ──────────────────────────────────────────────── */}
+      <section className="border-y border-northpeak-surface">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-northpeak-surface">
+            {[
+              { val: "+50", label: "negocios activos" },
+              { val: "3.2×", label: "crecimiento promedio" },
+              { val: "$2.4M", label: "en ventas generadas" },
+              { val: "4.9★", label: "satisfacción" },
+            ].map((s) => (
+              <div key={s.label} className="py-8 px-6 text-center">
+                <p className="font-mono font-bold text-3xl sm:text-4xl text-northpeak-green leading-none mb-1.5">{s.val}</p>
+                <p className="text-xs text-northpeak-text-muted uppercase tracking-wider">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Case Studies ───────────────────────────────────────── */}
+      <section id="casos" className="py-24 px-5 sm:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16">
+            <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">
+              — Resultados reales
+            </p>
+            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-6xl text-northpeak-text leading-tight">
+              No prometemos.
+              <br />
+              <span className="text-northpeak-text-muted">Demostramos.</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {caseStudies.map((cs) => (
               <div
-                key={cs.client}
-                className={`relative rounded-2xl border ${cs.border} bg-gradient-to-br ${cs.color} p-6 flex flex-col gap-4`}
+                key={cs.industry}
+                className="group relative rounded-2xl p-[1px] overflow-hidden"
+                style={{ background: `linear-gradient(135deg, ${cs.border.includes("purple") ? "rgba(168,85,247,0.25)" : cs.border.includes("blue") ? "rgba(59,130,246,0.25)" : "rgba(0,229,160,0.25)"}, transparent, transparent)` }}
               >
-                <div>
-                  <p className={`text-xs font-mono uppercase tracking-wider ${cs.accent} mb-1`}>
-                    {cs.industry}
-                  </p>
-                  <h3 className="text-xl font-heading font-bold text-northpeak-text leading-snug">
-                    {cs.headline}
-                  </h3>
-                </div>
+                <div className={`relative rounded-2xl ${cs.glow} bg-northpeak-card p-6 flex flex-col gap-5 h-full`}>
+                  {/* Industry */}
+                  <p className={`font-mono text-[10px] tracking-[0.15em] uppercase ${cs.accent}`}>{cs.industry}</p>
 
-                <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">
-                  {cs.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {cs.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2.5 py-1 rounded-full bg-northpeak-surface text-northpeak-text-muted text-[11px] font-medium"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-northpeak-surface">
-                  {cs.metrics.map((m) => (
-                    <div key={m.label} className="text-center">
-                      <p className={`text-lg font-heading font-bold ${cs.accent}`}>{m.value}</p>
-                      <p className="text-[10px] text-northpeak-text-dim leading-tight">{m.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ── */}
-      <section className="py-20 px-4 sm:px-6 bg-northpeak-card border-y border-northpeak-surface">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-              Proceso
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
-              Cómo trabajamos
-            </h2>
-            <p className="text-northpeak-text-muted max-w-xl mx-auto">
-              Sin reuniones interminables ni procesos complicados. Empezamos a trabajar rápido.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((step) => (
-              <div key={step.number} className="relative">
-                <div className="flex items-start gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-northpeak-green/10 border border-northpeak-green/20 shrink-0">
-                      <step.icon className="h-5 w-5 text-northpeak-green" />
-                    </div>
+                  {/* Big headline */}
+                  <div>
+                    <h3 className={`font-heading font-extrabold text-3xl sm:text-4xl ${cs.accent} leading-tight whitespace-pre-line`}>
+                      {cs.headline}
+                    </h3>
+                    <p className="text-northpeak-text-muted text-sm mt-1">{cs.sub}</p>
                   </div>
-                  <div className="flex-1 pt-1">
-                    <p className="text-xs font-mono text-northpeak-text-dim mb-1">{step.number}</p>
-                    <h3 className="font-heading font-bold text-northpeak-text mb-2">{step.title}</h3>
-                    <p className="text-sm text-northpeak-text-muted leading-relaxed">{step.description}</p>
+
+                  <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">{cs.description}</p>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {cs.tags.map((t) => (
+                      <span key={t} className="px-2.5 py-1 rounded-full bg-northpeak-surface text-northpeak-text-dim text-[10px] font-medium tracking-wide">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Metrics */}
+                  <div className="grid grid-cols-3 gap-2 pt-4 border-t border-northpeak-surface">
+                    {cs.metrics.map((m) => (
+                      <div key={m.label}>
+                        <p className={`font-mono font-bold text-xl ${cs.accent}`}>{m.value}</p>
+                        <p className="text-[10px] text-northpeak-text-dim mt-0.5 leading-snug">{m.label}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          <div className="mt-10 text-center">
+            <Link href="/analizar" className="group inline-flex items-center gap-2 text-northpeak-green text-sm font-medium hover:gap-3 transition-all">
+              ¿Puede funcionar para tu negocio? Averígualo gratis
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ── Services / Pricing ── */}
-      <section id="servicios" className="py-20 px-4 sm:px-6">
+      {/* ── Process ────────────────────────────────────────────── */}
+      <section className="py-24 px-5 sm:px-8 border-y border-northpeak-surface bg-northpeak-card">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-              Servicios y precios
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
-              Sin letras chiquitas
+          <div className="mb-16 text-center">
+            <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— El proceso</p>
+            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-northpeak-text">Así funciona</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 relative">
+            {/* Connector line */}
+            <div className="hidden md:block absolute top-10 left-[calc(16.666%+1rem)] right-[calc(16.666%+1rem)] h-px bg-gradient-to-r from-northpeak-green/40 via-northpeak-green/20 to-northpeak-green/40" />
+
+            {steps.map((step) => (
+              <div key={step.num} className="relative flex flex-col items-center md:items-start text-center md:text-left px-6 py-8">
+                {/* Step number */}
+                <div className="flex items-center justify-center h-20 w-20 rounded-2xl bg-northpeak-bg border border-northpeak-surface mb-6 relative z-10">
+                  <span className="font-mono font-bold text-2xl text-northpeak-green">{step.num}</span>
+                </div>
+                <h3 className="font-heading font-bold text-2xl text-northpeak-text mb-3">{step.title}</h3>
+                <p className="text-northpeak-text-muted text-sm leading-relaxed max-w-xs">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Services ───────────────────────────────────────────── */}
+      <section id="servicios" className="py-24 px-5 sm:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16">
+            <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Servicios y precios</p>
+            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-6xl text-northpeak-text leading-tight">
+              Sin letras
+              <br />
+              <span className="text-northpeak-text-muted">chiquitas.</span>
             </h2>
-            <p className="text-northpeak-text-muted max-w-xl mx-auto">
-              Mostramos rangos de inversión para que sepas con qué esperar antes de hablar con nosotros.
+            <p className="text-northpeak-text-muted mt-4 max-w-lg text-base leading-relaxed">
+              Rangos de inversión reales para que sepas con qué esperar antes de hablar con nosotros.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((svc) => (
               <div
-                key={svc.name}
-                className={`rounded-2xl border border-northpeak-surface bg-northpeak-card p-5 flex flex-col gap-4 hover:border-northpeak-green/20 transition-colors ${svc.highlight ? "ring-1 ring-northpeak-green/20" : ""}`}
+                key={svc.num}
+                className={`relative rounded-2xl border ${svc.featured ? "border-northpeak-green/30 bg-northpeak-green/5" : "border-northpeak-surface bg-northpeak-card"} p-5 flex flex-col gap-5 hover:border-opacity-60 transition-all`}
               >
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${svc.bg}`}>
-                  <BarChart2 className={`h-4 w-4 ${svc.color}`} />
+                {svc.featured && (
+                  <div className="absolute -top-3 left-4">
+                    <span className="font-mono text-[10px] font-bold tracking-wider px-3 py-1 rounded-full bg-northpeak-green text-northpeak-bg">
+                      + POPULAR
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-start justify-between">
+                  <span className={`font-mono text-xs font-bold ${svc.color} tracking-widest`}>{svc.num}</span>
+                  <BarChart2 className={`h-4 w-4 ${svc.color} opacity-50`} />
                 </div>
 
                 <div>
-                  <h3 className="font-heading font-bold text-northpeak-text text-base leading-snug mb-1">
-                    {svc.name}
-                  </h3>
-                  <p className={`text-sm font-mono font-bold ${svc.color}`}>{svc.price}</p>
+                  <h3 className="font-heading font-bold text-lg text-northpeak-text leading-snug mb-1">{svc.name}</h3>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className={`font-mono font-bold text-2xl ${svc.color}`}>{svc.price}</span>
+                    <span className="text-northpeak-text-dim text-sm">{svc.period}</span>
+                  </div>
                 </div>
 
-                <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">
-                  {svc.description}
-                </p>
+                <p className="text-sm text-northpeak-text-muted leading-relaxed">{svc.description}</p>
 
-                <ul className="space-y-1.5">
+                <ul className="space-y-2 flex-1">
                   {svc.includes.map((item) => (
                     <li key={item} className="flex items-center gap-2 text-sm text-northpeak-text-muted">
                       <Check className={`h-3.5 w-3.5 shrink-0 ${svc.color}`} />
@@ -407,77 +387,60 @@ export default async function LandingPage() {
 
                 <Link
                   href="/analizar"
-                  className={`mt-auto flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    svc.highlight
+                  className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                    svc.featured
                       ? "bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
                       : "border border-northpeak-surface text-northpeak-text-muted hover:text-northpeak-text hover:border-northpeak-green/30"
                   }`}
                 >
-                  Empezar
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  Empezar <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-sm text-northpeak-text-dim mt-6">
-            ¿No sabes por dónde empezar?{" "}
+          <p className="text-center text-sm text-northpeak-text-dim mt-8">
+            ¿No sabes cuál te conviene?{" "}
             <Link href="/analizar" className="text-northpeak-green hover:underline">
               Haz el diagnóstico gratis
             </Link>{" "}
-            y te recomendamos.
+            y te orientamos.
           </p>
         </div>
       </section>
 
-      {/* ── Testimonials ── */}
+      {/* ── Testimonials ───────────────────────────────────────── */}
       {testimonials && testimonials.length > 0 && (
-        <section className="py-20 px-4 sm:px-6 bg-northpeak-card border-y border-northpeak-surface">
+        <section className="py-24 px-5 sm:px-8 border-y border-northpeak-surface bg-northpeak-card">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-                Lo que dicen nuestros clientes
-              </p>
-              <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
-                Opiniones reales
-              </h2>
+            <div className="mb-16 text-center">
+              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Clientes</p>
+              <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-northpeak-text">Lo que dicen</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {testimonials.map((t) => {
                 const client = t.clients as unknown as { name: string; company: string } | null;
                 return (
-                  <div
-                    key={t.id}
-                    className="rounded-2xl border border-northpeak-surface bg-northpeak-bg p-5 flex flex-col gap-3"
-                  >
-                    {/* Stars */}
+                  <div key={t.id} className="relative rounded-2xl border border-northpeak-surface bg-northpeak-bg p-6 flex flex-col gap-4">
+                    {/* Quote mark */}
+                    <span className="absolute top-4 right-5 font-heading text-6xl text-northpeak-surface leading-none select-none">&ldquo;</span>
+
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3.5 w-3.5 ${
-                            i < t.rating ? "text-yellow-400 fill-yellow-400" : "text-northpeak-surface fill-northpeak-surface"
-                          }`}
-                        />
+                        <Star key={i} className={`h-3.5 w-3.5 ${i < t.rating ? "text-yellow-400 fill-yellow-400" : "text-northpeak-surface fill-northpeak-surface"}`} />
                       ))}
                     </div>
 
                     {t.title && (
-                      <p className="font-heading font-semibold text-northpeak-text text-sm">
-                        &ldquo;{t.title}&rdquo;
-                      </p>
+                      <p className="font-heading font-bold text-northpeak-text text-base leading-snug">&ldquo;{t.title}&rdquo;</p>
                     )}
-                    <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">
-                      {t.content}
-                    </p>
+                    <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">{t.content}</p>
 
                     {client && (
-                      <div className="pt-2 border-t border-northpeak-surface">
-                        <p className="text-xs font-medium text-northpeak-text">{client.name}</p>
-                        {client.company && (
-                          <p className="text-[11px] text-northpeak-text-dim">{client.company}</p>
-                        )}
+                      <div className="pt-3 border-t border-northpeak-surface">
+                        <p className="text-sm font-semibold text-northpeak-text">{client.name}</p>
+                        {client.company && <p className="text-xs text-northpeak-text-dim mt-0.5">{client.company}</p>}
                       </div>
                     )}
                   </div>
@@ -488,72 +451,71 @@ export default async function LandingPage() {
         </section>
       )}
 
-      {/* ── ROI Calculator ── */}
-      <section className="py-20 px-4 sm:px-6">
+      {/* ── ROI Calculator ─────────────────────────────────────── */}
+      <section className="py-24 px-5 sm:px-8">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-              Calculadora
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
+          <div className="mb-16 text-center">
+            <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Calculadora</p>
+            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-northpeak-text mb-4">
               ¿Cuánto podrías ganar?
             </h2>
-            <p className="text-northpeak-text-muted max-w-xl mx-auto">
-              Ajusta los números de tu negocio y ve qué retorno realista esperar con una inversión
-              en marketing digital.
+            <p className="text-northpeak-text-muted max-w-lg mx-auto leading-relaxed">
+              Ajusta los números de tu negocio y ve el retorno proyectado con una inversión en marketing.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-northpeak-surface bg-northpeak-card p-6 sm:p-8">
+          <div className="rounded-2xl border border-northpeak-surface bg-northpeak-card p-6 sm:p-10">
             <RoiCalculator />
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section id="preguntas" className="py-20 px-4 sm:px-6 bg-northpeak-card border-y border-northpeak-surface">
+      {/* ── FAQ ────────────────────────────────────────────────── */}
+      <section id="preguntas" className="py-24 px-5 sm:px-8 border-y border-northpeak-surface bg-northpeak-card">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-mono text-northpeak-green uppercase tracking-widest mb-3">
-              Preguntas frecuentes
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
+          <div className="mb-16 text-center">
+            <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— FAQ</p>
+            <h2 className="font-heading font-extrabold text-4xl sm:text-5xl text-northpeak-text mb-4">
               Lo que todos preguntan
             </h2>
           </div>
-
           <FaqAccordion />
         </div>
       </section>
 
-      {/* ── Final CTA ── */}
-      <section className="py-24 px-4 sm:px-6 relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-64 w-96 rounded-full bg-northpeak-green/5 blur-3xl" />
+      {/* ── Final CTA ──────────────────────────────────────────── */}
+      <section className="relative py-32 px-5 sm:px-8 overflow-hidden">
+        {/* Green ambient glow */}
+        <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-0">
+          <div className="h-64 w-[600px] rounded-full bg-northpeak-green/10 blur-[80px]" />
         </div>
+        <div className="pointer-events-none absolute inset-0 border-y border-northpeak-green/5" />
 
-        <div className="relative max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-heading font-bold text-northpeak-text mb-4">
-            ¿Listo para crecer?
+        <div className="relative max-w-4xl mx-auto text-center">
+          <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-6">— Empieza ahora</p>
+          <h2 className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl text-northpeak-text leading-tight mb-6">
+            ¿Listo para
+            <br />
+            <span className="text-northpeak-green">crecer?</span>
           </h2>
-          <p className="text-northpeak-text-muted text-lg mb-10 max-w-xl mx-auto">
-            Analiza tu presencia digital gratis en 5 minutos. Sin registro, sin compromiso. Te
-            decimos exactamente en qué mejorar.
+          <p className="text-northpeak-text-muted text-xl mb-12 max-w-xl mx-auto leading-relaxed">
+            Diagnóstico gratuito en 5 minutos. Sin registro, sin compromiso. Te decimos exactamente en qué mejorar.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/analizar"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-northpeak-green text-northpeak-bg text-base font-bold hover:bg-northpeak-green/90 transition-all hover:scale-105 shadow-xl shadow-northpeak-green/20"
+              className="group w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 rounded-xl bg-northpeak-green text-northpeak-bg text-lg font-bold hover:bg-northpeak-green/90 transition-all hover:scale-[1.02] shadow-[0_12px_40px_rgba(0,229,160,0.3)]"
             >
-              <Zap className="h-4 w-4" />
+              <Zap className="h-5 w-5" />
               Analizar mi negocio gratis
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <a
               href="https://wa.me/528110000000"
               target="_blank"
               rel="noreferrer"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted text-base font-medium hover:border-northpeak-green/30 hover:text-northpeak-text transition-colors"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted text-base font-medium hover:border-northpeak-green/30 hover:text-northpeak-text transition-all"
             >
               <MessageSquare className="h-4 w-4" />
               Hablar por WhatsApp
@@ -562,39 +524,56 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-northpeak-surface bg-northpeak-card py-10 px-4 sm:px-6">
+      {/* ── Footer ─────────────────────────────────────────────── */}
+      <footer className="border-t border-northpeak-surface bg-northpeak-card py-12 px-5 sm:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col items-center sm:items-start gap-2">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
+            <div className="space-y-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="NorthPeak Digital" className="h-6" />
-              <div className="flex items-center gap-1 text-xs text-northpeak-text-dim">
+              <img src="/logo.png" alt="NorthPeak" className="h-7" />
+              <p className="text-sm text-northpeak-text-muted max-w-xs leading-relaxed">
+                Agencia de marketing digital para negocios locales en Monterrey, N.L.
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-northpeak-text-dim font-mono">
                 <MapPin className="h-3 w-3" />
                 Monterrey, Nuevo León — México
               </div>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-northpeak-text-muted">
-              <a href="#casos" className="hover:text-northpeak-text transition-colors">Casos de éxito</a>
-              <a href="#servicios" className="hover:text-northpeak-text transition-colors">Servicios</a>
-              <a href="#preguntas" className="hover:text-northpeak-text transition-colors">Preguntas</a>
-              <Link href="/analizar" className="hover:text-northpeak-text transition-colors">Analizador</Link>
-              <Link href="/portal/dashboard" className="hover:text-northpeak-text transition-colors">Portal</Link>
-            </nav>
+            <div className="grid grid-cols-2 gap-x-16 gap-y-3">
+              {[
+                { label: "Casos de éxito", href: "#casos" },
+                { label: "Portal de clientes", href: "/portal/dashboard" },
+                { label: "Servicios", href: "#servicios" },
+                { label: "Analizador gratuito", href: "/analizar" },
+                { label: "Preguntas", href: "#preguntas" },
+              ].map((l) => (
+                <a
+                  key={l.label}
+                  href={l.href}
+                  className="text-sm text-northpeak-text-muted hover:text-northpeak-text transition-colors"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
 
-            <div className="flex items-center gap-3">
-              <a
+            <div>
+              <Link
                 href="/analizar"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-semibold hover:bg-northpeak-green/90 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-northpeak-green text-northpeak-bg text-sm font-bold hover:bg-northpeak-green/90 transition-colors"
               >
+                <Zap className="h-4 w-4" />
                 Diagnóstico gratis
-              </a>
+              </Link>
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-northpeak-surface text-center text-xs text-northpeak-text-dim">
-            © {new Date().getFullYear()} NorthPeak Digital. Todos los derechos reservados.
+          <div className="mt-10 pt-6 border-t border-northpeak-surface flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-northpeak-text-dim">
+              © {new Date().getFullYear()} NorthPeak Digital. Todos los derechos reservados.
+            </p>
+            <p className="text-xs text-northpeak-text-dim font-mono">MTY · NL · MX</p>
           </div>
         </div>
       </footer>

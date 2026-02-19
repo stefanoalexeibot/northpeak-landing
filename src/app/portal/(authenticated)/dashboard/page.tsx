@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import DashboardQuickLinks from "@/components/portal/dashboard-quick-links";
 import DeliverableQuickApprove from "@/components/portal/deliverable-quick-approve";
+import OnboardingWelcome from "@/components/portal/onboarding-welcome";
 
 function timeAgo(dateStr: string): string {
   const now = new Date();
@@ -188,6 +189,9 @@ export default async function PortalDashboard() {
 
   return (
     <div className="space-y-6">
+
+      {/* Onboarding guide (dismissible, stored in localStorage) */}
+      <OnboardingWelcome clientId={client.id} />
 
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-northpeak-surface bg-gradient-to-br from-northpeak-card via-northpeak-card to-northpeak-surface p-6 sm:p-8">
