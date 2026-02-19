@@ -54,6 +54,31 @@ export default async function CalendarPage() {
     }
   }
 
+  // Deliverables with scheduled_date
+  if (projects && projects.length > 0) {
+    const projectIds = projects.map(p => p.id);
+    const { data: deliverables } = await supabase
+      .from("deliverables")
+      .select("id, name, status, scheduled_date, project_id")
+      .in("project_id", projectIds)
+      .not("scheduled_date", "is", null)
+      .order("scheduled_date");
+
+    for (const del of deliverables || []) {
+      if (del.scheduled_date) {
+        const proj = projects.find(p => p.id === del.project_id);
+        events.push({
+          id: `del-${del.id}`,
+          title: del.name,
+          date: del.scheduled_date,
+          type: "entregable",
+          completed: del.status === "completed",
+          subtitle: proj?.name,
+        });
+      }
+    }
+  }
+
   // Payments with due_date
   const { data: payments } = await supabase
     .from("payments")

@@ -250,7 +250,20 @@ export default function ProjectTemplates({ clientId }: Props) {
   const [creating, setCreating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState<TemplateType>("proyecto");
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const router = useRouter();
+
+  function computeScheduledDate(name: string, weekItemCounts: Record<number, number>, startDateStr: string): string | null {
+    const match = name.match(/^S([1-4]):/);
+    if (!match) return null;
+    const week = parseInt(match[1], 10) - 1; // 0-indexed
+    const itemIndex = weekItemCounts[week] ?? 0;
+    weekItemCounts[week] = itemIndex + 1;
+
+    const base = new Date(startDateStr + "T00:00:00");
+    base.setDate(base.getDate() + week * 7 + itemIndex);
+    return base.toISOString().split("T")[0];
+  }
 
   async function createFromTemplate(template: Template) {
     setCreating(true);
@@ -268,12 +281,19 @@ export default function ProjectTemplates({ clientId }: Props) {
       .single();
 
     if (project) {
-      const deliverables = template.deliverables.map((name, i) => ({
-        project_id: project.id,
-        name,
-        order_index: i,
-        status: "pending",
-      }));
+      const weekItemCounts: Record<number, number> = {};
+      const deliverables = template.deliverables.map((name, i) => {
+        const scheduled_date = template.tipo === "contenido"
+          ? computeScheduledDate(name, weekItemCounts, startDate)
+          : null;
+        return {
+          project_id: project.id,
+          name,
+          order_index: i,
+          status: "pending",
+          ...(scheduled_date ? { scheduled_date } : {}),
+        };
+      });
 
       await supabase.from("deliverables").insert(deliverables);
     }
@@ -288,6 +308,7 @@ export default function ProjectTemplates({ clientId }: Props) {
     setOpen(false);
     setSelectedTemplate(null);
     setActiveTab("proyecto");
+    setStartDate(new Date().toISOString().split("T")[0]);
   }
 
   const visibleTemplates = activeTab === "proyecto" ? projectTemplates : contentTemplates;
@@ -370,6 +391,20 @@ export default function ProjectTemplates({ clientId }: Props) {
                   <p className="text-sm text-northpeak-text-muted">{selectedTemplate.description}</p>
                 </div>
               </div>
+
+              {selectedTemplate.tipo === "contenido" && (
+                <div className="flex items-center gap-3 px-3 py-2 bg-northpeak-bg rounded-lg">
+                  <label className="text-xs text-northpeak-text-muted whitespace-nowrap">
+                    Fecha de inicio (S1):
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-transparent text-xs text-northpeak-text border-0 outline-none cursor-pointer"
+                  />
+                </div>
+              )}
 
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-northpeak-text-muted uppercase tracking-wider">

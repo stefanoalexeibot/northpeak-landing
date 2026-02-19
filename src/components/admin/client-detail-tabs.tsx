@@ -42,7 +42,7 @@ interface AnalisisDigital {
 interface Props {
   client: Client;
   documents: Document[];
-  projects: (Project & { deliverables: { id: string; name: string; status: string; order_index: number }[] })[];
+  projects: (Project & { deliverables: { id: string; name: string; status: string; order_index: number; scheduled_date?: string | null }[] })[];
   media: MediaFile[];
   payments?: Payment[];
   analyses?: AnalisisDigital[];
@@ -273,6 +273,11 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
   async function updateDeliverableStatus(id: string, status: string) {
     await supabase.from("deliverables").update({ status }).eq("id", id);
+    router.refresh();
+  }
+
+  async function updateDeliverableDate(id: string, scheduled_date: string) {
+    await supabase.from("deliverables").update({ scheduled_date: scheduled_date || null }).eq("id", id);
     router.refresh();
   }
 
@@ -612,7 +617,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                       {proj.deliverables
                         ?.sort((a, b) => a.order_index - b.order_index)
                         .map((del) => (
-                          <div key={del.id} className="flex items-center gap-2">
+                          <div key={del.id} className="flex items-center gap-2 flex-wrap">
                             <Select
                               value={del.status}
                               onChange={(e) => updateDeliverableStatus(del.id, e.target.value)}
@@ -623,6 +628,12 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                               <option value="review">Revisión</option>
                               <option value="completed">Completado</option>
                             </Select>
+                            <input
+                              type="date"
+                              defaultValue={del.scheduled_date || ""}
+                              onBlur={(e) => updateDeliverableDate(del.id, e.target.value)}
+                              className="h-7 rounded border border-northpeak-surface bg-northpeak-card text-xs text-northpeak-text px-1.5 outline-none focus:border-northpeak-green cursor-pointer"
+                            />
                             <span className="text-sm text-northpeak-text">{del.name}</span>
                           </div>
                         ))}

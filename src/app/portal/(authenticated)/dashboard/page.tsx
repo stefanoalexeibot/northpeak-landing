@@ -4,7 +4,8 @@ import Link from "next/link";
 import {
   ImageIcon, MessageSquare,
   CreditCard, ChevronRight, CheckCircle2, Clock,
-  AlertCircle, ArrowRight,
+  AlertCircle, ArrowRight, CalendarDays,
+  Share2, MapPin, Star, UserCheck, Globe, BarChart2,
 } from "lucide-react";
 import DashboardQuickLinks from "@/components/portal/dashboard-quick-links";
 
@@ -37,8 +38,46 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   paused:      { label: "Pausado",       color: "text-northpeak-text-dim" },
 };
 
+const DEL_STATUS_DOT: Record<string, string> = {
+  pending:     "bg-northpeak-text-dim",
+  in_progress: "bg-blue-400",
+  review:      "bg-yellow-400",
+  completed:   "bg-northpeak-green",
+};
+
+function formatAgendaDate(dateStr: string, today: string, tomorrow: string): string {
+  if (dateStr === today) return "Hoy";
+  if (dateStr === tomorrow) return "Mañana";
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("es-MX", { weekday: "short", day: "numeric", month: "short" })
+    .replace(/^(.)/, (c) => c.toUpperCase());
+}
+
+const RESULTADO_ICON: Record<string, typeof Share2> = {
+  redes:   Share2,
+  gmb:     MapPin,
+  "reseñas": Star,
+  leads:   UserCheck,
+  web:     Globe,
+  otro:    BarChart2,
+};
+
+const RESULTADO_COLOR: Record<string, string> = {
+  redes:   "text-purple-400 bg-purple-400/10",
+  gmb:     "text-blue-400 bg-blue-400/10",
+  "reseñas": "text-yellow-400 bg-yellow-400/10",
+  leads:   "text-northpeak-green bg-northpeak-green/10",
+  web:     "text-cyan-400 bg-cyan-400/10",
+  otro:    "text-northpeak-text-muted bg-northpeak-surface",
+};
+
 export default async function PortalDashboard() {
   const { supabase, client } = await getClientData();
+
+  const today = new Date().toISOString().split("T")[0];
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrow = tomorrowDate.toISOString().split("T")[0];
 
   const [
     { count: projectCount },
@@ -60,6 +99,36 @@ export default async function PortalDashboard() {
     supabase.from("payments").select("id, amount, concept, due_date, status").eq("client_id", client.id).eq("status", "pending").order("due_date").limit(2),
     supabase.from("media").select("id, name, file_url, file_type, created_at").eq("client_id", client.id).order("created_at", { ascending: false }).limit(3),
     supabase.from("documents").select("id, type, signed").eq("client_id", client.id).eq("type", "contract").limit(1).maybeSingle(),
+  ]);
+
+  // Fetch all project IDs to query deliverables and resultados
+  const { data: allProjects } = await supabase
+    .from("projects")
+    .select("id, name")
+    .eq("client_id", client.id);
+
+  const projectIds = (allProjects ?? []).map((p) => p.id);
+  const projectNameMap: Record<string, string> = {};
+  (allProjects ?? []).forEach((p) => { projectNameMap[p.id] = p.name; });
+
+  const [{ data: upcomingDeliverables }, { data: latestResultados }] = await Promise.all([
+    projectIds.length > 0
+      ? supabase
+          .from("deliverables")
+          .select("id, name, status, scheduled_date, project_id")
+          .in("project_id", projectIds)
+          .not("scheduled_date", "is", null)
+          .gte("scheduled_date", today)
+          .order("scheduled_date", { ascending: true })
+          .limit(12)
+      : Promise.resolve({ data: [] as { id: string; name: string; status: string; scheduled_date: string | null; project_id: string }[] }),
+    supabase
+      .from("resultados_cliente")
+      .select("id, categoria, descripcion, valor, unidad, mes")
+      .eq("client_id", client.id)
+      .order("mes", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(6),
   ]);
 
   const hasUnsignedContract = contractDoc && !contractDoc.signed;
@@ -194,6 +263,92 @@ export default async function PortalDashboard() {
                     </CardContent>
                   </Card>
                 </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Agenda de contenido */}
+      {upcomingDeliverables && upcomingDeliverables.length > 0 && (() => {
+        // Group by date
+        const grouped: Record<string, typeof upcomingDeliverables> = {};
+        for (const d of upcomingDeliverables) {
+          const key = d.scheduled_date!;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(d);
+        }
+        const dates = Object.keys(grouped).sort();
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-northpeak-text-muted uppercase tracking-wider">Agenda de contenido</h2>
+              <Link href="/portal/calendar" className="text-xs text-northpeak-green hover:text-northpeak-green/80 flex items-center gap-1">
+                Ver calendario <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <Card className="bg-northpeak-card border-northpeak-surface">
+              <CardContent className="p-4 space-y-4">
+                {dates.map((date) => (
+                  <div key={date}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarDays className="h-3.5 w-3.5 text-northpeak-green" />
+                      <span className="text-xs font-semibold text-northpeak-text">
+                        {formatAgendaDate(date, today, tomorrow)}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 pl-5">
+                      {grouped[date].map((del) => (
+                        <div key={del.id} className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full shrink-0 ${DEL_STATUS_DOT[del.status] ?? "bg-northpeak-text-dim"}`} />
+                          <span className={`text-sm text-northpeak-text flex-1 ${del.status === "completed" ? "line-through text-northpeak-text-dim" : ""}`}>
+                            {del.name}
+                          </span>
+                          {del.project_id && projectNameMap[del.project_id] && (
+                            <span className="text-[10px] text-northpeak-text-dim whitespace-nowrap">
+                              {projectNameMap[del.project_id]}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
+
+      {/* Resultados recientes */}
+      {latestResultados && latestResultados.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-northpeak-text-muted uppercase tracking-wider">Resultados recientes</h2>
+            <Link href="/portal/resultados" className="text-xs text-northpeak-green hover:text-northpeak-green/80 flex items-center gap-1">
+              Ver todos <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {latestResultados.map((r) => {
+              const Icon = RESULTADO_ICON[r.categoria] ?? BarChart2;
+              const colorCls = RESULTADO_COLOR[r.categoria] ?? RESULTADO_COLOR.otro;
+              return (
+                <Card key={r.id} className="bg-northpeak-card border-northpeak-surface">
+                  <CardContent className="p-3 flex items-start gap-3">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${colorCls.split(" ")[1]}`}>
+                      <Icon className={`h-4 w-4 ${colorCls.split(" ")[0]}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-northpeak-text leading-snug">{r.descripcion}</p>
+                      {r.valor !== null && (
+                        <p className="text-xs font-bold text-northpeak-green mt-0.5">
+                          {r.valor} {r.unidad || ""}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle, CreditCard, Flag } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle, CreditCard, Flag, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface CalendarEvent {
   id: string;
   title: string;
   date: string; // ISO date string (YYYY-MM-DD)
-  type: "milestone" | "payment" | "project";
+  type: "milestone" | "payment" | "project" | "entregable";
   completed?: boolean;
   subtitle?: string; // project name, concept, etc.
   amount?: number;   // for payments
@@ -19,10 +19,11 @@ interface Props {
 }
 
 const EVENT_STYLES: Record<string, { bg: string; text: string }> = {
-  milestone: { bg: "bg-northpeak-blue/10",   text: "text-northpeak-blue" },
-  payment:   { bg: "bg-yellow-400/10",         text: "text-yellow-400" },
-  project:   { bg: "bg-purple-400/10",         text: "text-purple-400" },
-  done:      { bg: "bg-northpeak-green/10",    text: "text-northpeak-green" },
+  milestone:  { bg: "bg-northpeak-blue/10",   text: "text-northpeak-blue" },
+  payment:    { bg: "bg-yellow-400/10",         text: "text-yellow-400" },
+  project:    { bg: "bg-purple-400/10",         text: "text-purple-400" },
+  entregable: { bg: "bg-northpeak-green/10",   text: "text-northpeak-green" },
+  done:       { bg: "bg-northpeak-green/10",    text: "text-northpeak-green" },
 };
 
 export default function ProjectCalendar({ events }: Props) {
@@ -67,6 +68,7 @@ export default function ProjectCalendar({ events }: Props) {
   function IconFor({ ev }: { ev: CalendarEvent }) {
     if (ev.completed) return <CheckCircle className="h-2.5 w-2.5 inline mr-0.5 shrink-0" />;
     if (ev.type === "payment") return <CreditCard className="h-2.5 w-2.5 inline mr-0.5 shrink-0" />;
+    if (ev.type === "entregable") return <Package className="h-2.5 w-2.5 inline mr-0.5 shrink-0" />;
     return <Flag className="h-2.5 w-2.5 inline mr-0.5 shrink-0" />;
   }
 
@@ -160,6 +162,8 @@ export default function ProjectCalendar({ events }: Props) {
                 <div className={cn("mt-0.5 shrink-0", s.text)}>
                   {ev.type === "payment" ? (
                     <CreditCard className="h-4 w-4" />
+                  ) : ev.type === "entregable" ? (
+                    <Package className="h-4 w-4" />
                   ) : (
                     <Flag className="h-4 w-4" />
                   )}
@@ -193,7 +197,7 @@ export default function ProjectCalendar({ events }: Props) {
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-2.5 w-2.5 rounded-sm bg-northpeak-green/30" />
-          <span className="text-xs text-northpeak-text-muted">Completado</span>
+          <span className="text-xs text-northpeak-text-muted">Entregable / Completado</span>
         </div>
       </div>
     </div>
