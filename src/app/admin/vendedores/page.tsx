@@ -29,11 +29,6 @@ interface Vendedor {
   created_at: string;
 }
 
-interface VendedorStats {
-  total: number;
-  prospectos: number;
-  ganados: number;
-}
 
 export default function VendedoresPage() {
   const { addToast } = useToast();
