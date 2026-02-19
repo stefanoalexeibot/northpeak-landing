@@ -48,10 +48,66 @@ interface AnalisisRecord {
   client_id: string | null;
   created_at: string;
   etapa: string;
+  etapa_updated_at?: string;
   contacto?: string;
   telefono?: string;
   cuestionario_token?: string;
 }
+
+function daysInStage(a: AnalisisRecord): number {
+  const from = a.etapa_updated_at || a.created_at;
+  return Math.floor((Date.now() - new Date(from).getTime()) / 86400000);
+}
+
+function alertLevel(a: AnalisisRecord): "none" | "warn" | "urgent" {
+  const days = daysInStage(a);
+  if (["cerrado_ganado", "cerrado_perdido"].includes(a.etapa)) return "none";
+  if (a.etapa === "nuevo" && days >= 1) return days >= 3 ? "urgent" : "warn";
+  if (days >= 5) return "urgent";
+  if (days >= 3) return "warn";
+  return "none";
+}
+
+const WA_TEMPLATES: Record<string, Array<{ label: string; message: (a: AnalisisRecord) => string }>> = {
+  nuevo: [
+    {
+      label: "Primer contacto",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, vi que tu negocio *${a.nombre_negocio}* tiene un score digital de *${a.score}/100* (${a.nivel}). Hay varias áreas que podemos mejorar bastante rápido. ¿Tienes 15 minutos esta semana para que te explique exactamente qué está pasando? — NorthPeak Digital`,
+    },
+    {
+      label: "Seguimiento (sin respuesta)",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, solo para confirmar que recibiste mi mensaje anterior sobre el diagnóstico de *${a.nombre_negocio}*. 🙌 ¿Pudiste verlo?`,
+    },
+  ],
+  cuestionario_enviado: [
+    {
+      label: "Recordatorio cuestionario",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, solo quería confirmar que recibiste el cuestionario para *${a.nombre_negocio}*. Son 5 minutos y nos permite darte una propuesta mucho más personalizada. ¿Pudiste verlo?`,
+    },
+  ],
+  cuestionario_completado: [
+    {
+      label: "Propuesta lista",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, ya tenemos lista tu propuesta personalizada para *${a.nombre_negocio}*. ¿Cuándo tienes 20 minutos para revisarla juntos? 🚀`,
+    },
+  ],
+  en_negociacion: [
+    {
+      label: "Seguimiento propuesta",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, ¿tuviste oportunidad de revisar la propuesta de *${a.nombre_negocio}*? Cualquier pregunta con gusto la aclaro. 🙌`,
+    },
+    {
+      label: "Cierre (urgencia)",
+      message: (a) =>
+        `Hola ${a.contacto || a.nombre_negocio}, tenemos espacio disponible para arrancar con *${a.nombre_negocio}* esta semana. Mientras esperamos, tu competencia sigue creciendo en Google. ¿Arrancamos? 💪`,
+    },
+  ],
+};
 
 const ETAPA_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   nuevo: { label: "Nuevo", color: "text-gray-400", bg: "bg-gray-400/10" },
@@ -194,6 +250,8 @@ function AnalizadorContent() {
   const [tab, setTab] = useState<"form" | "history">("form");
   const [aiLoading, setAiLoading] = useState(false);
   const [vendedoresOpts, setVendedoresOpts] = useState<string[]>([]);
+  const [showTemplates, setShowTemplates] = useState<string | null>(null);
+  const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
 
   // Form state
   const [datos, setDatos] = useState<DatosNegocio>({
@@ -1182,6 +1240,50 @@ function AnalizadorContent() {
       ) : (
         /* History tab */
         <div className="space-y-3">
+          {/* Alertas de seguimiento */}
+          {!loadingHistory && (() => {
+            const urgentes = history.filter(a => alertLevel(a) === "urgent");
+            const warns = history.filter(a => alertLevel(a) === "warn");
+            if (urgentes.length === 0 && warns.length === 0) return null;
+            return (
+              <div className="space-y-2">
+                {urgentes.length > 0 && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-red-400 mb-2 flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse inline-block" />
+                      {urgentes.length} {urgentes.length === 1 ? "prospecto" : "prospectos"} sin movimiento — acción urgente
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {urgentes.map(a => (
+                        <button
+                          key={a.id}
+                          onClick={() => {
+                            const tmpl = (WA_TEMPLATES[a.etapa] || WA_TEMPLATES.nuevo)?.[0];
+                            if (tmpl && a.telefono) {
+                              window.open(`https://wa.me/${a.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(tmpl.message(a))}`, "_blank");
+                            }
+                          }}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 hover:bg-red-500/20 transition-colors"
+                        >
+                          {a.nombre_negocio} · {daysInStage(a)}d
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {warns.length > 0 && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+                    <p className="text-xs font-medium text-yellow-400 flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-yellow-400 inline-block" />
+                      {warns.length} {warns.length === 1 ? "prospecto" : "prospectos"} sin contacto reciente:&nbsp;
+                      {warns.map(a => a.nombre_negocio).join(" · ")}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {loadingHistory ? (
             <div className="text-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-northpeak-text-dim mx-auto" />
@@ -1211,13 +1313,23 @@ function AnalizadorContent() {
                         {a.score}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-medium text-northpeak-text truncate">
                             {a.nombre_negocio}
                           </p>
                           <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0", etapa.color, etapa.bg)}>
                             {etapa.label}
                           </span>
+                          {alertLevel(a) === "urgent" && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-red-500/10 text-red-400 border border-red-500/20 shrink-0">
+                              {daysInStage(a)}d sin contacto
+                            </span>
+                          )}
+                          {alertLevel(a) === "warn" && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 shrink-0">
+                              {daysInStage(a)}d
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-northpeak-text-muted">
                           {a.giro} · {a.zona}
@@ -1231,8 +1343,44 @@ function AnalizadorContent() {
                             minute: "2-digit",
                           })}
                         </p>
+                        {/* WA Templates dropdown */}
+                        {showTemplates === a.id && (
+                          <div className="mt-2 space-y-1 border border-northpeak-surface rounded-lg p-2 bg-northpeak-bg">
+                            {(WA_TEMPLATES[a.etapa] || WA_TEMPLATES.nuevo || []).map((tmpl, ti) => (
+                              <button
+                                key={ti}
+                                onClick={() => {
+                                  const msg = tmpl.message(a);
+                                  navigator.clipboard.writeText(msg);
+                                  setCopiedTemplate(`${a.id}-${ti}`);
+                                  setTimeout(() => setCopiedTemplate(null), 2000);
+                                  if (a.telefono) {
+                                    window.open(`https://wa.me/${a.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+                                  }
+                                }}
+                                className="flex items-center justify-between w-full text-left px-2.5 py-1.5 rounded-md hover:bg-northpeak-surface transition-colors"
+                              >
+                                <span className="text-xs text-northpeak-text">{tmpl.label}</span>
+                                {copiedTemplate === `${a.id}-${ti}` ? (
+                                  <Check className="h-3 w-3 text-northpeak-green shrink-0" />
+                                ) : (
+                                  <MessageCircle className="h-3 w-3 text-northpeak-text-dim shrink-0" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowTemplates(showTemplates === a.id ? null : a.id)}
+                          className={cn("h-8 text-northpeak-text-muted hover:text-northpeak-text", showTemplates === a.id && "text-northpeak-green")}
+                          title="Mensajes rápidos"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                        </Button>
                         {a.cuestionario_token && a.etapa === "nuevo" && (
                           <Button
                             variant="ghost"

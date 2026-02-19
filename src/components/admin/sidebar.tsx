@@ -23,6 +23,7 @@ import {
   CreditCard,
   CalendarDays,
   UserCheck,
+  TrendingUp,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -37,6 +38,7 @@ const navItems = [
   { label: "Reseñas", href: "/admin/testimonials", icon: Star },
   { label: "Analizador", href: "/admin/analizador", icon: Search },
   { label: "Pipeline", href: "/admin/pipeline", icon: Kanban },
+  { label: "Ventas", href: "/admin/ventas", icon: TrendingUp },
   { label: "Propuestas", href: "/admin/propuestas", icon: FileText },
   { label: "Vendedores", href: "/admin/vendedores", icon: UserCheck },
   { label: "Catálogo", href: "/admin/catalogo", icon: Package },

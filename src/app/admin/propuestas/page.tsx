@@ -23,7 +23,18 @@ interface Propuesta {
   vigencia_dias: number;
   status: "pendiente" | "vista" | "aceptada";
   visto_at: string | null;
+  vistas_count: number;
+  ultima_vista_at: string | null;
   created_at: string;
+}
+
+function timeAgo(date: string): string {
+  const diff = Date.now() - new Date(date).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `hace ${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `hace ${h}h`;
+  return `hace ${Math.floor(h / 24)}d`;
 }
 
 const SERVICIOS_OPCIONES = [
@@ -253,6 +264,12 @@ export default function PropuestasPage() {
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
                             {cfg.label}
                           </span>
+                          {p.vistas_count > 0 && (
+                            <p className="text-[10px] text-northpeak-text-dim mt-0.5">
+                              {p.vistas_count} {p.vistas_count === 1 ? "vista" : "vistas"}
+                              {p.ultima_vista_at && ` · ${timeAgo(p.ultima_vista_at)}`}
+                            </p>
+                          )}
                         </td>
                         <td className="px-4 py-3 hidden lg:table-cell">
                           <p className="text-sm text-northpeak-text-muted">

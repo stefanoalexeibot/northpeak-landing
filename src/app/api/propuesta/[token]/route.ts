@@ -25,15 +25,19 @@ export async function GET(
     return NextResponse.json({ error: "Propuesta no encontrada" }, { status: 404 });
   }
 
-  // Mark as vista on first load
+  // Track every view: increment count and timestamp
+  const now = new Date().toISOString();
+  const updates: Record<string, unknown> = {
+    vistas_count: (data.vistas_count ?? 0) + 1,
+    ultima_vista_at: now,
+  };
   if (data.status === "pendiente") {
-    await supabase
-      .from("propuestas")
-      .update({ status: "vista", visto_at: new Date().toISOString() })
-      .eq("id", data.id);
+    updates.status = "vista";
+    updates.visto_at = now;
   }
+  await supabase.from("propuestas").update(updates).eq("id", data.id);
 
-  return NextResponse.json(data);
+  return NextResponse.json({ ...data, ...updates });
 }
 
 export async function POST(
