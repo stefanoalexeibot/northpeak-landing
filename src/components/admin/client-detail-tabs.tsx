@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -442,6 +442,7 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
           <TabsTrigger value="activity" className="data-[state=active]:bg-northpeak-card">Actividad</TabsTrigger>
           <TabsTrigger value="analyses" className="data-[state=active]:bg-northpeak-card">Análisis</TabsTrigger>
           <TabsTrigger value="ai" className="data-[state=active]:bg-northpeak-card">IA</TabsTrigger>
+          <TabsTrigger value="resultados" className="data-[state=active]:bg-northpeak-card">Resultados</TabsTrigger>
         </TabsList>
 
         {/* INFO TAB */}
@@ -910,6 +911,11 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* RESULTADOS TAB */}
+        <TabsContent value="resultados">
+          <ResultadosTab clientId={client.id} />
+        </TabsContent>
       </Tabs>
 
       {/* UPLOAD DOCUMENT DIALOG */}
@@ -1210,5 +1216,215 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+// ─── Resultados Tab Component ────────────────────────────────────────────────
+
+interface Resultado {
+  id: string;
+  mes: string;
+  categoria: string;
+  descripcion: string;
+  valor: number | null;
+  unidad: string | null;
+  created_at: string;
+}
+
+const CATEGORIA_CONFIG: Record<string, { label: string; color: string }> = {
+  redes:    { label: "Redes sociales", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+  gmb:      { label: "Google My Business", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  "reseñas":{ label: "Reseñas", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" },
+  leads:    { label: "Leads", color: "bg-northpeak-green/10 text-northpeak-green border-northpeak-green/20" },
+  web:      { label: "Web", color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" },
+  otro:     { label: "Otro", color: "bg-northpeak-surface text-northpeak-text-muted border-northpeak-surface" },
+};
+
+function ResultadosTab({ clientId }: { clientId: string }) {
+  const { addToast } = useToast();
+  const [resultados, setResultados] = useState<Resultado[]>([]);
+  const [loadingR, setLoadingR] = useState(true);
+
+  const [mes, setMes] = useState("");
+  const [categoria, setCategoria] = useState("redes");
+  const [descripcion, setDescripcion] = useState("");
+  const [valor, setValor] = useState("");
+  const [unidad, setUnidad] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function fetchResultados() {
+    const res = await fetch(`/api/admin/resultados?client_id=${clientId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setResultados(data);
+    }
+    setLoadingR(false);
+  }
+
+  useEffect(() => { fetchResultados(); }, [clientId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleAdd() {
+    if (!mes || !descripcion) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/resultados", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client_id: clientId, mes: `${mes}-01`, categoria, descripcion, valor: valor || null, unidad: unidad || null }),
+    });
+    if (res.ok) {
+      addToast("Resultado registrado", "success");
+      setDescripcion(""); setValor(""); setUnidad("");
+      fetchResultados();
+    } else {
+      const d = await res.json();
+      addToast(d.error || "Error al guardar", "error");
+    }
+    setSaving(false);
+  }
+
+  async function handleDelete(id: string) {
+    const res = await fetch("/api/admin/resultados", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (res.ok) {
+      setResultados(prev => prev.filter(r => r.id !== id));
+    }
+  }
+
+  // Group by month
+  const grouped = resultados.reduce<Record<string, Resultado[]>>((acc, r) => {
+    const key = r.mes.slice(0, 7);
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(r);
+    return acc;
+  }, {});
+
+  function formatMes(ym: string) {
+    const [y, m] = ym.split("-");
+    const date = new Date(parseInt(y), parseInt(m) - 1);
+    return date.toLocaleDateString("es-MX", { month: "long", year: "numeric" });
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Add form */}
+      <Card className="bg-northpeak-card border-northpeak-surface">
+        <CardHeader>
+          <CardTitle className="text-northpeak-text font-heading text-base">Registrar resultado</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-northpeak-text-muted text-xs">Mes</Label>
+              <Input
+                type="month"
+                value={mes}
+                onChange={e => setMes(e.target.value)}
+                className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-northpeak-text-muted text-xs">Categoría</Label>
+              <select
+                value={categoria}
+                onChange={e => setCategoria(e.target.value)}
+                className="w-full h-9 rounded-md border border-northpeak-surface bg-northpeak-bg text-northpeak-text text-sm px-3"
+              >
+                <option value="redes">Redes sociales</option>
+                <option value="gmb">Google My Business</option>
+                <option value="reseñas">Reseñas</option>
+                <option value="leads">Leads</option>
+                <option value="web">Web</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-northpeak-text-muted text-xs">Descripción *</Label>
+            <Input
+              value={descripcion}
+              onChange={e => setDescripcion(e.target.value)}
+              placeholder="Ej. 45 reseñas nuevas en Google"
+              className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-northpeak-text-muted text-xs">Valor (opcional)</Label>
+              <Input
+                type="number"
+                value={valor}
+                onChange={e => setValor(e.target.value)}
+                placeholder="Ej. 45"
+                className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-northpeak-text-muted text-xs">Unidad (opcional)</Label>
+              <Input
+                value={unidad}
+                onChange={e => setUnidad(e.target.value)}
+                placeholder="Ej. reseñas, leads, %"
+                className="bg-northpeak-bg border-northpeak-surface text-northpeak-text"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleAdd}
+            disabled={saving || !mes || !descripcion}
+            className="bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
+          >
+            {saving ? <><Plus className="h-4 w-4 mr-1 animate-spin" />Guardando...</> : <><Plus className="h-4 w-4 mr-1" />Agregar resultado</>}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Results list */}
+      {loadingR ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="h-5 w-5 border-2 border-northpeak-green border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : Object.keys(grouped).length === 0 ? (
+        <div className="text-center py-10 text-northpeak-text-muted text-sm">
+          Aún no hay resultados registrados para este cliente.
+        </div>
+      ) : (
+        Object.entries(grouped).map(([ym, items]) => (
+          <div key={ym}>
+            <p className="text-xs font-medium text-northpeak-text-muted uppercase tracking-wider mb-2 capitalize">
+              {formatMes(ym)}
+            </p>
+            <div className="space-y-2">
+              {items.map(r => {
+                const cfg = CATEGORIA_CONFIG[r.categoria] || CATEGORIA_CONFIG.otro;
+                return (
+                  <div key={r.id} className="flex items-start gap-3 rounded-lg bg-northpeak-bg px-4 py-3">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border whitespace-nowrap ${cfg.color}`}>
+                      {cfg.label}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-northpeak-text">{r.descripcion}</p>
+                      {r.valor !== null && (
+                        <p className="text-xs text-northpeak-text-muted mt-0.5">
+                          {r.valor} {r.unidad || ""}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDelete(r.id)}
+                      className="text-northpeak-text-dim hover:text-red-400 transition-colors p-1 rounded"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
   );
 }
