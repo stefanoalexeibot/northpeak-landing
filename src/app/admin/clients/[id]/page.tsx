@@ -9,6 +9,7 @@ import DeleteClientButton from "@/components/admin/delete-client-button";
 import OnboardingChecklist from "@/components/admin/onboarding-checklist";
 import ClientNotes from "@/components/admin/client-notes";
 import ClientStatusSelect from "@/components/admin/client-status-select";
+import ClientTasksChecklist from "@/components/admin/client-tasks-checklist";
 
 export default async function ClientDetailPage({
   params,
@@ -76,11 +77,12 @@ export default async function ClientDetailPage({
         <DeleteClientButton clientId={client.id} clientName={client.name} />
       </div>
 
-      {/* Onboarding + Notes side by side */}
+      {/* Onboarding + Tareas + Notes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-northpeak-card border-northpeak-surface">
-          <CardHeader>
-            <CardTitle className="text-northpeak-text font-heading text-base">Onboarding</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-northpeak-text font-heading text-base">Alta de cliente</CardTitle>
+            <p className="text-xs text-northpeak-text-muted">Checklist automático al crear</p>
           </CardHeader>
           <CardContent>
             <OnboardingChecklist items={checklistItems} />
@@ -93,6 +95,17 @@ export default async function ClientDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Tareas operativas — checklist interactivo */}
+      <Card className="bg-northpeak-card border-northpeak-surface">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-northpeak-text font-heading text-base">Tareas del proyecto</CardTitle>
+          <p className="text-xs text-northpeak-text-muted">Marca cada paso conforme avances con el cliente</p>
+        </CardHeader>
+        <CardContent>
+          <ClientTasksChecklist clientId={client.id} />
+        </CardContent>
+      </Card>
 
       <ClientDetailTabs
         client={client}
