@@ -3,21 +3,22 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
   ArrowRight, Star, Check, MapPin, Zap, MessageSquare,
-  Share2, Target, Layers, Search, Lightbulb, Rocket,
-  TrendingUp, BarChart2, Users, LayoutDashboard, Shield,
+  Bot, Target, Layers, Search, Settings2, Rocket,
+  TrendingUp, BarChart2, Clock, LayoutDashboard, Shield,
   ChevronRight, Phone, Mail,
 } from "lucide-react";
 import FaqAccordion from "@/components/landing/faq-accordion";
 import RoiCalculator from "@/components/landing/roi-calculator";
+import FadeIn from "@/components/landing/fade-in";
 import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
 import TiltCard from "@/components/portal/tilt-card";
 
 export const metadata: Metadata = {
-  title: "NorthPeak Digital — Marketing Digital para Negocios en Monterrey",
+  title: "NorthPeak — IA para Incrementar Ventas · Monterrey",
   description:
-    "Agencia de marketing digital para restaurantes, clínicas y negocios locales en Monterrey. Redes sociales, publicidad digital y posicionamiento local con resultados medibles.",
+    "Infraestructura de inteligencia artificial para captar leads, calificarlos automáticamente y cerrar más ventas. Negocios en Monterrey que venden en piloto automático.",
 };
 
 // ── Static data ──────────────────────────────────────────────────────────────
@@ -26,14 +27,14 @@ const caseStudies = [
   {
     industry: "Restaurante · San Pedro GG",
     bigStat: "+1,920",
-    bigLabel: "seguidores nuevos",
+    bigLabel: "seguidores + reservaciones IA",
     timeframe: "en 5 meses",
-    description: "Sin estrategia en Instagram. Con Reels y contenido local logramos crecimiento orgánico sostenido y reservaciones récord.",
-    tags: ["Instagram", "Reels", "Contenido local"],
+    description: "Sin sistema de captación. Con IA de contenido + agente de reservaciones por WhatsApp logramos crecimiento orgánico y automatizamos el 80% de las reservas.",
+    tags: ["IA Conversacional", "Contenido IA", "WhatsApp"],
     metrics: [
       { label: "Reservaciones", value: "+34%" },
-      { label: "Alcance Reels", value: "4.8M" },
-      { label: "Engagement", value: "8.2%" },
+      { label: "Alcance orgánico", value: "4.8M" },
+      { label: "Automatización", value: "80%" },
     ],
     accent: "text-purple-400",
     borderFrom: "rgba(168,85,247,0.3)",
@@ -44,12 +45,12 @@ const caseStudies = [
     bigStat: "#2",
     bigLabel: "en Google Maps",
     timeframe: "en 3 meses",
-    description: "Solo 8 reseñas y sin presencia local. En 90 días llegamos al top 3 en búsquedas y duplicamos citas semanales.",
-    tags: ["Google Maps", "SEO Local", "Reseñas"],
+    description: "Solo 8 reseñas y cero pipeline digital. Implementamos captación automatizada + agente de citas por IA. Hoy el 60% de citas llegan sin intervención humana.",
+    tags: ["Captación IA", "Google Maps", "Citas Automáticas"],
     metrics: [
       { label: "Reseñas Google", value: "8→142" },
       { label: "Citas nuevas/sem", value: "+58%" },
-      { label: "Posición local", value: "Top 3" },
+      { label: "Citas sin personal", value: "60%" },
     ],
     accent: "text-blue-400",
     borderFrom: "rgba(59,130,246,0.3)",
@@ -58,10 +59,10 @@ const caseStudies = [
   {
     industry: "Constructora · Cumbres, NL",
     bigStat: "22",
-    bigLabel: "leads calificados",
+    bigLabel: "leads calificados por IA",
     timeframe: "en el primer mes",
-    description: "Necesitaban prospectos con poder adquisitivo real. Con Meta Ads + WhatsApp logramos un CPL por debajo del promedio de la industria.",
-    tags: ["Meta Ads", "WhatsApp Biz", "Retargeting"],
+    description: "Necesitaban prospectos con poder adquisitivo real. Agente de IA en WhatsApp calificó leads automáticamente. CPL 42% por debajo del promedio de la industria.",
+    tags: ["Agente IA", "Meta Ads", "Lead Scoring"],
     metrics: [
       { label: "Costo por lead", value: "$168" },
       { label: "Ventas cerradas", value: "3" },
@@ -76,12 +77,12 @@ const caseStudies = [
 const services = [
   {
     num: "01",
-    Icon: Share2,
-    name: "Gestión de Redes",
+    Icon: Bot,
+    name: "Agente IA en WhatsApp",
     price: "desde $4,500",
     period: "/mes",
-    description: "Contenido que conecta con tu cliente local en Instagram y Facebook.",
-    features: ["12–16 posts al mes", "Diseño + copywriting", "Reels y stories", "Reporte mensual"],
+    description: "Un agente de IA que atiende, califica y agenda citas por WhatsApp, 24 horas al día.",
+    features: ["Respuesta inmediata 24/7", "Calificación automática", "Agenda citas sin personal", "Handoff al equipo humano"],
     color: "text-purple-400",
     bg: "bg-purple-400/10",
     border: "border-purple-500/20",
@@ -89,11 +90,11 @@ const services = [
   {
     num: "02",
     Icon: MapPin,
-    name: "Posicionamiento Local",
+    name: "Captación Local con IA",
     price: "desde $3,500",
     period: "/mes",
-    description: "Domina Google Maps y aparece primero cuando te buscan.",
-    features: ["Google Business Profile", "Estrategia de reseñas", "SEO local", "Fotos y actualización"],
+    description: "Domina las búsquedas locales y genera reseñas en piloto automático.",
+    features: ["Google Maps optimizado", "Reseñas automatizadas", "SEO local con IA", "Perfil actualizado"],
     color: "text-blue-400",
     bg: "bg-blue-400/10",
     border: "border-blue-500/20",
@@ -101,11 +102,11 @@ const services = [
   {
     num: "03",
     Icon: Target,
-    name: "Publicidad Digital",
+    name: "Publicidad Inteligente",
     price: "desde $6,000",
     period: "/mes",
-    description: "Anuncios en Meta y Google que traen clientes, no solo clics.",
-    features: ["Meta Ads (FB + IG)", "Google Ads", "Retargeting por zona", "Reportes semanales"],
+    description: "Meta Ads y Google Ads con optimización automática por IA en tiempo real.",
+    features: ["Meta Ads (FB + IG)", "Google Ads + IA", "Lead scoring automático", "Reportes semanales"],
     color: "text-yellow-400",
     bg: "bg-yellow-400/10",
     border: "border-yellow-500/20",
@@ -114,11 +115,11 @@ const services = [
   {
     num: "04",
     Icon: Layers,
-    name: "Estrategia Completa",
+    name: "Stack Completo de Ventas",
     price: "desde $12,000",
     period: "/mes",
-    description: "Todo integrado: redes, publicidad, posicionamiento y portal exclusivo.",
-    features: ["Todo lo anterior", "Estrategia mensual", "Sesión de resultados", "Portal de cliente"],
+    description: "El sistema completo: captación + IA conversacional + seguimiento + portal exclusivo.",
+    features: ["Todo lo anterior", "CRM automatizado", "Seguimiento con IA", "Portal de cliente"],
     color: "text-northpeak-green",
     bg: "bg-northpeak-green/10",
     border: "border-northpeak-green/20",
@@ -129,49 +130,49 @@ const steps = [
   {
     num: "01",
     Icon: Search,
-    title: "Analizamos tu presencia",
-    description: "Diagnóstico gratuito y honesto de tu situación digital actual. Sin venta, solo datos.",
+    title: "Auditamos tu pipeline",
+    description: "Diagnóstico gratuito de dónde se pierden tus leads hoy. Sin venta, solo datos reales.",
   },
   {
     num: "02",
-    Icon: Lightbulb,
-    title: "Diseñamos tu estrategia",
-    description: "Un plan específico para tu negocio, tu zona y tu competencia en Monterrey.",
+    Icon: Settings2,
+    title: "Configuramos tu IA",
+    description: "Diseñamos e implementamos los agentes, flujos y automatizaciones específicas para tu negocio.",
   },
   {
     num: "03",
     Icon: Rocket,
-    title: "Ejecutamos y medimos",
-    description: "Publicamos, medimos resultados y te reportamos todo desde tu portal en tiempo real.",
+    title: "Activamos y escalamos",
+    description: "Tu sistema entra en producción. Medimos cada lead, cada conversación y cada venta desde tu portal.",
   },
 ];
 
 const differentiators = [
   {
-    Icon: MapPin,
-    title: "Conocemos Monterrey",
-    description: "Sabemos cómo habla tu cliente local, qué zonas son relevantes y qué funciona en este mercado. No somos una agencia genérica.",
+    Icon: Clock,
+    title: "Trabaja 24/7",
+    description: "Tu IA nunca duerme, nunca se va de vacaciones, nunca olvida dar seguimiento. Cada lead recibe atención inmediata a cualquier hora.",
     color: "text-northpeak-green",
     bg: "bg-northpeak-green/10",
   },
   {
     Icon: BarChart2,
-    title: "Resultados medibles",
-    description: "No te vendemos impresiones ni vanity metrics. Te reportamos ventas, leads y reservaciones. Números de negocio reales.",
+    title: "Métricas de ventas, no de marketing",
+    description: "No te reportamos impresiones ni alcance. Te reportamos leads, conversaciones calificadas y ventas cerradas. Números que mueven el negocio.",
     color: "text-blue-400",
     bg: "bg-blue-400/10",
   },
   {
     Icon: LayoutDashboard,
-    title: "Portal de cliente",
-    description: "Ves todo en tiempo real: avance de tu proyecto, entregables, mensajes con tu equipo y resultados del mes.",
+    title: "Portal en tiempo real",
+    description: "Ves cada lead que entra, cada conversación de tu IA y el estado de tu pipeline — en vivo, desde tu celular.",
     color: "text-purple-400",
     bg: "bg-purple-400/10",
   },
   {
     Icon: Shield,
-    title: "Sin contratos trampa",
-    description: "Contratos mínimos de 3 meses, no de 12. La mayoría renueva porque ve resultados, no por obligación.",
+    title: "Implementación en 7 días",
+    description: "De onboarding a primer lead automatizado en menos de una semana. Sin proyectos eternos ni consultores que nunca entregan.",
     color: "text-yellow-400",
     bg: "bg-yellow-400/10",
   },
@@ -208,8 +209,8 @@ export default async function LandingPage() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-8 text-sm text-northpeak-text-muted">
-              <a href="#servicios" className="hover:text-northpeak-text transition-colors">Servicios</a>
-              <a href="#casos" className="hover:text-northpeak-text transition-colors">Casos de éxito</a>
+              <a href="#servicios" className="hover:text-northpeak-text transition-colors">Soluciones</a>
+              <a href="#casos" className="hover:text-northpeak-text transition-colors">Resultados</a>
               <a href="#preguntas" className="hover:text-northpeak-text transition-colors">FAQ</a>
               <Link href="/portal/dashboard" className="hover:text-northpeak-text transition-colors">Portal</Link>
             </nav>
@@ -237,19 +238,20 @@ export default async function LandingPage() {
             <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-northpeak-green/25 bg-northpeak-green/8">
               <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse shrink-0" />
               <span className="font-mono text-[11px] tracking-[0.15em] text-northpeak-green uppercase">
-                Marketing Digital · Monterrey, N.L.
+                IA para Ventas · Monterrey, N.L.
               </span>
             </div>
 
-            {/* Main headline — "aplastada" single-block style */}
+            {/* Main headline */}
             <h1 className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-tight tracking-tight text-northpeak-text mb-6 max-w-4xl">
-              Tu negocio en internet.{" "}
-              <span className="text-northpeak-green">En serio.</span>
+              La IA que vende.{" "}
+              <span className="text-northpeak-green">Sin parar.</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-northpeak-text-muted max-w-2xl leading-relaxed mb-10">
-              Ayudamos a restaurantes, clínicas y negocios locales en Monterrey a ganar clientes
-              por internet — con estrategia real, no con promesas vacías.
+              Construimos la infraestructura de inteligencia artificial que tu negocio necesita
+              para captar leads, calificarlos automáticamente y cerrar más ventas — sin contratar
+              más personal.
             </p>
 
             {/* CTAs */}
@@ -274,8 +276,8 @@ export default async function LandingPage() {
             {/* Floating proof chips */}
             <div className="flex flex-wrap gap-3">
               {[
-                { icon: Users, val: "+50 negocios", sub: "en Monterrey", color: "text-northpeak-green" },
-                { icon: TrendingUp, val: "3.2× crecimiento", sub: "promedio", color: "text-blue-400" },
+                { icon: Bot, val: "+40 empresas", sub: "automatizadas con IA", color: "text-northpeak-green" },
+                { icon: TrendingUp, val: "3.2× más ventas", sub: "promedio de clientes", color: "text-blue-400" },
                 { icon: Star, val: "4.9★ satisfacción", sub: "clientes activos", color: "text-yellow-400" },
               ].map((chip) => (
                 <div
@@ -296,15 +298,15 @@ export default async function LandingPage() {
         {/* ── Services ─────────────────────────────────────────── */}
         <section id="servicios" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
           <div className="max-w-6xl mx-auto">
-            <div className="mb-14">
-              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Servicios y precios</p>
+            <FadeIn className="mb-14">
+              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Soluciones y precios</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text mb-3 tracking-tight">
                 Sin letras chiquitas.
               </h2>
               <p className="text-northpeak-text-muted max-w-lg">
-                Mostramos rangos de inversión para que sepas qué esperar antes de hablar con nosotros.
+                Mostramos rangos reales para que sepas qué esperar antes de hablar con nosotros.
               </p>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {services.map((svc) => (
@@ -362,15 +364,15 @@ export default async function LandingPage() {
         {/* ── Case Studies ─────────────────────────────────────── */}
         <section id="casos" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface bg-northpeak-card/40">
           <div className="max-w-6xl mx-auto">
-            <div className="mb-14">
+            <FadeIn className="mb-14">
               <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Resultados reales</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
                 No prometemos, demostramos.
               </h2>
               <p className="text-northpeak-text-muted max-w-lg">
-                Negocios en Monterrey que transformaron su presencia digital con NorthPeak.
+                Negocios en Monterrey que ya venden en piloto automático con NorthPeak.
               </p>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               {caseStudies.map((cs) => (
@@ -434,12 +436,12 @@ export default async function LandingPage() {
         {/* ── Process ──────────────────────────────────────────── */}
         <section className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
+            <FadeIn className="text-center mb-16">
               <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Proceso</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight">
-                Cómo trabajamos
+                De cero a ventas automáticas
               </h2>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
               <div className="hidden md:block absolute top-12 left-[calc(16.5%+2rem)] right-[calc(16.5%+2rem)] h-px bg-gradient-to-r from-northpeak-green/40 via-northpeak-green/15 to-northpeak-green/40" />
@@ -463,12 +465,12 @@ export default async function LandingPage() {
         {/* ── Why NorthPeak ─────────────────────────────────────── */}
         <section className="py-24 px-5 sm:px-8 border-t border-northpeak-surface bg-northpeak-card/40">
           <div className="max-w-6xl mx-auto">
-            <div className="mb-14">
+            <FadeIn className="mb-14">
               <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Por qué nosotros</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
                 Lo que nos diferencia.
               </h2>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {differentiators.map((d) => (
@@ -531,15 +533,15 @@ export default async function LandingPage() {
         {/* ── ROI Calculator ───────────────────────────────────── */}
         <section className="py-24 px-5 sm:px-8 border-t border-northpeak-surface bg-northpeak-card/40">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-14">
+            <FadeIn className="text-center mb-14">
               <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Calculadora de ROI</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
                 ¿Cuánto podrías ganar?
               </h2>
               <p className="text-northpeak-text-muted max-w-lg mx-auto">
-                Ajusta los números de tu negocio y ve el retorno proyectado con una inversión en marketing digital.
+                Ajusta los números de tu negocio y ve el retorno proyectado al automatizar tu proceso de ventas.
               </p>
-            </div>
+            </FadeIn>
             <div className="rounded-2xl border border-northpeak-surface bg-northpeak-card p-6 sm:p-10">
               <RoiCalculator />
             </div>
@@ -549,13 +551,18 @@ export default async function LandingPage() {
         {/* ── FAQ ──────────────────────────────────────────────── */}
         <section id="preguntas" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-14">
-              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— FAQ</p>
+            <FadeIn className="text-center mb-14">
+              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Preguntas frecuentes</p>
               <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
                 Lo que todos preguntan.
               </h2>
-            </div>
-            <FaqAccordion />
+              <p className="text-northpeak-text-muted max-w-md mx-auto">
+                Sin tecnicismos. Respuestas directas sobre cómo funciona la infraestructura de IA para tu negocio.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <FaqAccordion />
+            </FadeIn>
           </div>
         </section>
 
@@ -569,10 +576,10 @@ export default async function LandingPage() {
           <div className="relative max-w-3xl mx-auto text-center">
             <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-6">— Empieza hoy</p>
             <h2 className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl text-northpeak-text tracking-tight leading-tight mb-6">
-              ¿Listo para <span className="text-northpeak-green">crecer?</span>
+              ¿Listo para <span className="text-northpeak-green">automatizar?</span>
             </h2>
             <p className="text-xl text-northpeak-text-muted mb-10 max-w-xl mx-auto leading-relaxed">
-              Diagnóstico gratuito en 5 minutos. Sin registro, sin compromiso. Te decimos exactamente en qué mejorar.
+              Diagnóstico gratuito en 5 minutos. Analizamos tu proceso de ventas actual y te decimos exactamente dónde la IA puede multiplicar tus resultados.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -606,7 +613,7 @@ export default async function LandingPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo.png" alt="NorthPeak Digital" className="h-7" />
                 <p className="text-sm text-northpeak-text-muted leading-relaxed max-w-xs">
-                  Agencia de marketing digital para negocios locales en Monterrey, N.L.
+                  Infraestructura de IA para incrementar ventas. Negocios en Monterrey que venden en piloto automático.
                 </p>
                 <div className="flex items-center gap-1.5 text-xs text-northpeak-text-dim font-mono">
                   <MapPin className="h-3 w-3" />
@@ -619,9 +626,9 @@ export default async function LandingPage() {
                 <p className="font-mono text-[10px] tracking-[0.15em] text-northpeak-text-dim uppercase mb-4">Navegación</p>
                 <div className="space-y-2.5">
                   {[
-                    { label: "Servicios", href: "#servicios" },
-                    { label: "Casos de éxito", href: "#casos" },
-                    { label: "Preguntas", href: "#preguntas" },
+                    { label: "Soluciones", href: "#servicios" },
+                    { label: "Resultados", href: "#casos" },
+                    { label: "Preguntas frecuentes", href: "#preguntas" },
                     { label: "Diagnóstico gratuito", href: "/analizar" },
                     { label: "Portal de clientes", href: "/portal/dashboard" },
                     { label: "Aviso de privacidad", href: "/privacidad" },
