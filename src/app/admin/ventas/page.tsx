@@ -292,7 +292,7 @@ export default function VentasPage() {
 
           <StepLabel n={4} text="Seguimiento — 48 horas si no hay respuesta" />
           <p className="text-xs text-northpeak-text-muted ml-9 leading-relaxed">
-            Un solo mensaje amable. No preguntes "¿lo revisó?", pregunta "¿tiene alguna duda?".
+            Un solo mensaje amable. No preguntes &ldquo;¿lo revisó?&rdquo;, pregunta &ldquo;¿tiene alguna duda?&rdquo;.
             Si no responde en otros 2 días, un tercer mensaje y luego esperar.
           </p>
 
@@ -378,8 +378,8 @@ export default function VentasPage() {
         <div className="bg-northpeak-card border border-northpeak-surface rounded-lg p-3 mt-2">
           <p className="text-xs font-medium text-northpeak-text mb-1">Si dice no o está ocupado:</p>
           <p className="text-xs text-northpeak-text-muted leading-relaxed">
-            "Entiendo perfectamente. ¿Me puedo dejar su número para mandarle el análisis por
-            WhatsApp? Lo hace en 3 minutos cuando tenga tiempo." — Nunca te vayas sin un contacto.
+            &ldquo;Entiendo perfectamente. ¿Me puedo dejar su número para mandarle el análisis por
+            WhatsApp? Lo hace en 3 minutos cuando tenga tiempo.&rdquo; — Nunca te vayas sin un contacto.
           </p>
         </div>
         <div className="space-y-2 mt-2">
@@ -415,8 +415,8 @@ export default function VentasPage() {
           <p className="text-xs text-northpeak-green font-medium mb-1">Clave del referido</p>
           <p className="text-xs text-northpeak-text-muted">
             Pregúntale a tu cliente actual qué fue lo que más le gustó del servicio.
-            Eso es lo que vas a resaltar con el referido: "Luis me dijo que lo que más valora
-            es que siempre sabe qué se está haciendo en su cuenta. Eso es lo que hacemos."
+            Eso es lo que vas a resaltar con el referido: &ldquo;Luis me dijo que lo que más valora
+            es que siempre sabe qué se está haciendo en su cuenta. Eso es lo que hacemos.&rdquo;
           </p>
         </div>
       </Section>
@@ -430,7 +430,7 @@ export default function VentasPage() {
         </p>
         <div className="space-y-3">
           <div>
-            <p className="text-xs font-medium text-northpeak-text mb-2">Día 1 — Después de que dice "lo pienso"</p>
+            <p className="text-xs font-medium text-northpeak-text mb-2">Día 1 — Después de que dice &ldquo;lo pienso&rdquo;</p>
             <ConvStep
               speaker="vendedor"
               text="Perfecto, tómate el tiempo que necesites. Solo una pregunta rápida: ¿hay alguna duda específica que te esté generando la decisión? A veces puedo aclarar algo que ayuda."
@@ -593,8 +593,8 @@ export default function VentasPage() {
           <p className="text-xs font-semibold text-northpeak-text mb-2">Cómo cerrar cuando hay señales positivas</p>
           <p className="text-xs text-northpeak-text-muted leading-relaxed">
             No esperes. Cuando el cliente muestra señal de compra, pregunta directamente:
-            <span className="text-northpeak-text"> "¿Arrancamos esta semana?"</span> o
-            <span className="text-northpeak-text"> "¿Le mando el contrato hoy?"</span>. El silencio
+            <span className="text-northpeak-text"> &ldquo;¿Arrancamos esta semana?&rdquo;</span> o
+            <span className="text-northpeak-text"> &ldquo;¿Le mando el contrato hoy?&rdquo;</span>. El silencio
             incómodo después de esta pregunta es normal — déjalo. El que habla primero, pierde.
           </p>
         </div>
