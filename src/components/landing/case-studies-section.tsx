@@ -4,6 +4,7 @@ import FadeIn from "@/components/landing/fade-in";
 import AnimatedCounter from "@/components/landing/animated-counter";
 import TiltCard from "@/components/portal/tilt-card";
 import { caseStudies } from "@/lib/data/landing-data";
+import GradientText from "@/components/reactbits/GradientText";
 
 export default function CaseStudiesSection() {
     return (
@@ -12,7 +13,9 @@ export default function CaseStudiesSection() {
                 <FadeIn className="mb-14">
                     <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Resultados reales</p>
                     <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
-                        No prometemos, demostramos.
+                        <GradientText colors={["#ffffff", "#00d4ff", "#ffffff"]} animationSpeed={6}>
+                            No prometemos, demostramos.
+                        </GradientText>
                     </h2>
                     <p className="text-northpeak-text-muted max-w-lg">
                         Negocios en Monterrey que ya venden en piloto automático con NorthPeak.

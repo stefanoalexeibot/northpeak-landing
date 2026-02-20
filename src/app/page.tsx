@@ -16,6 +16,9 @@ import StatsMarquee from "@/components/landing/stats-marquee";
 import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
+import RotatingText from "@/components/reactbits/RotatingText";
+import ShinyText from "@/components/reactbits/ShinyText";
+import GradientText from "@/components/reactbits/GradientText";
 
 // ── Extracted section components ─────────────────────────────────────────────
 import ServicesSection from "@/components/landing/services-section";
@@ -106,15 +109,37 @@ export default async function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-northpeak-green/25 bg-northpeak-green/8">
                 <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse shrink-0" />
-                <span className="font-mono text-[11px] tracking-[0.15em] text-northpeak-green uppercase">
-                  IA para Ventas · Monterrey, N.L.
-                </span>
+                <ShinyText
+                  text="IA para Ventas · Monterrey, N.L."
+                  className="font-mono text-[11px] tracking-[0.15em] uppercase"
+                  color="#00e5a0"
+                  shineColor="#ffffff"
+                  speed={3}
+                />
               </div>
 
               <h1 className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-tight tracking-tight text-northpeak-text mb-6 max-w-4xl">
                 La IA que vende.{" "}
-                <span className="text-northpeak-green">Sin parar.</span>
+                <GradientText
+                  colors={["#00e5a0", "#00d4ff", "#00e5a0"]}
+                  animationSpeed={4}
+                  className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl xl:text-8xl"
+                >
+                  Sin parar.
+                </GradientText>
               </h1>
+
+              <div className="flex items-center gap-3 mb-4 text-northpeak-text-muted text-lg sm:text-xl">
+                <span>Expertos en</span>
+                <RotatingText
+                  texts={["Marketing Digital", "Redes Sociales", "Google My Business", "Chatbots con IA", "Automatización"]}
+                  rotationInterval={2500}
+                  staggerDuration={0.03}
+                  staggerFrom="first"
+                  mainClassName="text-northpeak-green font-bold overflow-hidden py-1"
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                />
+              </div>
 
               <p className="text-lg sm:text-xl text-northpeak-text-muted max-w-2xl leading-relaxed mb-10">
                 Construimos la infraestructura de inteligencia artificial que tu negocio necesita
