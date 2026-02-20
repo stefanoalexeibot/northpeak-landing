@@ -24,11 +24,13 @@ import {
   CalendarDays,
   UserCheck,
   TrendingUp,
+  Zap,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Leads", href: "/admin/leads", icon: Zap },
   { label: "Clientes", href: "/admin/clients", icon: Users },
   { label: "Pagos", href: "/admin/payments", icon: CreditCard },
   { label: "Calendario", href: "/admin/calendar", icon: CalendarDays },
