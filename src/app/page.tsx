@@ -17,11 +17,13 @@ import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
 import RotatingText from "@/components/reactbits/RotatingText";
-import ShinyText from "@/components/reactbits/ShinyText";
 import GradientText from "@/components/reactbits/GradientText";
 import ScrollToTop from "@/components/landing/scroll-to-top";
 import StickyMobileCta from "@/components/landing/sticky-mobile-cta";
 import ParallaxHeroGlow from "@/components/landing/parallax-hero-glow";
+import HeroEffects from "@/components/landing/hero-effects";
+import HeroBadge from "@/components/landing/hero-badge";
+import ClickSparkWrapper from "@/components/landing/click-spark-wrapper";
 
 // ── Extracted section components ─────────────────────────────────────────────
 import ServicesSection from "@/components/landing/services-section";
@@ -104,19 +106,11 @@ export default async function LandingPage() {
         {/* ── Hero ── */}
         <section className="relative min-h-[92vh] flex items-center px-5 sm:px-8 pt-16 pb-24 overflow-hidden">
           <ParallaxHeroGlow />
+          <HeroEffects />
 
           <div className="relative max-w-6xl mx-auto w-full grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-12 xl:gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-northpeak-green/25 bg-northpeak-green/8">
-                <span className="h-1.5 w-1.5 rounded-full bg-northpeak-green animate-pulse shrink-0" />
-                <ShinyText
-                  text="IA para Ventas · Monterrey, N.L."
-                  className="font-mono text-[11px] tracking-[0.15em] uppercase"
-                  color="#00e5a0"
-                  shineColor="#ffffff"
-                  speed={3}
-                />
-              </div>
+              <HeroBadge />
 
               <h1 className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-7xl xl:text-8xl leading-tight tracking-tight text-northpeak-text mb-6 max-w-4xl">
                 La IA que vende.{" "}
@@ -246,34 +240,36 @@ export default async function LandingPage() {
         </section>
 
         {/* ── Extracted sections ── */}
-        <ServicesSection />
-        <OneTimeServicesSection />
-        <CaseStudiesSection />
-        <ProcessSection />
-        <DifferentiatorsSection />
-        <TestimonialsSection testimonials={testimonials ?? []} />
-        <RoiSection />
+        <ClickSparkWrapper>
+          <ServicesSection />
+          <OneTimeServicesSection />
+          <CaseStudiesSection />
+          <ProcessSection />
+          <DifferentiatorsSection />
+          <TestimonialsSection testimonials={testimonials ?? []} />
+          <RoiSection />
 
-        {/* ── FAQ ── */}
-        <section id="preguntas" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
-          <div className="max-w-3xl mx-auto">
-            <FadeIn className="text-center mb-14">
-              <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Preguntas frecuentes</p>
-              <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
-                Lo que todos preguntan.
-              </h2>
-              <p className="text-northpeak-text-muted max-w-md mx-auto">
-                Sin tecnicismos. Respuestas directas sobre cómo funciona la infraestructura de IA para tu negocio.
-              </p>
-            </FadeIn>
-            <FadeIn delay={0.1}>
-              <FaqAccordion />
-            </FadeIn>
-          </div>
-        </section>
+          {/* ── FAQ ── */}
+          <section id="preguntas" className="py-24 px-5 sm:px-8 border-t border-northpeak-surface">
+            <div className="max-w-3xl mx-auto">
+              <FadeIn className="text-center mb-14">
+                <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Preguntas frecuentes</p>
+                <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
+                  Lo que todos preguntan.
+                </h2>
+                <p className="text-northpeak-text-muted max-w-md mx-auto">
+                  Sin tecnicismos. Respuestas directas sobre cómo funciona la infraestructura de IA para tu negocio.
+                </p>
+              </FadeIn>
+              <FadeIn delay={0.1}>
+                <FaqAccordion />
+              </FadeIn>
+            </div>
+          </section>
 
-        <FinalCtaSection />
-        <FooterSection />
+          <FinalCtaSection />
+          <FooterSection />
+        </ClickSparkWrapper>
 
       </div>{/* /z-10 wrapper */}
 

@@ -1,4 +1,5 @@
 import FadeIn from "@/components/landing/fade-in";
+import BlurTitle from "@/components/landing/blur-title";
 import TiltCard from "@/components/portal/tilt-card";
 import { steps } from "@/lib/data/landing-data";
 
@@ -9,7 +10,7 @@ export default function ProcessSection() {
                 <FadeIn className="text-center mb-16">
                     <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Proceso</p>
                     <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight">
-                        De cero a ventas automáticas
+                        <BlurTitle text="De cero a ventas automáticas" />
                     </h2>
                 </FadeIn>
 

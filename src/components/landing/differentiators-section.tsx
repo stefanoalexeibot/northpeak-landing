@@ -1,4 +1,5 @@
 import FadeIn from "@/components/landing/fade-in";
+import BlurTitle from "@/components/landing/blur-title";
 import TiltCard from "@/components/portal/tilt-card";
 import { differentiators } from "@/lib/data/landing-data";
 
@@ -9,7 +10,7 @@ export default function DifferentiatorsSection() {
                 <FadeIn className="mb-14">
                     <p className="font-mono text-[11px] tracking-[0.2em] text-northpeak-green uppercase mb-4">— Por qué nosotros</p>
                     <h2 className="font-heading font-bold text-4xl sm:text-5xl text-northpeak-text tracking-tight mb-3">
-                        Lo que nos diferencia.
+                        <BlurTitle text="Lo que nos diferencia." />
                     </h2>
                 </FadeIn>
 

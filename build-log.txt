@@ -1,0 +1,179 @@
+﻿  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/admin/documents/page.tsx
+72:6  Warning: React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/vendedores/page.tsx
+54:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/portal/(authenticated)/referrals/page.tsx
+72:6  Warning: React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/portal/(authenticated)/settings/page.tsx
+48:6  Warning: React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/portal/(authenticated)/support/page.tsx
+66:6  Warning: React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/portal/login/page.tsx
+57:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/admin/message-list.tsx
+95:6  Warning: React Hook useEffect has a missing dependency: 'supabase'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/admin/sidebar.tsx
+83:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+146:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/portal/nav.tsx
+116:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/reactbits/GradientText.tsx
+63:8  Warning: React Hook useEffect has a missing dependency: 'progress'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/76) ...
+   Generating static pages (19/76) 
+   Generating static pages (38/76) 
+node.exe :  ΓÜá 
+metadataBase 
+property in metadata 
+export is not set 
+for resolving social 
+open graph or 
+twitter images, 
+using "http://localho
+st:3000". See https:/
+/nextjs.org/docs/app/
+api-reference/functio
+ns/generate-metadata#
+metadatabase
+En línea: 1 
+Carácter: 1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ( ΓÜá me   
+ tadataBa...ta#me    
+tadatabase:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+   Generating static pages (57/76) 
+ Γ£ô Generating static pages (76/76)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                Size     First Load JS
+Γöî ╞Æ /                                      20.5 kB         160 kB
+Γö£ Γùï /_not-found                            880 B          88.6 kB
+Γö£ ╞Æ /admin                                 19 kB           278 kB
+Γö£ ╞Æ /admin/analizador                      12.8 kB         122 kB
+Γö£ ╞Æ /admin/calendar                        4.54 kB         164 kB
+Γö£ ╞Æ /admin/catalogo                        5.92 kB         112 kB
+Γö£ ╞Æ /admin/clients                         3.4 kB          108 kB
+Γö£ ╞Æ /admin/clients/[id]                    26.6 kB         196 kB
+Γö£ ╞Æ /admin/clients/new                     7.07 kB         112 kB
+Γö£ ╞Æ /admin/cotizador                       7.25 kB         113 kB
+Γö£ ╞Æ /admin/documents                       14.5 kB         304 kB
+Γö£ ╞Æ /admin/leads                           167 B          87.9 kB
+Γö£ ╞Æ /admin/messages                        5.06 kB         156 kB
+Γö£ ╞Æ /admin/payments                        6.79 kB         167 kB
+Γö£ ╞Æ /admin/pipeline                        8.29 kB         114 kB
+Γö£ ╞Æ /admin/propuestas                      6.78 kB         112 kB
+Γö£ ╞Æ /admin/referrals                       1.88 kB         153 kB
+Γö£ ╞Æ /admin/reports                         887 B           196 kB
+Γö£ ╞Æ /admin/testimonials                    3.53 kB         155 kB
+Γö£ ╞Æ /admin/vendedores                      5.67 kB         111 kB
+Γö£ ╞Æ /admin/ventas                          9.36 kB         105 kB
+Γö£ Γùï /analizar                              7.81 kB         107 kB
+Γö£ ╞Æ /api/admin/analisis                    0 B                0 B
+Γö£ ╞Æ /api/admin/analisis/[id]               0 B                0 B
+Γö£ ╞Æ /api/admin/catalogo                    0 B                0 B
+Γö£ ╞Æ /api/admin/client-mutations            0 B                0 B
+Γö£ ╞Æ /api/admin/client-tasks                0 B                0 B
+Γö£ ╞Æ /api/admin/confirm-payment             0 B                0 B
+Γö£ ╞Æ /api/admin/create-client               0 B                0 B
+Γö£ ╞Æ /api/admin/delete-client               0 B                0 B
+Γö£ ╞Æ /api/admin/delete-document             0 B                0 B
+Γö£ ╞Æ /api/admin/delete-media                0 B                0 B
+Γö£ ╞Æ /api/admin/delete-payment              0 B                0 B
+Γö£ ╞Æ /api/admin/delete-project              0 B                0 B
+Γö£ ╞Æ /api/admin/notifications               0 B                0 B
+Γö£ ╞Æ /api/admin/pago-link                   0 B                0 B
+Γö£ ╞Æ /api/admin/pagos-recurrentes           0 B                0 B
+Γö£ ╞Æ /api/admin/payments                    0 B                0 B
+Γö£ ╞Æ /api/admin/propuestas                  0 B                0 B
+Γö£ ╞Æ /api/admin/resend-welcome              0 B                0 B
+Γö£ ╞Æ /api/admin/resultados                  0 B                0 B
+Γö£ ╞Æ /api/admin/tareas                      0 B                0 B
+Γö£ ╞Æ /api/admin/vendedores                  0 B                0 B
+Γö£ ╞Æ /api/ai/analyze                        0 B                0 B
+Γö£ ╞Æ /api/ai/content                        0 B                0 B
+Γö£ ╞Æ /api/ai/pricing                        0 B                0 B
+Γö£ ╞Æ /api/ai/pricing-personalizado          0 B                0 B
+Γö£ ╞Æ /api/ai/strategy                       0 B                0 B
+Γö£ ╞Æ /api/analizar                          0 B                0 B
+Γö£ ╞Æ /api/cron/payment-reminders            0 B                0 B
+Γö£ ╞Æ /api/cron/recurring-payments           0 B                0 B
+Γö£ ╞Æ /api/cron/weekly-summary               0 B                0 B
+Γö£ ╞Æ /api/cuestionario/[token]              0 B                0 B
+Γö£ ╞Æ /api/leads                             0 B                0 B
+Γö£ ╞Æ /api/pago/[token]                      0 B                0 B
+Γö£ ╞Æ /api/pago/sign-upload                  0 B                0 B
+Γö£ ╞Æ /api/portal/deliverables/[id]/approve  0 B                0 B
+Γö£ ╞Æ /api/portal/notify                     0 B                0 B
+Γö£ ╞Æ /api/portal/sign-contract              0 B                0 B
+Γö£ ╞Æ /api/propuesta/[token]                 0 B                0 B
+Γö£ ╞Æ /api/reporte/[id]                      0 B                0 B
+Γö£ ╞Æ /api/testimonials                      0 B                0 B
+Γö£ ╞Æ /cuestionario/[token]                  3.13 kB        90.9 kB
+Γö£ Γùï /icon.png                              0 B                0 B
+Γö£ Γùï /icon.svg                              0 B                0 B
+Γö£ ╞Æ /pago/[token]                          4 kB           91.8 kB
+Γö£ ╞Æ /portal/calendar                       2.92 kB        98.8 kB
+Γö£ ╞Æ /portal/contract                       8.68 kB         114 kB
+Γö£ ╞Æ /portal/dashboard                      7.17 kB         112 kB
+Γö£ ╞Æ /portal/files                          3.61 kB         165 kB
+Γö£ ╞Æ /portal/invoice                        3.37 kB         237 kB
+Γö£ Γùï /portal/login                          3.52 kB         155 kB
+Γö£ ╞Æ /portal/payments                       187 B          96.7 kB
+Γö£ ╞Æ /portal/projects                       187 B          96.7 kB
+Γö£ ╞Æ /portal/projects/[id]                  3.67 kB         108 kB
+Γö£ ╞Æ /portal/propuesta                      167 B          87.9 kB
+Γö£ ╞Æ /portal/referrals                      5.04 kB         156 kB
+Γö£ ╞Æ /portal/resultados                     167 B          87.9 kB
+Γö£ ╞Æ /portal/settings                       4.77 kB         166 kB
+Γö£ ╞Æ /portal/support                        5.41 kB         166 kB
+Γö£ ╞Æ /portal/testimonial                    4.66 kB         166 kB
+Γö£ ╞Æ /portal/welcome                        167 B          87.9 kB
+Γö£ Γùï /privacidad                            187 B          96.7 kB
+Γöö ╞Æ /propuesta/[token]                     3.64 kB        91.4 kB
++ First Load JS shared by all              87.8 kB
+  Γö£ chunks/2117-d86cbc7c52962e33.js        31.9 kB
+  Γö£ chunks/fd9d1056-08c28c1f39be9001.js    53.6 kB
+  Γöö other shared chunks (total)            2.22 kB
+
+
+╞Æ Middleware                               74.5 kB
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
