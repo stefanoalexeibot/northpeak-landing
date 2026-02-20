@@ -83,11 +83,11 @@ created_at            timestamptz DEFAULT now()
 ```
 
 #### `documents`
-Contratos, notas de venta, documentos de bienvenida.
+Contratos, notas de venta, documentos de bienvenida, propuestas comerciales.
 ```sql
 id              uuid PRIMARY KEY DEFAULT gen_random_uuid()
 client_id       uuid REFERENCES clients ON DELETE CASCADE
-type            text NOT NULL  -- 'contract' | 'welcome' | 'invoice'
+type            text NOT NULL  -- 'contract' | 'welcome' | 'invoice' | 'proposal'
 title           text NOT NULL
 file_url        text
 content         jsonb          -- Para invoices: {items, discount, notes}
@@ -114,13 +114,17 @@ created_at  timestamptz DEFAULT now()
 #### `deliverables`
 Entregables dentro de un proyecto.
 ```sql
-id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
-project_id  uuid REFERENCES projects ON DELETE CASCADE
-name        text NOT NULL
-description text
-status      text DEFAULT 'pending'  -- pending|in_progress|review|completed
-order_index integer DEFAULT 0
-created_at  timestamptz DEFAULT now()
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+project_id       uuid REFERENCES projects ON DELETE CASCADE
+name             text NOT NULL
+description      text
+status           text DEFAULT 'pending'  -- pending|in_progress|review|completed
+order_index      integer DEFAULT 0
+client_approved  boolean                 -- Aprobado por el cliente
+client_feedback  text                    -- Comentarios del cliente
+approved_at      timestamptz
+scheduled_date   date                    -- Fecha programada (para agenda de contenido)
+created_at       timestamptz DEFAULT now()
 ```
 
 #### `project_milestones`
@@ -306,6 +310,61 @@ content     text NOT NULL
 created_at  timestamptz DEFAULT now()
 ```
 
+#### `client_tasks`
+Checklist interactivo de tareas visible por el cliente en su portal.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+label       text NOT NULL
+done        boolean DEFAULT false
+done_at     timestamptz
+sort_order  integer DEFAULT 0
+created_at  timestamptz DEFAULT now()
+```
+> Distinto de `tareas` (que son notas internas del admin). Estas las ve el cliente como un checklist de pendientes en su portal.
+
+#### `propuestas`
+Propuestas comerciales públicas enviadas a prospectos (sin auth, token-based).
+```sql
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+token            text UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex')
+nombre_prospecto text NOT NULL
+empresa          text
+servicios        jsonb DEFAULT '[]'   -- [{nombre, precio, descripcion}]
+precio_total     decimal
+mensaje          text                 -- Mensaje personalizado del admin
+vigencia_dias    integer DEFAULT 7
+status           text DEFAULT 'pendiente'  -- pendiente|vista|aceptada|rechazada
+visto_at         timestamptz
+vistas_count     int DEFAULT 0        -- Conteo de cada vez que se abre la propuesta
+ultima_vista_at  timestamptz
+created_at       timestamptz DEFAULT now()
+```
+
+#### `resultados_cliente`
+Resultados/scorecard registrados por el admin para mostrar al cliente (KPIs alcanzados).
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+mes         date NOT NULL            -- Mes al que corresponde el resultado
+categoria   text NOT NULL            -- 'alcance' | 'engagement' | 'leads' | 'ventas' | 'otro'
+descripcion text NOT NULL            -- Ej: "Seguidores nuevos en Instagram"
+valor       decimal                  -- Valor numerico (opcional)
+unidad      text                     -- Ej: "seguidores", "%", "consultas"
+created_at  timestamptz DEFAULT now()
+```
+
+#### `vendedores`
+Equipo de vendedores/agentes de la agencia (para CRM de ventas).
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+nombre      text NOT NULL
+email       text
+telefono    text
+activo      boolean DEFAULT true
+created_at  timestamptz DEFAULT now()
+```
+
 ### 2.2 Row Level Security (RLS)
 
 Todas las tablas tienen RLS habilitado. Patron general:
@@ -350,7 +409,7 @@ Habilitado en la tabla `notifications` para push en tiempo real al portal del cl
 
 ### 4.1 Layout
 - Sidebar fijo a la izquierda (64px de ancho, responsive — drawer en mobile)
-- Links: Dashboard, Clientes, Documentos, Mensajes, Referidos, Testimonios, Analizador, Pipeline, Catalogo, Cotizador, Reportes
+- Links: Dashboard, Clientes, Documentos, Mensajes, Referidos, Testimonios, Analizador, Pipeline, Propuestas, Catalogo, Cotizador, Ventas, Reportes
 - Boton de cerrar sesion
 - Logo de la marca arriba
 - Contenido principal con padding izquierdo de 64px
@@ -460,6 +519,19 @@ Dashboard de metricas:
 
 ### 4.11 Analizador Digital (`/admin/analizador`)
 > **Nota:** El campo "Giro" usa `ComboboxInput` con 55+ giros predefinidos. El campo "Zona/Ubicacion" usa `ComboboxInput` con 60+ ciudades de Mexico (enfocado en AMM). Ver seccion 10.2.
+
+**Alertas de seguimiento:**
+- Los prospectos en el historial muestran badge de dias en la etapa actual (`etapa_updated_at`)
+- Si llevan >3 dias: badge amarillo "warn" (X dias sin avance)
+- Si llevan >7 dias: badge rojo "urgent" (X dias, requiere atencion urgente)
+- Seccion "Requieren atencion" al inicio del historial muestra solo los urgentes/warn
+
+**Plantillas de WhatsApp por etapa:**
+- Boton de mensajeria por cada prospecto abre dropdown de templates
+- Templates predefinidos segun etapa actual: nuevo, cuestionario_enviado, cuestionario_completado, en_negociacion
+- Click en template lo copia al clipboard
+- Los templates usan el nombre del negocio y contacto del prospecto
+
 Herramienta para analizar la presencia digital de prospectos:
 - Form de datos: nombre, giro (dropdown con ~23 opciones), zona, contacto, telefono
 - Boton "Llenar con IA" — llama a Claude para estimar hallazgos
@@ -518,6 +590,48 @@ Generador de cotizaciones en tiempo real usando el catalogo:
 - Generacion de PDF de cotizacion
 - El campo "concepto" en pagos usa `ComboboxInput` con conceptos predefinidos
 
+### 4.16 Propuestas Publicas (`/admin/propuestas`)
+Generador de propuestas comerciales con link publico para prospectos:
+- Crear propuesta: nombre prospecto, empresa, lista de servicios (nombre + precio), mensaje personalizado, vigencia en dias
+- Tabla de propuestas con: nombre, empresa, precio total, status, vistas
+- Contador de vistas: cuantas veces se abrio la propuesta + tiempo desde la ultima visita (ej: "3 vistas · hace 2h")
+- Status automatico: pendiente → vista (al primer acceso) → aceptada/rechazada
+- Boton copiar link por cada propuesta (URL publica `/propuesta/{token}`)
+- Sin autenticacion requerida para el prospecto
+
+### 4.17 Ventas — Guia y Playbook (`/admin/ventas`)
+Seccion de referencia rapida para el proceso de ventas:
+
+**Metricas de conversion (live):**
+- Prospectos activos (en etapas abiertas del pipeline)
+- Tasa de cierre: ganados / (ganados + perdidos) %
+- Dias promedio para cerrar
+- Etapa con mas prospectos atascados (cuello de botella)
+
+**5 escenarios de venta simulados** con dialogos paso a paso:
+1. Cliente encontrado por internet (llama curioso)
+2. Visita presencial a negocio (cold call en calle)
+3. Referido de cliente actual
+4. Prospecto que pide tiempo para pensarlo
+5. Prospecto con objeciones de precio
+
+**7 tarjetas de objeciones** con framing y respuesta sugerida:
+- "Es muy caro"
+- "No tengo tiempo"
+- "Ya tenemos alguien que nos lleva las redes"
+- "Dejame pensarlo"
+- etc.
+
+**8 templates de WhatsApp** copiables con un click:
+- Primer contacto
+- Follow-up post-demo
+- Envio de propuesta
+- Recordatorio de propuesta
+- Cierre de urgencia
+- etc.
+
+**Senales de compra:** checklist de senales positivas vs. de duda para leer al prospecto.
+
 ---
 
 ## 5. PORTAL DEL CLIENTE
@@ -538,6 +652,8 @@ Generador de cotizaciones en tiempo real usando el catalogo:
 - Saludo personalizado con nombre del cliente
 - Quick links en grid: Contratos, Facturas, Propuestas, Proyectos, Archivos, Referidos, Soporte
 - Badge counts en cada link (proyectos activos, archivos nuevos, mensajes sin leer)
+- **Agenda de contenido:** deliverables con `scheduled_date >= hoy` agrupados por dia. Encabezados: "Hoy", "Manana", luego fecha corta. Punto de color por status (gris=pendiente, azul=en progreso, amarillo=revision, verde=completado con tachar). Solo se muestra si hay deliverables con fecha programada.
+- **Resultados recientes:** ultimos resultados del scorecard registrados por el admin. Cards con icono por categoria + descripcion + valor. Solo visible si el admin registro al menos 1 resultado. Link "Ver todos →" a `/portal/resultados`.
 
 ### 5.4 Proyectos (`/portal/projects`)
 - Lista de proyectos con status badge y barra de progreso
@@ -581,6 +697,7 @@ Generador de cotizaciones en tiempo real usando el catalogo:
 
 ### 5.12 Calendario (`/portal/calendar`)
 - Vista de calendario con hitos del proyecto y fechas importantes
+- Deliverables con `scheduled_date` aparecen como eventos verdes diferenciados de milestones y pagos
 
 ### 5.13 Referidos (`/portal/referrals`)
 - Formulario para enviar referidos (nombre, email, telefono, empresa, notas)
@@ -593,6 +710,12 @@ Generador de cotizaciones en tiempo real usando el catalogo:
 ### 5.15 Settings (`/portal/settings`)
 - Toggle de tema (dark/light)
 - Edicion de perfil
+
+### 5.16 Resultados / Scorecard (`/portal/resultados`)
+- Lista completa de resultados registrados por el admin agrupados por mes
+- Cards con categoria, descripcion, valor y unidad
+- Categorias con icono: alcance, engagement, leads, ventas, otro
+- Solo lectura para el cliente (el admin los registra desde el panel)
 
 ---
 
@@ -616,7 +739,33 @@ Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionari
 
 ---
 
-## 5C. PAGINA PUBLICA: PAGO (`/pago/[token]`)
+## 5C. PAGINA PUBLICA: PROPUESTA (`/propuesta/[token]`)
+
+Pagina publica (sin autenticacion) para que el prospecto vea una propuesta comercial:
+- **Diseno oscuro** con branding de la marca
+- Muestra: nombre del prospecto, empresa, lista de servicios con precios, precio total, mensaje personalizado, vigencia restante
+- Al abrirse: incrementa `vistas_count` y guarda `ultima_vista_at`. Si es la primera visita (`status = pendiente`), cambia a `status = vista` y registra `visto_at`
+- Si la propuesta ha expirado: muestra pantalla de expirada con opciones de contacto
+- Si ya fue respondida: muestra estado correspondiente (aceptada/rechazada)
+
+> Implementacion: `src/app/propuesta/[token]/page.tsx` (cliente) + `src/app/api/propuesta/[token]/route.ts` (GET datos + POST/PUT tracking)
+
+---
+
+## 5D. PAGINA PUBLICA: ANALIZADOR PUBLICO (`/analizar`)
+
+Pagina publica donde cualquier persona puede analizar su presencia digital (sin auth):
+- Formulario publico: nombre negocio, giro, zona, contacto, telefono
+- Claude estima los hallazgos automaticamente
+- Genera reporte con score y oportunidades
+- Al finalizar: prospecto aparece en el historial del analizador admin con etapa "nuevo"
+- Sirve como herramienta de generacion de leads (el admin ve quien uso el analizador publico)
+
+> Implementacion: `src/app/analizar/page.tsx` + `src/app/api/analizar/route.ts`
+
+---
+
+## 5E. PAGINA PUBLICA: PAGO (`/pago/[token]`)
 
 Pagina publica (sin autenticacion) para que el cliente pague una factura pendiente:
 - **Diseno oscuro** con branding de la marca
@@ -648,6 +797,8 @@ Pagina publica (sin autenticacion) para que el cliente pague una factura pendien
 | `/api/admin/tareas` | GET/POST/PATCH/DELETE | CRUD de tareas por cliente |
 | `/api/admin/pagos-recurrentes` | GET/POST/PATCH/DELETE | CRUD de cobros recurrentes |
 | `/api/admin/pago-link` | POST | Genera token de pago y guarda datos bancarios |
+| `/api/admin/propuestas` | GET/POST | Lista y crea propuestas publicas |
+| `/api/admin/resultados` | GET/POST/DELETE | CRUD de resultados del scorecard por cliente |
 
 ### IA
 | Ruta | Metodo | Funcion |
@@ -668,6 +819,17 @@ Pagina publica (sin autenticacion) para que el cliente pague una factura pendien
 |------|--------|---------|
 | `/api/pago/[token]` | GET | Retorna datos del pago: concepto, monto, datos bancarios, nombre del cliente, status, due_date |
 | `/api/pago/[token]` | POST | Acepta `FormData` con campo `comprobante` (File, opcional); sube archivo a Storage en `client-files/comprobantes/{client_id}/{payment_id}.{ext}` con `upsert: true`; marca pago completado; crea notificacion `payment_received` con link al comprobante (o al perfil del cliente si no hay archivo) |
+
+### Propuesta (publico, sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/propuesta/[token]` | GET | Retorna datos de la propuesta: servicios, precio, mensaje, vigencia, status |
+| `/api/propuesta/[token]` | POST | Registra cada visita: incrementa `vistas_count`, guarda `ultima_vista_at`. Si es primera visita cambia status a "vista" y registra `visto_at` |
+
+### Analizador publico (sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/analizar` | POST | Recibe datos del negocio, llama a Claude para estimar hallazgos, crea registro en `analisis_digital` con etapa "nuevo". Accesible sin autenticacion — sirve como captacion de leads. |
 
 ### Portal
 | Ruta | Metodo | Funcion |
@@ -1001,6 +1163,27 @@ NEXT_PUBLIC_SITE_URL=https://tudominio.com  (opcional, para links en emails)
 14. Cron `/api/cron/weekly-summary` — resumen semanal por email cada lunes
 15. Dark-mode styles para `input[type="date"]` en globals.css
 
+### Fase 10: Ventas y Seguimiento
+1. Tabla `propuestas` — token publico, servicios jsonb, vistas_count, ultima_vista_at, status
+2. Pagina `/admin/propuestas` — crear propuestas, ver vistas, copiar link
+3. Pagina publica `/propuesta/[token]` — prospecto ve propuesta sin auth
+4. API `/api/propuesta/[token]` — tracking de vistas en cada apertura
+5. Alertas de seguimiento en analizador — calcular dias en etapa, badges warn/urgent
+6. Plantillas de WhatsApp por etapa en analizador — dropdown copiable por prospecto
+7. Pagina `/admin/ventas` — playbook de ventas con escenarios, objeciones, templates WA y senales de compra
+8. Tabla `resultados_cliente` — KPIs/scorecard registrados por el admin
+9. API `/api/admin/resultados` — CRUD de resultados por cliente
+10. Pagina `/portal/resultados` — cliente ve su scorecard agrupado por mes
+11. Tabla `client_tasks` — checklist interactivo visible por el cliente
+12. Pagina publica `/analizar` + API `/api/analizar` — analizador publico para captacion de leads
+
+### Fase 11: Agenda de Contenido y Calendario
+1. `deliverables.scheduled_date` (date) — fecha programada por entregable
+2. Admin: input de fecha inline en el listado de entregables del proyecto (tab Proyectos)
+3. Plantillas de proyecto tipo "contenido": auto-asignar `scheduled_date` al crear (distribucion S1-S4 de lunes a viernes)
+4. Dashboard del cliente: seccion "Agenda de contenido" — deliverables agrupados por dia con `scheduled_date >= hoy`
+5. Calendario del portal: deliverables con scheduled_date aparecen como eventos verdes
+
 ---
 
 ## 14. ADAPTACIONES PARA AGENCIA INMOBILIARIA
@@ -1027,6 +1210,13 @@ Al replicar, considera cambiar:
 - Calculadora de hipoteca
 - **Pipeline Kanban ya existe** — solo cambiar etapas: Prospecto → Visita → Oferta → Negociacion → Cierre → Perdido
 - **Cuestionario dinamico ya existe** — adaptar preguntas: presupuesto, tipo de propiedad, zona deseada, financiamiento, urgencia
+- **Propuestas publicas ya existen** — ideal para enviar propuestas de inversion/listados con tracking de vistas (saber cuando el comprador la abre)
+- **Alertas de seguimiento ya existen** — saber cuando un prospecto lleva X dias sin avance en el pipeline
+- **Plantillas WA ya existen** — adaptar templates: primer contacto, seguimiento post-visita, envio de propuesta, cierre
+- **Playbook de ventas ya existe** — reemplazar con escenarios inmobiliarios: comprador por internet, visita fria, referido de cliente, negociacion de precio
+- **Scorecard / Resultados ya existen** — usar para reportar al propietario vendedor: visitas al listing, leads generados, ofertas recibidas, comparativo de mercado
+- **Agenda de contenido ya existe** — usar para mostrar al cliente el calendario de publicacion del listing (Instagram, portales, Open House)
+- **Analizador publico ya existe** — adaptar como "analizador de tu propiedad" o captacion de leads: formulario publico con datos de la propiedad
 - Generador de listings con IA
 - Analisis comparativo de mercado con IA
 - Portal del comprador con documentos, avance de tramites, timeline
@@ -1148,4 +1338,6 @@ INSERT INTO catalogo_servicios (nombre, descripcion, precio, categoria) VALUES
 
 ---
 
-> **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026, incluyendo: diseno profesional de PDFs, cotizador rapido con generacion de PDF, subida de comprobante de pago por el cliente y datos bancarios reales. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.
+> **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026, incluyendo: diseno profesional de PDFs, cotizador rapido con generacion de PDF, subida de comprobante de pago por el cliente, datos bancarios reales, propuestas publicas con tracking de vistas, scorecard de resultados para clientes, agenda de contenido en el portal, alertas de seguimiento de prospectos, plantillas de WhatsApp por etapa, playbook de ventas con escenarios/objeciones/scripts, analizador publico para captacion de leads, y checklist interactivo de tareas por cliente. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.
+>
+> **Tablas DB actuales:** profiles, clients, documents, projects, deliverables, project_milestones, media, messages, payments, referrals, testimonials, notifications, analisis_digital, cuestionarios, tareas, catalogo_servicios, pagos_recurrentes, ai_strategies, propuestas, resultados_cliente, client_tasks, vendedores

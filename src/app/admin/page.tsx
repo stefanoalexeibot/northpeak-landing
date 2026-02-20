@@ -6,6 +6,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import ClientsChart from "@/components/admin/charts/clients-chart";
 import ProjectsChart from "@/components/admin/charts/projects-chart";
 import RevenueChart from "@/components/admin/charts/revenue-chart";
@@ -22,17 +23,15 @@ function getGreeting() {
 }
 
 const ETAPA_LABELS: Record<string, { label: string; color: string; dot: string }> = {
-  nuevo:                  { label: "Nuevos",       color: "text-gray-400",    dot: "bg-gray-400" },
-  cuestionario_enviado:   { label: "En contacto",  color: "text-blue-400",    dot: "bg-blue-400" },
-  cuestionario_completado:{ label: "Con cotización",color: "text-emerald-400", dot: "bg-emerald-400" },
-  en_negociacion:         { label: "Negociando",   color: "text-yellow-400",  dot: "bg-yellow-400" },
-  cerrado_ganado:         { label: "Ganados",      color: "text-northpeak-green", dot: "bg-northpeak-green" },
-  cerrado_perdido:        { label: "Perdidos",     color: "text-red-400",     dot: "bg-red-400" },
+  nuevo: { label: "Nuevos", color: "text-gray-400", dot: "bg-gray-400" },
+  cuestionario_enviado: { label: "En contacto", color: "text-blue-400", dot: "bg-blue-400" },
+  cuestionario_completado: { label: "Con cotización", color: "text-emerald-400", dot: "bg-emerald-400" },
+  en_negociacion: { label: "Negociando", color: "text-yellow-400", dot: "bg-yellow-400" },
+  cerrado_ganado: { label: "Ganados", color: "text-northpeak-green", dot: "bg-northpeak-green" },
+  cerrado_perdido: { label: "Perdidos", color: "text-red-400", dot: "bg-red-400" },
 };
 
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
+
 
 function getMonthlyData(dates: string[]) {
   const months: Record<string, number> = {};
@@ -75,6 +74,13 @@ function getMonthlyRevenue(payments: { amount: number; paid_at: string | null }[
 
 export default async function AdminDashboard() {
   const supabase = createClient();
+
+  // Get admin name dynamically
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: adminClient } = user
+    ? await supabase.from("clients").select("name").eq("user_id", user.id).single()
+    : { data: null };
+  const adminName = adminClient?.name || "Admin";
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -166,7 +172,7 @@ export default async function AdminDashboard() {
               {dateStr}
             </p>
             <h1 className="text-2xl sm:text-3xl font-heading font-bold text-northpeak-text">
-              {getGreeting()}, Alejandro
+              {getGreeting()}, {adminName}
             </h1>
             <p className="text-northpeak-text-muted mt-1 text-sm">
               {activeClients ?? 0} clientes activos · {prospectoActivos} prospectos en curso

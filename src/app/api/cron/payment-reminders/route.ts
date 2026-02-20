@@ -20,8 +20,8 @@ export async function GET(request: Request) {
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   const in3days = new Date(now.getTime() + 3 * 86400000).toISOString().split("T")[0];
-  const portalUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/portal/invoice`
+  const portalUrl = process.env.NEXT_PUBLIC_APP_URL
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/portal/invoice`
     : "https://northpeakdigital.com.mx/portal/invoice";
 
   // Get payments due in next 3 days (upcoming) + overdue

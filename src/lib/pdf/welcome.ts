@@ -36,7 +36,7 @@ export function generateWelcomePDF(data: ClientFormData): jsPDF {
     doc,
     "Tu acceso al Portal de Clientes NorthPeak",
     [
-      `Dirección:  ${process.env.NEXT_PUBLIC_SITE_URL || "northpeakdigital.com.mx"}/portal`,
+      `Dirección:  ${process.env.NEXT_PUBLIC_APP_URL || "northpeak.mx"}/portal`,
       `Email:      ${data.email}`,
       `Contraseña: La que te enviamos por WhatsApp al registrarte`,
     ],

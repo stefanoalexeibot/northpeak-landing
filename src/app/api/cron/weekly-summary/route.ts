@@ -83,11 +83,11 @@ export async function GET(request: Request) {
   // Pipeline summary
   const pipelineSummary = newProspectos
     ? {
-        nuevos: newProspectos.filter((p) => p.etapa === "nuevo").length,
-        enNegociacion: newProspectos.filter((p) => p.etapa === "en_negociacion").length,
-        ganados,
-        perdidos: newProspectos.filter((p) => p.etapa === "cerrado_perdido").length,
-      }
+      nuevos: newProspectos.filter((p) => p.etapa === "nuevo").length,
+      enNegociacion: newProspectos.filter((p) => p.etapa === "en_negociacion").length,
+      ganados,
+      perdidos: newProspectos.filter((p) => p.etapa === "cerrado_perdido").length,
+    }
     : { nuevos: 0, enNegociacion: 0, ganados: 0, perdidos: 0 };
 
   const fmt = (n: number) =>
@@ -145,7 +145,7 @@ export async function GET(request: Request) {
     ` : ""}
 
     <div style="text-align: center; margin-top: 24px;">
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://northpeakdigital.com"}/admin" style="display: inline-block; background: #00E5A0; color: #05060A; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://northpeakdigital.com"}/admin" style="display: inline-block; background: #00E5A0; color: #05060A; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
         Ir al Portal
       </a>
     </div>
