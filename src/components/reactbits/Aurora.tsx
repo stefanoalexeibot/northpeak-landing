@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useDesktop } from "@/hooks/use-media-query";
 
 interface AuroraProps {
     className?: string;
@@ -19,7 +20,22 @@ export default function Aurora({
     speed = 8,
     opacity = 0.35,
 }: AuroraProps) {
+    const isDesktop = useDesktop();
     const gradient = `radial-gradient(ellipse at 50% 50%, ${colorStops.join(", ")})`;
+
+    // On mobile: static lightweight gradient, no animation, no blur
+    if (!isDesktop) {
+        return (
+            <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: `radial-gradient(ellipse at 50% 30%, ${colorStops[0]}22, transparent 65%)`,
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>

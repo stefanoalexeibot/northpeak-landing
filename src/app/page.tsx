@@ -13,7 +13,6 @@ import QuickCaptureForm from "@/components/landing/quick-capture-form";
 import MobileNav from "@/components/landing/mobile-nav";
 import HeroLiveFeed from "@/components/landing/hero-live-feed";
 import StatsMarquee from "@/components/landing/stats-marquee";
-import CursorGlow from "@/components/portal/cursor-glow";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
 import RotatingText from "@/components/reactbits/RotatingText";
@@ -72,7 +71,6 @@ export default async function LandingPage() {
       {/* ── Global effects ── */}
       <AnimatedBackground />
       <DotGrid />
-      <CursorGlow />
 
       <div className="relative z-10">
 
