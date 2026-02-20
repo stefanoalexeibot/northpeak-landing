@@ -136,7 +136,11 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
   async function saveInfo() {
     setSaving(true);
-    await supabase.from("clients").update({ name, company, phone: phone || null }).eq("id", client.id);
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "update-info", clientId: client.id, name, company, phone }),
+    });
     setSaving(false);
     router.refresh();
   }
@@ -144,20 +148,25 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   async function createPayment() {
     if (!payAmount || !payConcept) return;
     setSavingPayment(true);
-    const { error } = await supabase.from("payments").insert({
-      client_id: client.id,
-      amount: parseFloat(payAmount),
-      concept: payConcept,
-      payment_method: payMethod,
-      status: payStatus,
-      reference_number: payRef || null,
-      notes: payNotes || null,
-      due_date: payDueDate || null,
-      paid_at: payStatus === "completed" ? new Date().toISOString() : null,
+    const res = await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "create-payment",
+        clientId: client.id,
+        amount: parseFloat(payAmount),
+        concept: payConcept,
+        payment_method: payMethod,
+        status: payStatus,
+        reference_number: payRef || null,
+        notes: payNotes || null,
+        due_date: payDueDate || null,
+      }),
     });
     setSavingPayment(false);
-    if (error) {
-      addToast(`Error al registrar pago: ${error.message}`, "error");
+    if (!res.ok) {
+      const data = await res.json();
+      addToast(`Error al registrar pago: ${data.error}`, "error");
       return;
     }
     addToast("Pago registrado exitosamente", "success");
@@ -199,11 +208,10 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
       }
     }
 
-    await supabase.from("documents").insert({
-      client_id: client.id,
-      type: docType,
-      title: docTitle,
-      file_url: fileUrl,
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "upload-document", clientId: client.id, type: docType, title: docTitle, file_url: fileUrl }),
     });
 
     setShowDocDialog(false);
@@ -222,18 +230,12 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
       notes: invoiceNotes,
     };
 
-    // Upsert invoice document
     const existing = documents.find(d => d.type === "invoice");
-    if (existing) {
-      await supabase.from("documents").update({ content, title: "Nota de venta" }).eq("id", existing.id);
-    } else {
-      await supabase.from("documents").insert({
-        client_id: client.id,
-        type: "invoice",
-        title: "Nota de venta",
-        content,
-      });
-    }
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "save-invoice", clientId: client.id, content, existingId: existing?.id || null }),
+    });
 
     setShowInvoiceDialog(false);
     setSavingInvoice(false);
@@ -242,11 +244,10 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
   async function createProject() {
     setSavingProject(true);
-    await supabase.from("projects").insert({
-      client_id: client.id,
-      name: projName,
-      description: projDesc || null,
-      status: projStatus,
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "create-project", clientId: client.id, name: projName, description: projDesc, status: projStatus }),
     });
     setShowProjectDialog(false);
     setProjName("");
@@ -260,10 +261,10 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
     setSavingDeliverable(true);
     const proj = projects.find(p => p.id === delProjectId);
     const maxOrder = proj?.deliverables?.reduce((m, d) => Math.max(m, d.order_index), -1) ?? -1;
-    await supabase.from("deliverables").insert({
-      project_id: delProjectId,
-      name: delName,
-      order_index: maxOrder + 1,
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add-deliverable", projectId: delProjectId, name: delName, order_index: maxOrder + 1 }),
     });
     setShowDeliverableDialog(false);
     setDelName("");
@@ -272,17 +273,29 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
   }
 
   async function updateDeliverableStatus(id: string, status: string) {
-    await supabase.from("deliverables").update({ status }).eq("id", id);
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "update-deliverable", id, status }),
+    });
     router.refresh();
   }
 
   async function updateDeliverableDate(id: string, scheduled_date: string) {
-    await supabase.from("deliverables").update({ scheduled_date: scheduled_date || null }).eq("id", id);
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "update-deliverable", id, scheduled_date: scheduled_date || null }),
+    });
     router.refresh();
   }
 
   async function updateProjectStatus(id: string, status: string) {
-    await supabase.from("projects").update({ status }).eq("id", id);
+    await fetch("/api/admin/client-mutations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "update-project-status", id, status }),
+    });
     router.refresh();
   }
 
@@ -296,12 +309,17 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
 
     if (!error) {
       const { data } = supabase.storage.from("client-files").getPublicUrl(path);
-      await supabase.from("media").insert({
-        client_id: client.id,
-        name: mediaFile.name,
-        file_url: data.publicUrl,
-        file_type: mediaFile.type,
-        file_size: mediaFile.size,
+      await fetch("/api/admin/client-mutations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "upload-media",
+          clientId: client.id,
+          name: mediaFile.name,
+          file_url: data.publicUrl,
+          file_type: mediaFile.type,
+          file_size: mediaFile.size,
+        }),
       });
     }
 
@@ -676,75 +694,75 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                       const isOverdue = dueDate && dueDate < today && pay.status !== "completed";
                       const isUpcoming = dueDate && !isOverdue && dueDate.getTime() - today.getTime() < 7 * 86400000 && pay.status !== "completed";
                       return (
-                      <div key={pay.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
-                        <CreditCard className="h-5 w-5 text-northpeak-green shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-xs text-northpeak-text-dim">
-                              {pay.payment_method === "transfer" ? "Transferencia" : pay.payment_method === "card" ? "Tarjeta" : pay.payment_method === "cash" ? "Efectivo" : pay.payment_method === "other" ? "Otro" : pay.payment_method}
-                              {pay.reference_number ? ` — ${pay.reference_number}` : ""}
-                            </p>
-                            {pay.due_date && (
-                              <span className="text-xs text-northpeak-text-dim">
-                                Vence: {new Date(pay.due_date + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
-                              </span>
-                            )}
-                            {isOverdue && (
-                              <span className="text-[10px] font-medium text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">
-                                Vencido
-                              </span>
-                            )}
-                            {isUpcoming && (
-                              <span className="text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
-                                Próximo
-                              </span>
-                            )}
+                        <div key={pay.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
+                          <CreditCard className="h-5 w-5 text-northpeak-green shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-northpeak-text truncate">{pay.concept}</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-xs text-northpeak-text-dim">
+                                {pay.payment_method === "transfer" ? "Transferencia" : pay.payment_method === "card" ? "Tarjeta" : pay.payment_method === "cash" ? "Efectivo" : pay.payment_method === "other" ? "Otro" : pay.payment_method}
+                                {pay.reference_number ? ` — ${pay.reference_number}` : ""}
+                              </p>
+                              {pay.due_date && (
+                                <span className="text-xs text-northpeak-text-dim">
+                                  Vence: {new Date(pay.due_date + "T00:00:00").toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                                </span>
+                              )}
+                              {isOverdue && (
+                                <span className="text-[10px] font-medium text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-full">
+                                  Vencido
+                                </span>
+                              )}
+                              {isUpcoming && (
+                                <span className="text-[10px] font-medium text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded-full">
+                                  Próximo
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-northpeak-text">${Number(pay.amount).toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
-                          <span className={`text-xs font-medium ${pay.status === "completed" ? "text-northpeak-green" : pay.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
-                            {pay.status === "completed" ? "Pagado" : pay.status === "pending" ? "Pendiente" : pay.status === "failed" ? "Fallido" : "Reembolsado"}
-                          </span>
-                        </div>
-                        {pay.comprobante_url && (
-                          <a
-                            href={pay.comprobante_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Ver comprobante"
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-northpeak-green hover:bg-northpeak-green/10 transition-colors"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        )}
-                        {pay.status === "pending" && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openPagoLink(pay.id)}
-                              title="Generar link de pago"
-                              className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-northpeak-text">${Number(pay.amount).toLocaleString("es-MX", { minimumFractionDigits: 2 })}</p>
+                            <span className={`text-xs font-medium ${pay.status === "completed" ? "text-northpeak-green" : pay.status === "failed" ? "text-red-400" : "text-yellow-400"}`}>
+                              {pay.status === "completed" ? "Pagado" : pay.status === "pending" ? "Pendiente" : pay.status === "failed" ? "Fallido" : "Reembolsado"}
+                            </span>
+                          </div>
+                          {pay.comprobante_url && (
+                            <a
+                              href={pay.comprobante_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="Ver comprobante"
+                              className="inline-flex items-center justify-center h-8 w-8 rounded-md text-northpeak-green hover:bg-northpeak-green/10 transition-colors"
                             >
-                              <Link2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => confirmPayment(pay.id)}
-                              title="Confirmar pago recibido"
-                              className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        <Button variant="ghost" size="icon" onClick={() => deletePayment(pay.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          )}
+                          {pay.status === "pending" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openPagoLink(pay.id)}
+                                title="Generar link de pago"
+                                className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                              >
+                                <Link2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => confirmPayment(pay.id)}
+                                title="Confirmar pago recibido"
+                                className="text-northpeak-text-muted hover:text-northpeak-green h-8 w-8"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button variant="ghost" size="icon" onClick={() => deletePayment(pay.id)} className="text-northpeak-text-muted hover:text-red-400 h-8 w-8">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       );
                     })}
                   </div>
@@ -796,9 +814,9 @@ export default function ClientDetailTabs({ client, documents, projects, media, p
                   {analyses.map((a) => {
                     const nivelColor =
                       a.nivel === "CRITICO" ? "text-red-400 bg-red-400/10" :
-                      a.nivel === "BAJO" ? "text-yellow-400 bg-yellow-400/10" :
-                      a.nivel === "MEDIO" ? "text-blue-400 bg-blue-400/10" :
-                      "text-northpeak-green bg-northpeak-green/10";
+                        a.nivel === "BAJO" ? "text-yellow-400 bg-yellow-400/10" :
+                          a.nivel === "MEDIO" ? "text-blue-400 bg-blue-400/10" :
+                            "text-northpeak-green bg-northpeak-green/10";
                     return (
                       <div key={a.id} className="flex items-center gap-3 rounded-lg p-3 bg-northpeak-bg">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-northpeak-surface shrink-0">
@@ -1244,12 +1262,12 @@ interface Resultado {
 }
 
 const CATEGORIA_CONFIG: Record<string, { label: string; color: string }> = {
-  redes:    { label: "Redes sociales", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
-  gmb:      { label: "Google My Business", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  "reseñas":{ label: "Reseñas", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" },
-  leads:    { label: "Leads", color: "bg-northpeak-green/10 text-northpeak-green border-northpeak-green/20" },
-  web:      { label: "Web", color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" },
-  otro:     { label: "Otro", color: "bg-northpeak-surface text-northpeak-text-muted border-northpeak-surface" },
+  redes: { label: "Redes sociales", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+  gmb: { label: "Google My Business", color: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  "reseñas": { label: "Reseñas", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" },
+  leads: { label: "Leads", color: "bg-northpeak-green/10 text-northpeak-green border-northpeak-green/20" },
+  web: { label: "Web", color: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" },
+  otro: { label: "Otro", color: "bg-northpeak-surface text-northpeak-text-muted border-northpeak-surface" },
 };
 
 function ResultadosTab({ clientId }: { clientId: string }) {
