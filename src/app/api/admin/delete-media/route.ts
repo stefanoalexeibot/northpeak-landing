@@ -1,6 +1,7 @@
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 export async function DELETE(request: Request) {
   const supabase = createServerClient();
@@ -21,5 +22,6 @@ export async function DELETE(request: Request) {
   const { error } = await service.from("media").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
+  revalidatePath("/admin", "layout");
   return NextResponse.json({ success: true });
 }

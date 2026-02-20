@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -26,5 +27,6 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
+  revalidatePath("/admin", "layout");
   return NextResponse.json({ success: true });
 }

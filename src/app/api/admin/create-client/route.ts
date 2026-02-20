@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome";
 
 export async function POST(request: Request) {
@@ -114,5 +115,6 @@ export async function POST(request: Request) {
     }
   }
 
+  revalidatePath("/admin", "layout");
   return NextResponse.json({ success: true, clientId });
 }

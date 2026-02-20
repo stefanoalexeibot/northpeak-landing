@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
@@ -10,13 +9,28 @@ export default function DeleteClientButton({ clientId, clientName }: { clientId:
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleDelete() {
     setDeleting(true);
-    await supabase.from("clients").delete().eq("id", clientId);
-    router.push("/admin/clients");
-    router.refresh();
+    try {
+      const res = await fetch("/api/admin/delete-client", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: clientId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Error al eliminar");
+      }
+
+      router.push("/admin/clients");
+      router.refresh();
+    } catch (err) {
+      console.error("Error deleting client:", err);
+      setDeleting(false);
+      setConfirming(false);
+    }
   }
 
   if (confirming) {
