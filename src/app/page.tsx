@@ -19,6 +19,9 @@ import DotGrid from "@/components/portal/dot-grid";
 import RotatingText from "@/components/reactbits/RotatingText";
 import ShinyText from "@/components/reactbits/ShinyText";
 import GradientText from "@/components/reactbits/GradientText";
+import ScrollToTop from "@/components/landing/scroll-to-top";
+import StickyMobileCta from "@/components/landing/sticky-mobile-cta";
+import ParallaxHeroGlow from "@/components/landing/parallax-hero-glow";
 
 // ── Extracted section components ─────────────────────────────────────────────
 import ServicesSection from "@/components/landing/services-section";
@@ -100,10 +103,7 @@ export default async function LandingPage() {
 
         {/* ── Hero ── */}
         <section className="relative min-h-[92vh] flex items-center px-5 sm:px-8 pt-16 pb-24 overflow-hidden">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-northpeak-green/8 blur-[100px]" />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-northpeak-green/25 to-transparent" />
-          </div>
+          <ParallaxHeroGlow />
 
           <div className="relative max-w-6xl mx-auto w-full grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-12 xl:gap-16 items-center">
             <div>
@@ -276,6 +276,9 @@ export default async function LandingPage() {
         <FooterSection />
 
       </div>{/* /z-10 wrapper */}
+
+      <ScrollToTop />
+      <StickyMobileCta />
     </div>
   );
 }

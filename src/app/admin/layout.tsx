@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/sidebar";
 import AdminLayoutClient from "@/components/admin/admin-layout-client";
 import { ToastProvider } from "@/components/ui/toast";
+import Breadcrumbs from "@/components/admin/breadcrumbs";
+import PageTransition from "@/components/admin/page-transition";
 
 export default async function AdminLayout({
   children,
@@ -26,8 +28,12 @@ export default async function AdminLayout({
       <div className="flex min-h-screen bg-northpeak-bg">
         <AdminSidebar />
         <AdminLayoutClient />
-        <main className="flex-1 pt-14 px-4 pb-6 lg:pt-0 lg:ml-64 lg:p-8">{children}</main>
+        <main className="flex-1 pt-14 px-4 pb-6 lg:pt-0 lg:ml-64 lg:p-8">
+          <Breadcrumbs />
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </ToastProvider>
   );
 }
+
