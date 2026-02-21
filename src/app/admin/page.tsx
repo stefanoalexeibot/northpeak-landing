@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
   // Get admin name dynamically
   const { data: { user } } = await supabase.auth.getUser();
   const { data: adminClient } = user
-    ? await supabase.from("clients").select("name").eq("user_id", user.id).single()
+    ? await supabase.from("clients").select("name").eq("user_id", user.id).maybeSingle()
     : { data: null };
   const adminName = adminClient?.name || "Admin";
 
@@ -88,37 +88,70 @@ export default async function AdminDashboard() {
   const today = now.toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
   const in7days = new Date(now.getTime() + 7 * 86400000).toLocaleDateString("en-CA", { timeZone: "America/Monterrey" });
 
-  const [
-    { data: monthlyPayments },
-    { data: lastMonthPayments },
-    { count: unsignedContracts },
-    { count: messageCount },
-    { data: overduePaymentsData },
-    { data: pendingPaymentsData },
-    { data: upcomingPaymentsData },
-    { count: totalClients },
-    { count: activeClients },
-    { data: pipelineData },
-    { data: recentClients },
-    { data: allClients },
-    { data: allProjects },
-    { data: allPayments },
-  ] = await Promise.all([
-    supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", startOfMonth),
-    supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", lastMonthStart).lt("paid_at", startOfMonth),
-    supabase.from("documents").select("*", { count: "exact", head: true }).eq("type", "contract").or("signed.is.null,signed.eq.false"),
-    supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
-    supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).lt("due_date", today),
-    supabase.from("payments").select("amount").eq("status", "pending"),
-    supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).gte("due_date", today).lte("due_date", in7days),
-    supabase.from("clients").select("*", { count: "exact", head: true }),
-    supabase.from("clients").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("analisis_digital").select("etapa"),
-    supabase.from("clients").select("id, name, company, email, status, created_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("clients").select("created_at").order("created_at"),
-    supabase.from("projects").select("status"),
-    supabase.from("payments").select("amount, paid_at").eq("status", "completed").not("paid_at", "is", null).order("paid_at"),
-  ]);
+  let monthlyPayments: { amount: number }[] | null = null;
+  let lastMonthPayments: { amount: number }[] | null = null;
+  let unsignedContracts: number | null = 0;
+  let messageCount: number | null = 0;
+  let overduePaymentsData: { id: string; client_id: string; concept: string; amount: number; due_date: string | null; clients: unknown }[] | null = null;
+  let pendingPaymentsData: { amount: number }[] | null = null;
+  let upcomingPaymentsData: { id: string; client_id: string; concept: string; amount: number; due_date: string | null; clients: unknown }[] | null = null;
+  let totalClients: number | null = 0;
+  let activeClients: number | null = 0;
+  let pipelineData: { etapa: string }[] | null = null;
+  let recentClients: { id: string; name: string; company: string | null; email: string; status: string; created_at: string }[] | null = null;
+  let allClients: { created_at: string }[] | null = null;
+  let allProjects: { status: string }[] | null = null;
+  let allPayments: { amount: number; paid_at: string | null }[] | null = null;
+
+  try {
+    const results = await Promise.all([
+      supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", startOfMonth),
+      supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", lastMonthStart).lt("paid_at", startOfMonth),
+      supabase.from("documents").select("*", { count: "exact", head: true }).eq("type", "contract").or("signed.is.null,signed.eq.false"),
+      supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
+      supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).lt("due_date", today),
+      supabase.from("payments").select("amount").eq("status", "pending"),
+      supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).gte("due_date", today).lte("due_date", in7days),
+      supabase.from("clients").select("*", { count: "exact", head: true }),
+      supabase.from("clients").select("*", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("analisis_digital").select("etapa"),
+      supabase.from("clients").select("id, name, company, email, status, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("clients").select("created_at").order("created_at"),
+      supabase.from("projects").select("status"),
+      supabase.from("payments").select("amount, paid_at").eq("status", "completed").not("paid_at", "is", null).order("paid_at"),
+    ]);
+
+    monthlyPayments = results[0].data;
+    lastMonthPayments = results[1].data;
+    unsignedContracts = results[2].count;
+    messageCount = results[3].count;
+    overduePaymentsData = results[4].data;
+    pendingPaymentsData = results[5].data;
+    upcomingPaymentsData = results[6].data;
+    totalClients = results[7].count;
+    activeClients = results[8].count;
+    pipelineData = results[9].data;
+    recentClients = results[10].data;
+    allClients = results[11].data;
+    allProjects = results[12].data;
+    allPayments = results[13].data;
+  } catch (err) {
+    console.error("Admin dashboard error:", err);
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4 max-w-md text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-400/10">
+            <AlertTriangle className="h-6 w-6 text-red-400" />
+          </div>
+          <h2 className="text-lg font-heading font-bold text-northpeak-text">Error al cargar el dashboard</h2>
+          <p className="text-sm text-northpeak-text-muted">
+            No se pudieron obtener los datos. Verifica tu conexión a Supabase.
+          </p>
+          <p className="font-mono text-xs text-red-400/60">{err instanceof Error ? err.message : "Error desconocido"}</p>
+        </div>
+      </div>
+    );
+  }
 
   const monthRevenue = monthlyPayments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
   const lastMonthRevenue = lastMonthPayments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;

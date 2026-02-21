@@ -84,7 +84,10 @@
       "Bash(VERCEL_ORG_ID=team_kLy9mGGZRCrpLkjoqwU2132O VERCEL_PROJECT_ID=prj_9aruINe6kNaUqtesXytV4v9C2g2k npx vercel:*)",
       "Bash(for dir in analizador cotizador reportes ventas pipeline)",
       "Bash(do echo \"=== $dir ===\" cat \"C:\\\\Users\\\\brand\\\\Downloads\\\\propiedades-mty\\\\app\\\\admin\\\\$dir\\\\page.tsx\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm uninstall:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
