@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 async function getAdminUser() {
@@ -6,7 +6,7 @@ async function getAdminUser() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { supabase, user: null, error: "No autenticado" };
+  if (!user) return { supabase: null, user: null, error: "No autenticado" };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -14,9 +14,9 @@ async function getAdminUser() {
     .eq("id", user.id)
     .single();
   if (profile?.role !== "admin")
-    return { supabase, user: null, error: "No autorizado" };
+    return { supabase: null, user: null, error: "No autorizado" };
 
-  return { supabase, user, error: null };
+  return { supabase: createAdminClient(), user, error: null };
 }
 
 export async function GET(request: Request) {
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const clientId = url.searchParams.get("client_id");
   const analisisId = url.searchParams.get("analisis_id");
 
-  let query = supabase.from("tareas").select("*").order("created_at", { ascending: false });
+  let query = supabase!.from("tareas").select("*").order("created_at", { ascending: false });
 
   if (clientId) query = query.eq("client_id", clientId);
   if (analisisId) query = query.eq("analisis_id", analisisId);
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   if (analisis_id) insert.analisis_id = analisis_id;
   if (fecha_limite) insert.fecha_limite = fecha_limite;
 
-  const { data, error: dbError } = await supabase
+  const { data, error: dbError } = await supabase!
     .from("tareas")
     .insert(insert)
     .select()
@@ -79,7 +79,7 @@ export async function PATCH(request: Request) {
   if (Object.keys(update).length === 0)
     return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
 
-  const { data, error: dbError } = await supabase
+  const { data, error: dbError } = await supabase!
     .from("tareas")
     .update(update)
     .eq("id", id)
@@ -100,7 +100,7 @@ export async function DELETE(request: Request) {
 
   if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
 
-  const { error: dbError } = await supabase.from("tareas").delete().eq("id", id);
+  const { error: dbError } = await supabase!.from("tareas").delete().eq("id", id);
   if (dbError) return NextResponse.json({ error: dbError.message }, { status: 400 });
 
   return NextResponse.json({ success: true });

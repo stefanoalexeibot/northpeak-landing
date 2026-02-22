@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ export default async function AdminClientsPage({
 }: {
   searchParams: { status?: string };
 }) {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   let query = supabase
     .from("clients")
     .select("*")

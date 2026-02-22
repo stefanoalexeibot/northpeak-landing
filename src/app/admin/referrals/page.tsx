@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import ReferralStatusUpdater from "@/components/admin/referral-status-updater";
 
 export default async function AdminReferralsPage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: referrals } = await supabase
     .from("referrals")

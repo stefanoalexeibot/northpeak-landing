@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome";
@@ -22,12 +21,8 @@ export async function POST(request: Request) {
 
   const { name, email, company, phone, password, onboarding } = await request.json();
 
-  // Use service role to create user (doesn't affect admin session)
-  const serviceClient = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  // Use admin client to create user (doesn't affect admin session)
+  const serviceClient = createAdminClient();
 
   const { data: authData, error: authError } = await serviceClient.auth.admin.createUser({
     email,

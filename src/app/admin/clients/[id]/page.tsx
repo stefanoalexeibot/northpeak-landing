@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export default async function ClientDetailPage({
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: client } = await supabase
     .from("clients")

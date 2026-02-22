@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DollarSign, FileText, MessageSquare, AlertTriangle,
@@ -73,7 +73,10 @@ function getMonthlyRevenue(payments: { amount: number; paid_at: string | null }[
 }
 
 export default async function AdminDashboard() {
+  // createClient para auth (respeta sesión del usuario)
   const supabase = createClient();
+  // createAdminClient para datos (bypasea RLS)
+  const adminSupabase = createAdminClient();
 
   // Get admin name dynamically
   const { data: { user } } = await supabase.auth.getUser();
@@ -105,20 +108,20 @@ export default async function AdminDashboard() {
 
   try {
     const results = await Promise.all([
-      supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", startOfMonth),
-      supabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", lastMonthStart).lt("paid_at", startOfMonth),
-      supabase.from("documents").select("*", { count: "exact", head: true }).eq("type", "contract").or("signed.is.null,signed.eq.false"),
-      supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
-      supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).lt("due_date", today),
-      supabase.from("payments").select("amount").eq("status", "pending"),
-      supabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).gte("due_date", today).lte("due_date", in7days),
-      supabase.from("clients").select("*", { count: "exact", head: true }),
-      supabase.from("clients").select("*", { count: "exact", head: true }).eq("status", "active"),
-      supabase.from("analisis_digital").select("etapa"),
-      supabase.from("clients").select("id, name, company, email, status, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("clients").select("created_at").order("created_at"),
-      supabase.from("projects").select("status"),
-      supabase.from("payments").select("amount, paid_at").eq("status", "completed").not("paid_at", "is", null).order("paid_at"),
+      adminSupabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", startOfMonth),
+      adminSupabase.from("payments").select("amount").eq("status", "completed").gte("paid_at", lastMonthStart).lt("paid_at", startOfMonth),
+      adminSupabase.from("documents").select("*", { count: "exact", head: true }).eq("type", "contract").or("signed.is.null,signed.eq.false"),
+      adminSupabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false),
+      adminSupabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).lt("due_date", today),
+      adminSupabase.from("payments").select("amount").eq("status", "pending"),
+      adminSupabase.from("payments").select("id, client_id, concept, amount, due_date, clients(name, phone)").eq("status", "pending").not("due_date", "is", null).gte("due_date", today).lte("due_date", in7days),
+      adminSupabase.from("clients").select("*", { count: "exact", head: true }),
+      adminSupabase.from("clients").select("*", { count: "exact", head: true }).eq("status", "active"),
+      adminSupabase.from("analisis_digital").select("etapa"),
+      adminSupabase.from("clients").select("id, name, company, email, status, created_at").order("created_at", { ascending: false }).limit(5),
+      adminSupabase.from("clients").select("created_at").order("created_at"),
+      adminSupabase.from("projects").select("status"),
+      adminSupabase.from("payments").select("amount, paid_at").eq("status", "completed").not("paid_at", "is", null).order("paid_at"),
     ]);
 
     monthlyPayments = results[0].data;

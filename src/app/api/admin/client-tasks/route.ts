@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 const DEFAULT_TASKS = [
@@ -21,7 +21,7 @@ async function getAdmin() {
   const { data: profile } = await supabase
     .from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") return { error: "No autorizado", status: 403, supabase: null };
-  return { error: null, status: 200, supabase };
+  return { error: null, status: 200, supabase: createAdminClient() };
 }
 
 // GET: returns tasks for a client, auto-creates defaults if none exist

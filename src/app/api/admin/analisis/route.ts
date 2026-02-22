@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { calcularScore, clasificarPrioridad, generarOportunidades } from "@/lib/analizador/scoring";
 import { generarReporteHTML } from "@/lib/analizador/report-html";
@@ -87,11 +86,8 @@ export async function POST(request: Request) {
 
   const viewUrl = `/api/reporte/${analisis.id}`;
 
-  // Create cuestionario with token (uses service role to bypass RLS)
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Create cuestionario with token (uses admin client to bypass RLS)
+  const serviceSupabase = createAdminClient();
 
   const token = randomBytes(16).toString("hex");
   const { data: cuestionario } = await serviceSupabase
@@ -128,16 +124,13 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Get cuestionario tokens for all analyses
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const serviceSupabase = createAdminClient();
   const ids = (data ?? []).map((a) => a.id);
   const { data: cuestionarios } = ids.length > 0
     ? await serviceSupabase
-        .from("cuestionarios")
-        .select("analisis_id, token")
-        .in("analisis_id", ids)
+      .from("cuestionarios")
+      .select("analisis_id, token")
+      .in("analisis_id", ids)
     : { data: [] };
 
   const tokenMap = new Map(
@@ -172,10 +165,7 @@ export async function DELETE(request: Request) {
   const { id } = await request.json();
   if (!id) return NextResponse.json({ error: "Falta el id" }, { status: 400 });
 
-  const serviceSupabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const serviceSupabase = createAdminClient();
 
   // Delete related cuestionarios first (FK dependency)
   await serviceSupabase.from("cuestionarios").delete().eq("analisis_id", id);

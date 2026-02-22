@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DollarSign, Users, TrendingUp, FolderOpen,
@@ -6,7 +6,7 @@ import {
 import RevenueChart from "@/components/admin/charts/revenue-chart";
 
 export default async function ReportsPage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();

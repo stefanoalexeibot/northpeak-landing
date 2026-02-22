@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: analisis } = await supabase
     .from("analisis_digital")

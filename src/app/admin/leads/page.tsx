@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Zap, MessageSquare, Phone, Calendar, Globe } from "lucide-react";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -29,7 +29,7 @@ function timeAgo(iso: string) {
 }
 
 export default async function LeadsPage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const { data: leads } = await supabase
     .from("leads")
     .select("*")

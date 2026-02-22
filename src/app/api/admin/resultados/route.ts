@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 async function getAdmin() {
@@ -17,7 +17,7 @@ async function getAdmin() {
   if (profile?.role !== "admin")
     return { error: "No autorizado", status: 403, supabase: null };
 
-  return { error: null, status: 200, supabase };
+  return { error: null, status: 200, supabase: createAdminClient() };
 }
 
 export async function GET(request: Request) {

@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import TestimonialActions from "./testimonial-actions";
 
 export default async function AdminTestimonialsPage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const { data: testimonials } = await supabase
     .from("testimonials")

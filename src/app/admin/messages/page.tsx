@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import AdminMessageList from "@/components/admin/message-list";
 
 export default async function AdminMessagesPage() {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   // Get all clients that have messages
   const { data: clients } = await supabase
