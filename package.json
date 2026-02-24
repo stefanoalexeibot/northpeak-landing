@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "video:install": "cd remotion-videos && npm install",
+    "video:studio": "cd remotion-videos && npx remotion studio src/Root.tsx",
+    "video:render:hero": "cd remotion-videos && npx remotion render src/Root.tsx HeroAnimation out/hero.mp4",
+    "video:render:stats": "cd remotion-videos && npx remotion render src/Root.tsx StatsAnimation out/stats.mp4",
+    "video:render:dashboard": "cd remotion-videos && npx remotion render src/Root.tsx DashboardPreview out/dashboard.mp4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
