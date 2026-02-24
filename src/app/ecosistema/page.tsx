@@ -1,21 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
-import { Scene3D } from "@/components/ecosystem/Scene3D";
+import dynamic from "next/dynamic";
 import { SectionWrapper } from "@/components/ecosystem/SectionWrapper";
 import { motion } from "framer-motion";
 import {
     BarChart3,
-    Smartphone,
-    Globe,
-    MessageSquare,
-    Clock,
     Zap,
     ShieldCheck,
     Bot
 } from "lucide-react";
-import { ShinyText } from "@/components/reactbits/ShinyText";
-import { GradientText } from "@/components/reactbits/GradientText";
+import ShinyText from "@/components/reactbits/ShinyText";
+import GradientText from "@/components/reactbits/GradientText";
+
+const Scene3D = dynamic(
+    () => import("@/components/ecosystem/Scene3D").then((mod) => mod.Scene3D),
+    { ssr: false }
+);
 
 export default function EcosystemPage() {
     const [currentSection, setCurrentSection] = useState(0);

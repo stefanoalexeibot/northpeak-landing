@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FileSearch, Plus } from "lucide-react";
 
 interface EmptyStateProps {
-    icon?: React.ElementType;
+    icon?: React.ComponentType<{ className?: string }>;
     title: string;
     description: string;
     actionLabel?: string;

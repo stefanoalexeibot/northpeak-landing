@@ -69,7 +69,7 @@ export default function AdminDocumentsPage() {
       setClients(data ?? []);
     }
     loadClients();
-  }, []);
+  }, [supabase]);
 
   function handleClientSelect(clientId: string) {
     setSelectedClientId(clientId);
