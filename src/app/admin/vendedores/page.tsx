@@ -50,38 +50,37 @@ export default function VendedoresPage() {
   const [editTelefono, setEditTelefono] = useState("");
 
   useEffect(() => {
-    loadData();
-  }, []);
+    async function loadData() {
+      setLoading(true);
+      try {
+        const [vendRes, analisisRes] = await Promise.all([
+          fetch("/api/admin/vendedores"),
+          fetch("/api/admin/analisis"),
+        ]);
 
-  async function loadData() {
-    setLoading(true);
-    try {
-      const [vendRes, analisisRes] = await Promise.all([
-        fetch("/api/admin/vendedores"),
-        fetch("/api/admin/analisis"),
-      ]);
+        if (vendRes.ok) {
+          const v: Vendedor[] = await vendRes.json();
+          setVendedores(v);
 
-      if (vendRes.ok) {
-        const v: Vendedor[] = await vendRes.json();
-        setVendedores(v);
-
-        if (analisisRes.ok) {
-          const analisis: Array<{ vendedor?: string; etapa: string }> = await analisisRes.json();
-          const statsMap: Record<string, { prospectos: number; ganados: number }> = {};
-          for (const a of analisis) {
-            if (!a.vendedor) continue;
-            if (!statsMap[a.vendedor]) statsMap[a.vendedor] = { prospectos: 0, ganados: 0 };
-            statsMap[a.vendedor].prospectos++;
-            if (a.etapa === "cerrado_ganado") statsMap[a.vendedor].ganados++;
+          if (analisisRes.ok) {
+            const analisis: Array<{ vendedor?: string; etapa: string }> = await analisisRes.json();
+            const statsMap: Record<string, { prospectos: number; ganados: number }> = {};
+            for (const a of analisis) {
+              if (!a.vendedor) continue;
+              if (!statsMap[a.vendedor]) statsMap[a.vendedor] = { prospectos: 0, ganados: 0 };
+              statsMap[a.vendedor].prospectos++;
+              if (a.etapa === "cerrado_ganado") statsMap[a.vendedor].ganados++;
+            }
+            setStats(statsMap);
           }
-          setStats(statsMap);
         }
+      } catch {
+        addToast("Error al cargar vendedores", "error");
       }
-    } catch {
-      addToast("Error al cargar vendedores", "error");
+      setLoading(false);
     }
-    setLoading(false);
-  }
+    loadData();
+  }, [addToast]);
 
   async function handleCreate() {
     if (!newNombre.trim()) { addToast("El nombre es requerido", "error"); return; }

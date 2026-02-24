@@ -10,14 +10,15 @@ import {
   Zap,
   BarChart2,
   MessageSquare,
+  ChevronRight,
 } from "lucide-react";
 import FaqAccordion from "@/components/landing/faq-accordion";
 import RoiCalculator from "@/components/landing/roi-calculator";
 
 export const metadata: Metadata = {
-  title: "NorthPeak Digital — Marketing Digital para Negocios en Monterrey",
+  title: "NorthPeak Digital ΓÇö Marketing Digital para Negocios en Monterrey",
   description:
-    "Agencia de marketing digital para restaurantes, clínicas y negocios locales en Monterrey. Redes sociales, publicidad y posicionamiento local con resultados medibles.",
+    "Agencia de marketing digital para restaurantes, cl├¡nicas y negocios locales en Monterrey. Redes sociales, publicidad y posicionamiento local con resultados medibles.",
 };
 
 // ΓöÇΓöÇ Static data ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -187,8 +188,7 @@ export default async function LandingPage() {
             <img src="/logo.png" alt="NorthPeak Digital" className="h-7" />
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-northpeak-text-muted">
-            <Link href="/ecosistema" className="hover:text-northpeak-text transition-colors">Ecosistema</Link>
-            <a href="#casos" className="hover:text-northpeak-text transition-colors">Resultados</a>
+            <a href="#casos" className="hover:text-northpeak-text transition-colors">Casos de ├⌐xito</a>
             <a href="#servicios" className="hover:text-northpeak-text transition-colors">Servicios</a>
             <a href="#preguntas" className="hover:text-northpeak-text transition-colors">Preguntas</a>
           </nav>
@@ -236,18 +236,19 @@ export default async function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/ecosistema"
+              href="/analizar"
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-northpeak-green text-northpeak-bg text-base font-bold hover:bg-northpeak-green/90 transition-all hover:scale-105 shadow-lg shadow-northpeak-green/20"
             >
-              Ver Ecosistema 3D
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/analizar"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted text-base font-medium hover:border-northpeak-green/30 hover:text-northpeak-text transition-colors"
-            >
+              <Zap className="h-4 w-4" />
               Analiza tu presencia gratis
             </Link>
+            <a
+              href="#casos"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-northpeak-surface text-northpeak-text-muted text-base font-medium hover:border-northpeak-green/30 hover:text-northpeak-text transition-colors"
+            >
+              Ver casos de ├⌐xito
+              <ChevronRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
@@ -407,8 +408,8 @@ export default async function LandingPage() {
                 <Link
                   href="/analizar"
                   className={`mt-auto flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${svc.highlight
-                    ? "bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
-                    : "border border-northpeak-surface text-northpeak-text-muted hover:text-northpeak-text hover:border-northpeak-green/30"
+                      ? "bg-northpeak-green text-northpeak-bg hover:bg-northpeak-green/90"
+                      : "border border-northpeak-surface text-northpeak-text-muted hover:text-northpeak-text hover:border-northpeak-green/30"
                     }`}
                 >
                   Empezar
