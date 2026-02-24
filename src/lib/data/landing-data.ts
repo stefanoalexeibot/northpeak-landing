@@ -41,23 +41,6 @@ export const caseStudies = [
         borderFrom: "rgba(59,130,246,0.3)",
         glow: "rgba(59,130,246,0.06)",
     },
-    {
-        industry: "Constructora · Cumbres, NL",
-        bigStat: 22,
-        bigStatPrefix: "",
-        bigLabel: "leads calificados por IA",
-        timeframe: "en el primer mes",
-        description: "Necesitaban prospectos con poder adquisitivo real. Agente de IA en WhatsApp calificó leads automáticamente. CPL 42% por debajo del promedio de la industria.",
-        tags: ["Agente IA", "Meta Ads", "Lead Scoring"],
-        metrics: [
-            { label: "Costo por lead", value: "$168" },
-            { label: "Ventas cerradas", value: "3" },
-            { label: "CPL vs industria", value: "-42%" },
-        ],
-        accent: "text-northpeak-green",
-        borderFrom: "rgba(0,229,160,0.3)",
-        glow: "rgba(0,229,160,0.06)",
-    },
 ];
 
 // ── Services (Monthly) ──────────────────────────────────────────────────────

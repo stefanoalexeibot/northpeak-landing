@@ -130,11 +130,6 @@ const PREGUNTAS_POR_GIRO: Record<string, Pregunta[]> = {
     { id: "vende_productos", texto: "¿Vendes productos para mascotas?", tipo: "si_no", categoria: "giro" },
     { id: "tiene_estetica", texto: "¿Ofreces servicio de estética canina?", tipo: "si_no", categoria: "giro" },
   ],
-  Inmobiliaria: [
-    { id: "propiedades_activas", texto: "¿Cuántas propiedades tienes activas?", tipo: "opcion", opciones: ["Menos de 10", "10 - 30", "30 - 100", "Más de 100"], categoria: "giro" },
-    { id: "portales_inmobiliarios", texto: "¿Publicas en portales inmobiliarios?", tipo: "si_no", categoria: "giro" },
-    { id: "tipo_propiedades", texto: "¿Qué tipo de propiedades manejas principalmente?", tipo: "opcion", opciones: ["Residencial", "Comercial", "Industrial", "Mixto"], categoria: "giro" },
-  ],
   "Panadería / Repostería": [
     { id: "tiene_delivery", texto: "¿Ofreces servicio a domicilio?", tipo: "si_no", categoria: "giro" },
     { id: "pedidos_personalizados", texto: "¿Aceptas pedidos personalizados (pasteles, eventos)?", tipo: "si_no", categoria: "giro" },

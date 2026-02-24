@@ -104,7 +104,6 @@ export const GIROS_NEGOCIO = [
   "Videografía / Video producción",
   "Despacho Contable",
   "Despacho Legal / Abogado",
-  "Inmobiliaria",
   "Constructora",
   "Arquitectura / Diseño de interiores",
   "Taller Mecánico",

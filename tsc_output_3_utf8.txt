@@ -1,0 +1,3 @@
+﻿src/app/page.tsx(279,2): error TS1127: Invalid character.
+src/app/page.tsx(280,1): error TS1127: Invalid character.
+src/app/page.tsx(281,1): error TS1127: Invalid character.

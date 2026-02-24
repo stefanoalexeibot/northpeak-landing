@@ -40,17 +40,6 @@ const scenarios: Scenario[] = [
       { from: "ai", text: "Tenemos disponibilidad mañana martes a las 4pm o jueves 5:30pm 📅 ¿Cuál te acomoda mejor?", delay: 5600 },
     ],
   },
-  {
-    tab: "Inmobiliaria",
-    contact: "Propiedades Cumbres",
-    avatar: "🏠",
-    messages: [
-      { from: "user", text: "Vi un depto en Cumbres en $2.8M ¿sigue disponible?", delay: 700 },
-      { from: "ai", text: "¡Hola! Sí, sigue disponible 🏠 ¿Te gustaría agendar una visita esta semana?", delay: 2200 },
-      { from: "user", text: "Este sábado en la mañana", delay: 3800 },
-      { from: "ai", text: "Perfecto 📋 Te reservo el sábado a las 11am. Un asesor te contactará en minutos. ¿Me das tu nombre?", delay: 5600 },
-    ],
-  },
 ];
 
 function TypingIndicator() {
@@ -141,11 +130,10 @@ export default function ChatbotDemo() {
           <button
             key={s.tab}
             onClick={() => setActiveTab(i)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === i
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${activeTab === i
                 ? "bg-northpeak-green text-northpeak-bg"
                 : "text-northpeak-text-muted hover:text-northpeak-text"
-            }`}
+              }`}
           >
             {s.tab}
           </button>
@@ -196,11 +184,10 @@ export default function ChatbotDemo() {
                 className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`relative max-w-[210px] px-3 py-2 text-[12px] leading-snug ${
-                    msg.from === "user"
+                  className={`relative max-w-[210px] px-3 py-2 text-[12px] leading-snug ${msg.from === "user"
                       ? "rounded-2xl rounded-br-sm bg-[#005C4B] text-white"
                       : "rounded-2xl rounded-bl-sm bg-northpeak-card border border-northpeak-surface/60 text-northpeak-text"
-                  }`}
+                    }`}
                 >
                   {msg.text}
                   <div className={`flex items-center justify-end gap-0.5 mt-0.5 ${msg.from === "user" ? "" : "hidden"}`}>

@@ -1,0 +1,7 @@
+﻿commit 81d37a2387fe9361e5591f6df1cf72f4ffb08a52
+Author: Alex <hola@northpeakdigital.com.mx>
+Date:   Tue Feb 24 00:02:33 2026 -0600
+
+    feat: integrate flipping ecosystem (landing, roi-calculator, opportunities-listing, portal-updates)
+
+M	package.json
