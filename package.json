@@ -16,8 +16,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
     "@radix-ui/react-slot": "^1.2.4",
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@types/react-signature-canvas": "^1.0.7",
