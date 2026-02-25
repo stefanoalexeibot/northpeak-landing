@@ -11,6 +11,12 @@ import {
 import GradientText from "@/components/reactbits/GradientText";
 import ShinyText from "@/components/reactbits/ShinyText";
 import CountUp from "@/components/reactbits/CountUp";
+import {
+    HowItWorksSection,
+    LiveDemoPlayer,
+    BigSectionNumber,
+    ExitIntentModal,
+} from "@/components/ecosystem/EcosistemaExtras";
 
 const Scene3D = dynamic(
     () => import("@/components/ecosystem/Scene3D").then((m) => m.Scene3D),
@@ -420,77 +426,87 @@ export default function EcosystemPage() {
             </header>
 
             {/* ── HERO ────────────────────────────────────────────────────────────── */}
-            <section className="relative z-[2] min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20 pb-16">
+            <section className="relative z-[2] min-h-screen flex items-center px-6 pt-20 pb-16">
                 <div className="absolute inset-0 pointer-events-none"
                     style={{ background: "radial-gradient(ellipse 55% 65% at 50% 50%, transparent 0%, rgba(5,6,10,0.65) 100%)" }} />
 
-                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}
-                    className="relative max-w-4xl mx-auto">
+                <div className="relative max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    {/* Left: text */}
+                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9 }}>
+                        {/* Badge */}
+                        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
+                            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-northpeak-green/30 bg-northpeak-green/8 text-northpeak-green font-mono text-[11px] tracking-widest uppercase mb-8">
+                            <span className="w-1.5 h-1.5 rounded-full bg-northpeak-green animate-pulse" />
+                            Ecosistema Digital · NorthPeak
+                        </motion.div>
 
-                    {/* Badge */}
-                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-northpeak-green/30 bg-northpeak-green/8 text-northpeak-green font-mono text-[11px] tracking-widest uppercase mb-8">
-                        <span className="w-1.5 h-1.5 rounded-full bg-northpeak-green animate-pulse" />
-                        Ecosistema Digital · NorthPeak
+                        <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-[1.0] mb-6">
+                            <GradientText colors={["#E8E9ED", "#00E5A0", "#E8E9ED", "#3B82F6", "#E8E9ED"]}
+                                animationSpeed={7} className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl leading-[1.0]">
+                                La infraestructura que vende.
+                            </GradientText>
+                        </h1>
+
+                        <p className="text-northpeak-text-muted text-lg leading-relaxed mb-8 max-w-xl">
+                            No es solo un sitio web. Es el sistema completo de captación, calificación y cierre —{" "}
+                            <span className="text-northpeak-text font-semibold">en piloto automático</span>.
+                        </p>
+
+                        {/* Feature pills */}
+                        <div className="flex flex-wrap gap-2 mb-8">
+                            {[
+                                { emoji: "🤖", text: "Agente IA 24/7" },
+                                { emoji: "📱", text: "App móvil" },
+                                { emoji: "📊", text: "Portal del cliente" },
+                                { emoji: "⚡️", text: "Live en 7 días" },
+                                { emoji: "🛡️", text: "Sin permanencia" },
+                            ].map((f) => (
+                                <div key={f.text}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium text-northpeak-text-muted"
+                                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                    <span className="text-sm leading-none">{f.emoji}</span>
+                                    {f.text}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* CTAs */}
+                        <div className="flex flex-wrap gap-4 mb-10">
+                            <Link href="/analizar"
+                                className="group flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-northpeak-green text-northpeak-bg font-bold text-base hover:bg-northpeak-green/90 transition-all hover:scale-[1.02] shadow-[0_8px_40px_rgba(0,229,160,0.3)]">
+                                <Zap className="w-4 h-4" />
+                                Analiza tu negocio gratis
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                            </Link>
+                            <a href="#section-01"
+                                className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-northpeak-text-muted font-medium transition-all hover:text-northpeak-text"
+                                style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+                                Ver el ecosistema
+                            </a>
+                        </div>
+
+                        <HeroStatsStrip />
+                        <div className="mt-6"><ScrollIndicator /></div>
                     </motion.div>
 
-                    <h1 className="font-heading font-extrabold text-5xl sm:text-7xl lg:text-[88px] tracking-tight leading-[1.0] mb-6">
-                        <GradientText colors={["#E8E9ED", "#00E5A0", "#E8E9ED", "#3B82F6", "#E8E9ED"]}
-                            animationSpeed={7} className="font-heading font-extrabold text-5xl sm:text-7xl lg:text-[88px] leading-[1.0]">
-                            La infraestructura que vende.
-                        </GradientText>
-                    </h1>
-
-                    <p className="text-northpeak-text-muted text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
-                        No es solo un sitio web. Es el sistema completo de captación, calificación y cierre —{" "}
-                        <span className="text-northpeak-text font-semibold">en piloto automático</span>.
-                    </p>
-
-                    {/* Feature pills */}
-                    <div className="flex flex-wrap gap-2.5 justify-center mb-10">
-                        {[
-                            { emoji: "🤖", text: "Agente IA 24/7" },
-                            { emoji: "📱", text: "App móvil" },
-                            { emoji: "📊", text: "Portal del cliente" },
-                            { emoji: "⚡️", text: "Live en 7 días" },
-                            { emoji: "🛡️", text: "Sin permanencia" },
-                        ].map((f) => (
-                            <div key={f.text}
-                                className="flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium text-northpeak-text-muted"
-                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                                <span className="text-base leading-none">{f.emoji}</span>
-                                {f.text}
-                            </div>
-                        ))}
+                    {/* Right: Live Demo — hidden on mobile (3D canvas fills space there) */}
+                    <div className="hidden lg:flex justify-center">
+                        <LiveDemoPlayer />
                     </div>
-
-                    {/* CTAs */}
-                    <div className="flex flex-wrap gap-4 justify-center mb-12">
-                        <Link href="/analizar"
-                            className="group flex items-center gap-2.5 px-8 py-4 rounded-xl bg-northpeak-green text-northpeak-bg font-bold text-base hover:bg-northpeak-green/90 transition-all hover:scale-[1.02] shadow-[0_8px_40px_rgba(0,229,160,0.3)]">
-                            <Zap className="w-4 h-4" />
-                            Analiza tu negocio gratis
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                        </Link>
-                        <a href="#section-01"
-                            className="flex items-center gap-2 px-8 py-4 rounded-xl text-northpeak-text-muted font-medium transition-all hover:text-northpeak-text"
-                            style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-                            Ver el ecosistema
-                        </a>
-                    </div>
-
-                    {/* ── 4. Stats strip hero */}
-                    <HeroStatsStrip />
-
-                    <ScrollIndicator />
-                </motion.div>
+                </div>
             </section>
+
+            {/* ── HOW IT WORKS ─────────────────────────────────────────────────────── */}
+            <HowItWorksSection />
 
             {/* ── CONTENT SECTIONS ─────────────────────────────────────────────────── */}
             <div className="relative z-[2]">
                 {sections.map((sec, idx) => (
                     <ParallaxSection key={sec.n} index={idx} onVisible={setCurrentSection}>
                         <div id={`section-${sec.n}`} className="scroll-mt-20" />
+
+                        {/* ── 4. Big section number background */}
+                        <BigSectionNumber n={sec.n} accent={sec.accent} />
 
                         {/* ── 6. Mobile iPhone mockup */}
                         <MobileIPhoneMockup section={idx} />
@@ -615,6 +631,8 @@ export default function EcosystemPage() {
                     <Link href="/" className="text-northpeak-text-dim hover:text-northpeak-green font-mono text-[11px] transition-colors">← Volver al inicio</Link>
                 </div>
             </footer>
+            {/* ── 7. Exit intent modal */}
+            <ExitIntentModal />
         </main>
     );
 }
