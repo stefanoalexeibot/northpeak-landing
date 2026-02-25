@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import {
     Bot, Zap, ShieldCheck, BarChart3,
