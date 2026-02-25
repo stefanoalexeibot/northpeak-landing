@@ -68,8 +68,8 @@ function SectionProgressBar({ current, total }: { current: number; total: number
                     onClick={() => document.getElementById(`section-${String(i + 1).padStart(2, "0")}`)?.scrollIntoView({ behavior: "smooth" })}
                     className="group flex items-center gap-3" aria-label={`Ir a sección ${i + 1}`}>
                     <div className={`transition-all duration-500 rounded-full ${current === i
-                            ? "w-1.5 h-8 bg-northpeak-green shadow-[0_0_10px_rgba(0,229,160,0.6)]"
-                            : "w-1 h-4 bg-northpeak-surface group-hover:bg-northpeak-text-dim"
+                        ? "w-1.5 h-8 bg-northpeak-green shadow-[0_0_10px_rgba(0,229,160,0.6)]"
+                        : "w-1 h-4 bg-northpeak-surface group-hover:bg-northpeak-text-dim"
                         }`} />
                     <span className={`font-mono text-[10px] transition-all duration-300 ${current === i ? "text-northpeak-green opacity-100" : "opacity-0 group-hover:opacity-60 text-northpeak-text-dim"
                         }`}>0{i + 1}</span>
@@ -304,7 +304,7 @@ function SocialProofSection() {
                             viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
                             className="rounded-2xl p-6"
                             style={{ background: "rgba(5,6,10,0.85)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                            <div className="text-northpeak-green text-xl mb-3">"</div>
+                            <div className="text-northpeak-green text-xl mb-3">&ldquo;</div>
                             <p className="text-northpeak-text text-sm leading-relaxed mb-4">{q.text}</p>
                             <p className="font-mono text-[10px] text-northpeak-text-dim tracking-wide">{q.author}</p>
                         </motion.div>
