@@ -22,6 +22,7 @@ import ParallaxHeroGlow from "@/components/landing/parallax-hero-glow";
 import HeroEffects from "@/components/landing/hero-effects";
 import HeroBadge from "@/components/landing/hero-badge";
 import ClickSparkWrapper from "@/components/landing/click-spark-wrapper";
+import { GlossHint } from "@/components/ui/gloss-term";
 
 // ── Extracted section components ─────────────────────────────────────────────
 import ServicesSection from "@/components/landing/services-section";
@@ -271,6 +272,7 @@ export default async function LandingPage() {
 
       </div>{/* /z-10 wrapper */}
 
+      <GlossHint />
       <FloatingButtons />
     </div>
   );

@@ -3,6 +3,7 @@ import { ArrowRight, Check, Zap, Sparkles, Timer } from "lucide-react";
 import FadeIn from "@/components/landing/fade-in";
 import TiltCard from "@/components/portal/tilt-card";
 import { oneTimeServices, superOffer } from "@/lib/data/landing-data";
+import { AutoGloss } from "@/components/ui/gloss-term";
 
 export default function OneTimeServicesSection() {
     return (
@@ -34,7 +35,7 @@ export default function OneTimeServicesSection() {
                                     {superOffer.name}
                                 </h2>
                                 <p className="text-northpeak-text-muted leading-relaxed mb-6 max-w-md">
-                                    {superOffer.tagline}
+                                    <AutoGloss text={superOffer.tagline} />
                                 </p>
 
                                 <div className="flex items-end gap-4 mb-8">
@@ -69,7 +70,9 @@ export default function OneTimeServicesSection() {
                                             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-northpeak-green/15 border border-northpeak-green/20">
                                                 <item.Icon className="h-3.5 w-3.5 text-northpeak-green" />
                                             </div>
-                                            <span className="text-sm text-northpeak-text">{item.label}</span>
+                                            <span className="text-sm text-northpeak-text">
+                                                <AutoGloss text={item.label} />
+                                            </span>
                                             <Check className="h-4 w-4 text-northpeak-green ml-auto shrink-0" />
                                         </li>
                                     ))}
@@ -103,12 +106,14 @@ export default function OneTimeServicesSection() {
                                         <span className="text-northpeak-text-dim text-xs font-normal ml-1">pago único</span>
                                     </p>
                                 </div>
-                                <p className="text-sm text-northpeak-text-muted leading-relaxed">{svc.description}</p>
+                                <p className="text-sm text-northpeak-text-muted leading-relaxed">
+                                    <AutoGloss text={svc.description} />
+                                </p>
                                 <ul className="space-y-1.5 flex-1">
                                     {svc.features.map((f) => (
                                         <li key={f} className="flex items-center gap-2 text-xs text-northpeak-text-muted">
                                             <Check className={`h-3 w-3 shrink-0 ${svc.color}`} />
-                                            {f}
+                                            <AutoGloss text={f} />
                                         </li>
                                     ))}
                                 </ul>

@@ -5,6 +5,7 @@ import AnimatedCounter from "@/components/landing/animated-counter";
 import TiltCard from "@/components/portal/tilt-card";
 import { caseStudies } from "@/lib/data/landing-data";
 import GradientText from "@/components/reactbits/GradientText";
+import { AutoGloss } from "@/components/ui/gloss-term";
 
 export default function CaseStudiesSection() {
     return (
@@ -47,12 +48,14 @@ export default function CaseStudiesSection() {
                                         <p className="text-northpeak-text-muted text-sm">{cs.timeframe}</p>
                                     </div>
 
-                                    <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">{cs.description}</p>
+                                    <p className="text-sm text-northpeak-text-muted leading-relaxed flex-1">
+                                        <AutoGloss text={cs.description} />
+                                    </p>
 
                                     <div className="flex flex-wrap gap-1.5">
                                         {cs.tags.map((t) => (
                                             <span key={t} className="px-2.5 py-1 rounded-full bg-northpeak-surface text-northpeak-text-dim text-[10px] font-medium tracking-wide">
-                                                {t}
+                                                <AutoGloss text={t} />
                                             </span>
                                         ))}
                                     </div>
