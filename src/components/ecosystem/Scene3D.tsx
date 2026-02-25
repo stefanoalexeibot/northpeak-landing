@@ -220,7 +220,7 @@ function CameraRig({ section }: { section: number }) {
 
     // Each section has a different camera Z distance (zoom)
     const targetZ = [7.5, 6.5, 8, 7][section] ?? 7.5;
-    const targetX = [0, 1.5, -1.5, 0][section] ?? 0;
+    const targetX = [-1.5, 1.5, -1.5, 1.5][section] ?? 0;
 
     useFrame(() => {
         camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.04);
