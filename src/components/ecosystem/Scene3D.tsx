@@ -1,143 +1,267 @@
 "use client";
 
-import React, { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import {
-    Float,
-    PerspectiveCamera,
-    Environment,
-    ContactShadows,
-    Html
-} from "@react-three/drei";
+import React, { useRef, useMemo } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float, PerspectiveCamera, Html, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 
-function Laptop() {
-    const group = useRef<THREE.Group>(null);
+// ── Floating particles ──────────────────────────────────────────────────────
+function Particles({ count = 80 }: { count?: number }) {
+    const mesh = useRef<THREE.InstancedMesh>(null);
+    const positions = useMemo(() => {
+        const arr: THREE.Vector3[] = [];
+        for (let i = 0; i < count; i++) {
+            arr.push(
+                new THREE.Vector3(
+                    (Math.random() - 0.5) * 18,
+                    (Math.random() - 0.5) * 14,
+                    (Math.random() - 0.5) * 8
+                )
+            );
+        }
+        return arr;
+    }, [count]);
+
+    const dummy = useMemo(() => new THREE.Object3D(), []);
 
     useFrame((state) => {
-        if (!group.current) return;
+        if (!mesh.current) return;
         const t = state.clock.getElapsedTime();
-        // Animación de flotación suave
-        group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, Math.cos(t / 2) / 10 + 0.25, 0.1);
-        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, Math.sin(t / 4) / 10, 0.1);
-        group.current.position.y = THREE.MathUtils.lerp(group.current.position.y, (1 + Math.sin(t / 1.5)) / 10, 0.1);
+        positions.forEach((pos, i) => {
+            const y = pos.y + Math.sin(t * 0.3 + i * 0.5) * 0.08;
+            dummy.position.set(pos.x, y, pos.z);
+            dummy.scale.setScalar(0.04 + Math.sin(t + i) * 0.01);
+            dummy.updateMatrix();
+            mesh.current!.setMatrixAt(i, dummy.matrix);
+        });
+        mesh.current.instanceMatrix.needsUpdate = true;
     });
 
     return (
-        <group ref={group}>
-            <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-                {/* Cuerpo de la Laptop */}
-                <mesh position={[0, -0.1, 0]}>
-                    <boxGeometry args={[4, 0.2, 3]} />
-                    <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.2} />
-                </mesh>
-
-                {/* Pantalla (Tapa) */}
-                <mesh position={[0, 1.4, -1.4]} rotation={[-0.2, 0, 0]}>
-                    <boxGeometry args={[4, 2.8, 0.1]} />
-                    <meshStandardMaterial color="#333" />
-                    {/* Contenido de la pantalla */}
-                    <mesh position={[0, 0, 0.06]}>
-                        <planeGeometry args={[3.8, 2.6]} />
-                        <meshStandardMaterial color="#0066ff" emissive="#0044aa" emissiveIntensity={0.5} />
-                        <Html distanceFactor={3} position={[0, 0, 0.01]} transform occlude>
-                            <div className="w-[380px] h-[260px] bg-blue-600 flex items-center justify-center rounded-sm overflow-hidden border-2 border-blue-400">
-                                <div className="text-white text-center p-4">
-                                    <h3 className="text-2xl font-bold mb-2">NorthPeak Portal</h3>
-                                    <p className="text-xs">Visualiza tus ventas en tiempo real</p>
-                                    <div className="mt-4 flex gap-2 justify-center">
-                                        <div className="w-12 h-2 bg-blue-300 rounded" />
-                                        <div className="w-12 h-2 bg-blue-300 rounded" />
-                                        <div className="w-12 h-2 bg-blue-300 rounded" />
-                                    </div>
-                                </div>
-                            </div>
-                        </Html>
-                    </mesh>
-                </mesh>
-            </Float>
-        </group>
+        <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
+            <sphereGeometry args={[1, 8, 8]} />
+            <meshStandardMaterial
+                color="#00E5A0"
+                emissive="#00E5A0"
+                emissiveIntensity={0.6}
+                transparent
+                opacity={0.5}
+            />
+        </instancedMesh>
     );
 }
 
-function Smartphone() {
-    const group = useRef<THREE.Group>(null);
-
-    useFrame((state) => {
-        if (!group.current) return;
-        const t = state.clock.getElapsedTime();
-        group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, Math.sin(t / 2) / 10, 0.1);
-        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, Math.cos(t / 4) / 10 + 0.3, 0.1);
-    });
-
+// ── WA-style chat screen ─────────────────────────────────────────────────────
+function WAScreen({ visible }: { visible: boolean }) {
+    const messages = [
+        { from: "user", text: "Hola, ¿tienen disponibilidad esta semana?" },
+        { from: "ai", text: "¡Hola! Claro que sí 🤖 ¿Qué día te queda mejor?" },
+        { from: "user", text: "El miércoles en la tarde" },
+        { from: "ai", text: "Perfecto ✅ Te agendo el miércoles a las 4pm. ¡Nos vemos!" },
+    ];
     return (
-        <group ref={group}>
-            <Float speed={2} rotationIntensity={1} floatIntensity={1}>
-                {/* Cuerpo del teléfono */}
-                <mesh>
-                    <boxGeometry args={[1.5, 3, 0.1]} />
-                    <meshStandardMaterial color="#111" metalness={0.9} roughness={0.1} />
-                </mesh>
-                {/* Pantalla */}
-                <mesh position={[0, 0, 0.06]}>
-                    <planeGeometry args={[1.4, 2.9]} />
-                    <meshStandardMaterial color="#000" emissive="#111" />
-                    <Html distanceFactor={3} position={[0, 0, 0.01]} transform occlude>
-                        <div className="w-[140px] h-[290px] bg-black flex flex-col items-center p-2 rounded-xl overflow-hidden border border-gray-800">
-                            <div className="w-8 h-1 bg-gray-800 rounded-full mb-4" />
-                            <div className="w-full flex-1 bg-gray-900 rounded-lg p-2 space-y-2">
-                                <div className="w-full h-8 bg-blue-500/20 rounded-md border border-blue-500/30 flex items-center px-2">
-                                    <div className="w-4 h-4 rounded-full bg-blue-500" />
-                                </div>
-                                <div className="w-full h-8 bg-gray-800 rounded-md" />
-                                <div className="w-full h-8 bg-gray-800 rounded-md" />
-                                <div className="w-full h-24 bg-gray-800 rounded-md flex items-end p-1">
-                                    <div className="w-full h-1/2 bg-blue-500/10 rounded" />
-                                </div>
-                            </div>
+        <div className="w-[160px] h-[300px] bg-[#0A0B10] flex flex-col overflow-hidden rounded-[20px]">
+            {/* Header */}
+            <div className="bg-[#075E54] px-3 py-1.5 flex items-center gap-1.5 shrink-0">
+                <div className="w-5 h-5 rounded-full bg-northpeak-green/30 border border-northpeak-green/50 flex items-center justify-center text-[8px]">🤖</div>
+                <div>
+                    <p className="text-white text-[8px] font-bold leading-tight">IA NorthPeak</p>
+                    <div className="flex items-center gap-0.5">
+                        <span className="w-1 h-1 rounded-full bg-green-400" />
+                        <p className="text-white/60 text-[7px]">En línea</p>
+                    </div>
+                </div>
+            </div>
+            {/* Chat */}
+            <div className="flex-1 px-2 py-2 space-y-1.5 overflow-hidden">
+                {messages.map((m, i) => (
+                    <div
+                        key={i}
+                        className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
+                        style={{
+                            opacity: visible ? 1 : 0,
+                            transition: `opacity 0.4s ease ${i * 0.3}s`,
+                        }}
+                    >
+                        <div
+                            className={`text-[7px] px-2 py-1 rounded-xl max-w-[110px] leading-tight ${m.from === "user"
+                                ? "bg-[#005C4B] text-white rounded-br-none"
+                                : "bg-[#1F2C34] text-white/90 rounded-bl-none"
+                                }`}
+                        >
+                            {m.text}
                         </div>
-                    </Html>
+                    </div>
+                ))}
+            </div>
+            {/* Input */}
+            <div className="bg-[#1F2C34] px-2 py-1.5 flex items-center gap-1.5 shrink-0">
+                <div className="flex-1 bg-[#2A3942] rounded-full px-2 py-1">
+                    <p className="text-white/30 text-[7px]">Escribe...</p>
+                </div>
+                <div className="w-5 h-5 rounded-full bg-[#00E5A0] flex items-center justify-center text-[8px]">▶</div>
+            </div>
+        </div>
+    );
+}
+
+// ── Dashboard screen ─────────────────────────────────────────────────────────
+function DashboardScreen({ visible }: { visible: boolean }) {
+    return (
+        <div className="w-[260px] h-[160px] bg-[#05060A] rounded p-2 overflow-hidden">
+            <div className="text-[8px] text-[#00E5A0] font-mono mb-1.5 opacity-80">— NorthPeak Portal</div>
+            <div className="grid grid-cols-3 gap-1 mb-2">
+                {[
+                    { label: "Leads", val: "142", color: "#00E5A0" },
+                    { label: "Citas", val: "38", color: "#60A5FA" },
+                    { label: "MRR", val: "$84k", color: "#A78BFA" },
+                ].map((s) => (
+                    <div key={s.label} className="bg-white/5 rounded p-1.5 text-center border border-white/10"
+                        style={{ opacity: visible ? 1 : 0, transition: "opacity 0.5s ease" }}
+                    >
+                        <p className="text-[11px] font-bold" style={{ color: s.color }}>{s.val}</p>
+                        <p className="text-[7px] text-white/40">{s.label}</p>
+                    </div>
+                ))}
+            </div>
+            {/* Mini bar chart */}
+            <div className="flex items-end gap-0.5 h-8">
+                {[40, 65, 80, 55, 90, 120, 142].map((v, i) => (
+                    <div
+                        key={i}
+                        className="flex-1 rounded-sm bg-gradient-to-t from-[#00E5A0]/60 to-[#00E5A0]/20"
+                        style={{
+                            height: `${(v / 142) * 100}%`,
+                            opacity: visible ? 1 : 0,
+                            transition: `opacity 0.3s ease ${i * 0.08}s`,
+                        }}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ── iPhone mockup ─────────────────────────────────────────────────────────────
+function IPhoneModel({ section }: { section: number }) {
+    const group = useRef<THREE.Group>(null);
+    const notch = useRef<THREE.Mesh>(null);
+
+    useFrame((state) => {
+        if (!group.current) return;
+        const t = state.clock.getElapsedTime();
+        group.current.rotation.y = Math.sin(t * 0.4) * 0.18;
+        group.current.rotation.x = Math.cos(t * 0.3) * 0.06 - 0.05;
+        group.current.position.y = Math.sin(t * 0.8) * 0.07;
+    });
+
+    return (
+        <group ref={group}>
+            <Float speed={1.2} rotationIntensity={0.12} floatIntensity={0.2}>
+                {/* Body */}
+                <RoundedBox args={[2.2, 4.6, 0.22]} radius={0.28} smoothness={6} position={[0, 0, 0]}>
+                    <meshStandardMaterial color="#1a1a1c" metalness={0.95} roughness={0.08} />
+                </RoundedBox>
+
+                {/* Screen glass */}
+                <RoundedBox args={[2.0, 4.3, 0.01]} radius={0.22} smoothness={6} position={[0, 0, 0.12]}>
+                    <meshStandardMaterial color="#030305" metalness={0.1} roughness={0} opacity={0.92} transparent />
+                </RoundedBox>
+
+                {/* Dynamic island */}
+                <mesh ref={notch} position={[0, 1.92, 0.14]}>
+                    <capsuleGeometry args={[0.12, 0.3, 4, 8]} />
+                    <meshStandardMaterial color="#000000" />
                 </mesh>
+
+                {/* Side button */}
+                <mesh position={[1.14, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+                    <cylinderGeometry args={[0.04, 0.04, 0.6, 8]} />
+                    <meshStandardMaterial color="#2a2a2c" metalness={0.9} roughness={0.2} />
+                </mesh>
+
+                {/* Volume buttons */}
+                {[-0.4, 0.1, 0.6].map((y, i) => (
+                    <mesh key={i} position={[-1.14, y, 0]} rotation={[0, Math.PI / 2, 0]}>
+                        <cylinderGeometry args={[0.035, 0.035, i === 0 ? 0.3 : 0.45, 8]} />
+                        <meshStandardMaterial color="#2a2a2c" metalness={0.9} roughness={0.2} />
+                    </mesh>
+                ))}
+
+                {/* Screen content */}
+                <Html
+                    distanceFactor={4}
+                    position={[0, -0.05, 0.13]}
+                    transform
+                    occlude
+                    style={{ pointerEvents: "none" }}
+                >
+                    {section === 0 && <WAScreen visible={true} />}
+                    {section === 1 && <DashboardScreen visible={true} />}
+                    {section === 2 && <WAScreen visible={true} />}
+                    {section === 3 && <DashboardScreen visible={true} />}
+                </Html>
+
+                {/* Glow light */}
+                <pointLight
+                    position={[0, 0, 1]}
+                    intensity={section === 0 ? 1.2 : 0.8}
+                    color={section % 2 === 0 ? "#00E5A0" : "#60A5FA"}
+                    distance={4}
+                />
             </Float>
         </group>
     );
 }
 
+// ── Camera rig: zoom smoothly on section change ───────────────────────────────
+function CameraRig({ section }: { section: number }) {
+    const { camera } = useThree();
+
+    // Each section has a different camera Z distance (zoom)
+    const targetZ = [7.5, 6.5, 8, 7][section] ?? 7.5;
+    const targetX = [0, -1.5, 1.5, 0][section] ?? 0;
+
+    useFrame(() => {
+        camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.04);
+        camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, 0.04);
+        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 0, 0.04);
+    });
+
+    return null;
+}
+
+// ── Scene export ──────────────────────────────────────────────────────────────
 export function Scene3D({ section = 0 }: { section?: number }) {
     return (
         <div className="w-full h-full">
-            <Canvas shadows dpr={[1, 2]}>
-                <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
-                <ambientLight intensity={0.5} />
-                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-                <pointLight position={[-10, -10, -10]} intensity={0.5} />
+            <Canvas
+                shadows
+                dpr={[1, 2]}
+                gl={{ antialias: true, alpha: true }}
+                style={{ background: "transparent" }}
+            >
+                <PerspectiveCamera makeDefault position={[0, 0, 7.5]} fov={45} />
+                <CameraRig section={section} />
 
-                <Environment preset="city" />
+                {/* Lighting */}
+                <ambientLight intensity={0.3} />
+                <spotLight
+                    position={[5, 8, 5]}
+                    angle={0.2}
+                    penumbra={1}
+                    intensity={2}
+                    castShadow
+                    color="#ffffff"
+                />
+                <pointLight position={[-6, -4, -4]} intensity={0.6} color="#60A5FA" />
+                <pointLight position={[6, 4, 2]} intensity={0.4} color="#00E5A0" />
 
-                <group position={[0, 0, 0]}>
-                    {section === 0 && (
-                        <group position={[0, 0, 0]}>
-                            <Laptop />
-                            <group position={[3.5, -1, 2]} scale={0.8} rotation={[0, -0.4, 0]}>
-                                <Smartphone />
-                            </group>
-                        </group>
-                    )}
+                {/* Particles */}
+                <Particles count={70} />
 
-                    {section === 1 && (
-                        <group position={[-2, 0, 0]} scale={0.9}>
-                            <Laptop />
-                        </group>
-                    )}
-
-                    {section === 2 && (
-                        <group position={[2, 0, 0]} scale={1.2}>
-                            <Smartphone />
-                        </group>
-                    )}
-                </group>
-
-                <ContactShadows position={[0, -2.5, 0]} opacity={0.4} scale={20} blur={2.5} far={4.5} />
+                {/* iPhone */}
+                <IPhoneModel section={section} />
             </Canvas>
         </div>
     );
