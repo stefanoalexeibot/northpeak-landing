@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -85,6 +85,7 @@ export default async function LandingPage() {
               <a href="#pago-unico" className="hover:text-northpeak-text transition-colors">Pago único</a>
               <a href="#casos" className="hover:text-northpeak-text transition-colors">Resultados</a>
               <a href="#preguntas" className="hover:text-northpeak-text transition-colors">FAQ</a>
+              <Link href="/ecosistema" className="hover:text-northpeak-green transition-colors text-northpeak-green/80">Ecosistema</Link>
               <Link href="/portal/dashboard" className="hover:text-northpeak-text transition-colors">Portal</Link>
             </nav>
 
