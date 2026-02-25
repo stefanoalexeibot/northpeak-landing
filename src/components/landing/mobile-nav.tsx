@@ -10,6 +10,7 @@ const links = [
   { label: "Pago único", href: "#pago-unico" },
   { label: "Resultados", href: "#casos" },
   { label: "FAQ", href: "#preguntas" },
+  { label: "Ecosistema", href: "/ecosistema", highlight: true },
   { label: "Portal", href: "/portal/dashboard" },
 ];
 
@@ -53,17 +54,32 @@ export default function MobileNav() {
               className="fixed left-0 right-0 top-16 z-50 bg-northpeak-bg border-b border-northpeak-surface px-5 py-5"
             >
               <nav className="space-y-1 mb-5">
-                {links.map((l) => (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    onClick={close}
-                    className="flex items-center justify-between px-4 py-3 rounded-xl text-northpeak-text-muted hover:text-northpeak-text hover:bg-northpeak-card transition-all text-base font-medium"
-                  >
-                    {l.label}
-                    <ArrowRight className="h-3.5 w-3.5 opacity-40" />
-                  </a>
-                ))}
+                {links.map((l) =>
+                  l.href.startsWith("/") ? (
+                    <Link
+                      key={l.label}
+                      href={l.href}
+                      onClick={close}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl hover:bg-northpeak-card transition-all text-base font-medium ${l.highlight
+                          ? "text-northpeak-green"
+                          : "text-northpeak-text-muted hover:text-northpeak-text"
+                        }`}
+                    >
+                      {l.label}
+                      <ArrowRight className={`h-3.5 w-3.5 ${l.highlight ? "opacity-70" : "opacity-40"}`} />
+                    </Link>
+                  ) : (
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      onClick={close}
+                      className="flex items-center justify-between px-4 py-3 rounded-xl text-northpeak-text-muted hover:text-northpeak-text hover:bg-northpeak-card transition-all text-base font-medium"
+                    >
+                      {l.label}
+                      <ArrowRight className="h-3.5 w-3.5 opacity-40" />
+                    </a>
+                  )
+                )}
               </nav>
 
               <Link

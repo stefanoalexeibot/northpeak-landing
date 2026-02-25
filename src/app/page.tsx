@@ -17,8 +17,7 @@ import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
 import RotatingText from "@/components/reactbits/RotatingText";
 import GradientText from "@/components/reactbits/GradientText";
-import ScrollToTop from "@/components/landing/scroll-to-top";
-import StickyMobileCta from "@/components/landing/sticky-mobile-cta";
+import FloatingButtons from "@/components/landing/floating-buttons";
 import ParallaxHeroGlow from "@/components/landing/parallax-hero-glow";
 import HeroEffects from "@/components/landing/hero-effects";
 import HeroBadge from "@/components/landing/hero-badge";
@@ -272,8 +271,7 @@ export default async function LandingPage() {
 
       </div>{/* /z-10 wrapper */}
 
-      <ScrollToTop />
-      <StickyMobileCta />
+      <FloatingButtons />
     </div>
   );
 }
