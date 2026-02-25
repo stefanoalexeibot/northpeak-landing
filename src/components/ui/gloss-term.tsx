@@ -172,7 +172,7 @@ export function GlossHint() {
                     animate={{ y: 0, opacity: 1, scale: 1 }}
                     exit={{ y: 80, opacity: 0, scale: 0.95 }}
                     transition={{ type: "spring", damping: 22, stiffness: 260, delay: 0 }}
-                    className="fixed bottom-[88px] md:bottom-8 left-1/2 -translate-x-1/2 z-[9998] w-[calc(100%-2rem)] max-w-sm"
+                    className="fixed bottom-[88px] md:bottom-8 left-4 right-4 md:left-auto md:right-8 md:w-80 z-[9998]"
                     style={{ pointerEvents: "all" }}
                 >
                     <div
