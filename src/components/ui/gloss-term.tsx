@@ -303,3 +303,37 @@ export default function GlossTerm({ term, children, className = "" }: GlossTermP
         </>
     );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AutoGloss — parsea un string y envuelve automáticamente los términos del
+// glosario con <GlossTerm>. Úsalo en lugar de {texto} en cualquier párrafo.
+//
+// Uso: <AutoGloss text={svc.description} />
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Ordena términos de más largo a más corto (para que "integraciones llave en mano"
+// matchee antes que "integraciones")
+const SORTED_TERMS = Object.keys(GLOSSARY).sort((a, b) => b.length - a.length);
+
+export function AutoGloss({ text, className }: { text: string; className?: string }) {
+    // Build a regex that matches any known term
+    const pattern = SORTED_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+    const regex = new RegExp(`(${pattern})`, "g");
+
+    const parts = text.split(regex);
+
+    return (
+        <span className={className}>
+            {parts.map((part, i) => {
+                if (GLOSSARY[part]) {
+                    return (
+                        <GlossTerm key={i} term={part}>
+                            {part}
+                        </GlossTerm>
+                    );
+                }
+                return <React.Fragment key={i}>{part}</React.Fragment>;
+            })}
+        </span>
+    );
+}

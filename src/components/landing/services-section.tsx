@@ -5,6 +5,7 @@ import TiltCard from "@/components/portal/tilt-card";
 import { services } from "@/lib/data/landing-data";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import GradientText from "@/components/reactbits/GradientText";
+import { AutoGloss } from "@/components/ui/gloss-term";
 
 export default function ServicesSection() {
     return (
@@ -48,13 +49,15 @@ export default function ServicesSection() {
                                     </p>
                                 </div>
 
-                                <p className="text-sm text-northpeak-text-muted leading-relaxed">{svc.description}</p>
+                                <p className="text-sm text-northpeak-text-muted leading-relaxed">
+                                    <AutoGloss text={svc.description} />
+                                </p>
 
                                 <ul className="space-y-1.5 flex-1">
                                     {svc.features.map((f) => (
                                         <li key={f} className="flex items-center gap-2 text-sm text-northpeak-text-muted">
                                             <Check className={`h-3.5 w-3.5 shrink-0 ${svc.color}`} />
-                                            {f}
+                                            <AutoGloss text={f} />
                                         </li>
                                     ))}
                                 </ul>

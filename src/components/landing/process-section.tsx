@@ -2,6 +2,7 @@ import FadeIn from "@/components/landing/fade-in";
 import BlurTitle from "@/components/landing/blur-title";
 import TiltCard from "@/components/portal/tilt-card";
 import { steps } from "@/lib/data/landing-data";
+import { AutoGloss } from "@/components/ui/gloss-term";
 
 export default function ProcessSection() {
     return (
@@ -26,7 +27,9 @@ export default function ProcessSection() {
                                 </span>
                             </div>
                             <h3 className="font-heading font-bold text-xl text-northpeak-text">{step.title}</h3>
-                            <p className="text-sm text-northpeak-text-muted leading-relaxed">{step.description}</p>
+                            <p className="text-sm text-northpeak-text-muted leading-relaxed">
+                                <AutoGloss text={step.description} />
+                            </p>
                         </TiltCard>
                     ))}
                 </div>

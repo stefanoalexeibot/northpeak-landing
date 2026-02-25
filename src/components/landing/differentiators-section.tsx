@@ -2,6 +2,7 @@ import FadeIn from "@/components/landing/fade-in";
 import BlurTitle from "@/components/landing/blur-title";
 import TiltCard from "@/components/portal/tilt-card";
 import { differentiators } from "@/lib/data/landing-data";
+import { AutoGloss } from "@/components/ui/gloss-term";
 
 export default function DifferentiatorsSection() {
     return (
@@ -21,7 +22,9 @@ export default function DifferentiatorsSection() {
                                 <d.Icon className={`h-5 w-5 ${d.color}`} />
                             </div>
                             <h3 className="font-heading font-bold text-lg text-northpeak-text leading-snug">{d.title}</h3>
-                            <p className="text-sm text-northpeak-text-muted leading-relaxed">{d.description}</p>
+                            <p className="text-sm text-northpeak-text-muted leading-relaxed">
+                                <AutoGloss text={d.description} />
+                            </p>
                         </TiltCard>
                     ))}
                 </div>
