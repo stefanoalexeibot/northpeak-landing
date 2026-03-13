@@ -16,7 +16,15 @@ import { cn } from "@/lib/utils";
 
 // --- Componentes Locales ---
 
-const FeatureCard = ({ icon: Icon, title, why, forWhat, color }: any) => (
+interface FeatureCardProps {
+  icon: React.ElementType;
+  title: string;
+  why: string;
+  forWhat: string;
+  color: string;
+}
+
+const FeatureCard = ({ icon: Icon, title, why, forWhat, color }: FeatureCardProps) => (
   <div className="group p-6 rounded-3xl bg-northpeak-card/30 border border-northpeak-surface hover:border-northpeak-green/40 transition-all duration-500 backdrop-blur-sm relative overflow-hidden">
     <div className={cn("absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity blur-2xl rounded-full -mr-8 -mt-8", color)} />
     <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center mb-6 border border-northpeak-surface shadow-inner", color.replace('bg-', 'text-').replace('-500', '/10'))}>
@@ -26,7 +34,7 @@ const FeatureCard = ({ icon: Icon, title, why, forWhat, color }: any) => (
     <div className="space-y-4">
       <div>
         <p className="text-[10px] font-mono uppercase tracking-widest text-northpeak-green mb-1">¿Por qué?</p>
-        <p className="text-sm text-northpeak-text-muted leading-relaxed italic">"{why}"</p>
+        <p className="text-sm text-northpeak-text-muted leading-relaxed italic">&quot;{why}&quot;</p>
       </div>
       <div>
         <p className="text-[10px] font-mono uppercase tracking-widest text-blue-400 mb-1">¿Para qué?</p>
@@ -36,7 +44,17 @@ const FeatureCard = ({ icon: Icon, title, why, forWhat, color }: any) => (
   </div>
 );
 
-const PlanItem = ({ item, isSelected, onToggle }: any) => (
+interface PlanItemProps {
+  item: {
+    title: string;
+    price: number;
+    desc: string;
+  };
+  isSelected: boolean;
+  onToggle: () => void;
+}
+
+const PlanItem = ({ item, isSelected, onToggle }: PlanItemProps) => (
   <div 
     onClick={onToggle}
     className={cn(
@@ -67,16 +85,16 @@ const PlanItem = ({ item, isSelected, onToggle }: any) => (
 export default function RemodelacionesNovaPremiumProposal() {
   const [selectedServices, setSelectedServices] = useState<string[]>(["web", "infra", "seo", "auto"]);
 
-  const services: any = {
+  const services: Record<string, { id: string; title: string; price: number; desc: string }> = useMemo(() => ({
     infra: { id: "infra", title: "Cimentación Digital", price: 4500, desc: "Dominio .com + Google Workspace + Hosting de alta velocidad." },
     web: { id: "web", title: "Plataforma Premium", price: 12500, desc: "Web interactiva Next.js con portafolio de impacto y SEO inicial." },
     auto: { id: "auto", title: "Cierre en Caliente (IA)", price: 5000, desc: "Automatización de leads a WhatsApp y CRM básico." },
     seo: { id: "seo", title: "Imán de Clientes (SEO)", price: 2500, desc: "Optimización profunda para Monterrey y área metropolitana." },
-  };
+  }), []);
 
   const totalPrice = useMemo(() => {
     return selectedServices.reduce((acc, curr) => acc + services[curr].price, 0);
-  }, [selectedServices]);
+  }, [selectedServices, services]);
 
   const toggleService = (id: string) => {
     setSelectedServices(prev => 
@@ -245,7 +263,7 @@ export default function RemodelacionesNovaPremiumProposal() {
             </FadeIn>
 
             <div className="space-y-4 mb-12">
-              {Object.values(services).map((item: any) => (
+              {Object.values(services).map((item) => (
                 <FadeIn key={item.id}>
                   <PlanItem 
                     item={item} 
@@ -309,7 +327,7 @@ export default function RemodelacionesNovaPremiumProposal() {
                 </ul>
                 
                 <p className="text-sm font-medium text-black/60 italic leading-relaxed">
-                  "No queremos ser un gasto, queremos ser la inversión que pague sus próximas remodelaciones."
+                  &quot;No queremos ser un gasto, queremos ser la inversión que pague sus próximas remodelaciones.&quot;
                 </p>
               </div>
             </FadeIn>
