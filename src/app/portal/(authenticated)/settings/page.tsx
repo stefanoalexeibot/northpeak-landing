@@ -45,7 +45,7 @@ export default function SettingsPage() {
       setPhotoUrl(client.photo_url || "");
     }
     load();
-  }, []);
+  }, [supabase]);
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();

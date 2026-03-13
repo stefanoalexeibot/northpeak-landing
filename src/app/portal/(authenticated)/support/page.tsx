@@ -63,7 +63,7 @@ export default function SupportPage() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

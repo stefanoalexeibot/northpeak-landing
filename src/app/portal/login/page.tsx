@@ -54,6 +54,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-northpeak-bg px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="NorthPeak Digital" className="h-10" />
         </div>
 

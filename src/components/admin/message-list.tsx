@@ -92,7 +92,7 @@ export default function AdminMessageList({ clients, unreadByClient, lastMessageB
     }
 
     loadMessages();
-  }, [selectedClient]);
+  }, [selectedClient, supabase]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

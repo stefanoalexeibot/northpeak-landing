@@ -113,6 +113,7 @@ export default function PortalNav({ client }: { client: Client }) {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/portal/dashboard">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="NorthPeak" className="h-7" />
             </Link>
           </div>

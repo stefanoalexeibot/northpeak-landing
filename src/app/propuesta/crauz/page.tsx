@@ -3,12 +3,12 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { 
-  CheckCircle2, Globe, TrendingUp, 
-  Factory, Shield, 
+  CheckCircle2, Globe, 
+  Shield, 
   Rocket, Plus, Info, 
   BookOpen, Timer, Tag,
   ArrowRight, MousePointer2, MessageSquare,
-  Cog, HardHat, Construction, Truck,
+  Construction, Truck,
   Wrench, Building2, MapPin
 } from "lucide-react";
 import AnimatedBackground from "@/components/portal/animated-background";

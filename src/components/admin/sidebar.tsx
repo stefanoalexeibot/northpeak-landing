@@ -80,6 +80,7 @@ export default function AdminSidebar() {
     <>
       <div className="flex h-16 items-center justify-between px-6 border-b border-northpeak-surface">
         <div className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="NorthPeak" className="h-7" />
           <span className="ml-2 text-xs font-mono text-northpeak-text-muted uppercase tracking-widest">
             Admin
@@ -143,6 +144,7 @@ export default function AdminSidebar() {
         >
           <Menu className="h-5 w-5" />
         </button>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="NorthPeak" className="h-6" />
         <NotificationBell />
       </div>

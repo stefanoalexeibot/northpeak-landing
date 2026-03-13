@@ -69,7 +69,7 @@ export default function ReferralsPage() {
       setReferrals(data ?? []);
     }
     load();
-  }, []);
+  }, [supabase]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
