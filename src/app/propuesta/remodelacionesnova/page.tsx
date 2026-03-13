@@ -403,10 +403,18 @@ export default function RemodelacionesNovaFinalProposal() {
                       <div className="h-2 w-2 rounded-full bg-green-500/50" />
                       <div className="ml-2 h-4 w-32 bg-white/10 rounded-full" />
                     </div>
-                    <div className="flex items-center justify-center h-full p-20 opacity-30 blur-[2px] group-hover:opacity-100 group-hover:blur-0 transition-all duration-700">
-                      <div className="text-center">
-                        <Building2 className="h-16 w-16 text-northpeak-green mx-auto mb-6" />
-                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-black">Tu Página de Ejemplo</p>
+                    <div className="absolute inset-0 group-hover:scale-110 transition-transform duration-1000">
+                      <img 
+                        src="/nova-mockup.png" 
+                        alt="Preview de tu nueva oficina digital" 
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-northpeak-bg via-transparent to-transparent opacity-60" />
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center p-8 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 group-hover:opacity-0 transition-opacity duration-500">
+                        <Building2 className="h-10 w-10 text-northpeak-green mx-auto mb-4" />
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-black text-white">Tu Página de Ejemplo</p>
                       </div>
                     </div>
                   </div>
