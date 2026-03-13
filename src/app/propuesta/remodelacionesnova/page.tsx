@@ -2,11 +2,13 @@ import Link from "next/link";
 import { 
   ArrowRight, Zap, CheckCircle2, Clock, 
   MapPin, PenTool, Layout, Database, 
-  Settings2, Smartphone, Globe, Mail 
+  Settings2, Globe, Mail 
 } from "lucide-react";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
 import FadeIn from "@/components/landing/fade-in";
+
+/* eslint-disable @next/next/no-img-element */
 
 export default function RemodelacionesNovaProposal() {
   return (
