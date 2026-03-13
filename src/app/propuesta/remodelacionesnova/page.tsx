@@ -31,6 +31,7 @@ interface PlanItemProps {
     title: string;
     price: number;
     desc: string;
+    tag?: string;
   };
   isSelected: boolean;
   onToggle: () => void;
@@ -76,9 +77,16 @@ const PlanItem = ({ item, isSelected, onToggle }: PlanItemProps) => (
     </div>
     <div className="flex-1">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-        <h5 className={cn("font-bold text-base", isSelected ? "text-northpeak-green" : "text-white")}>
-          {item.title}
-        </h5>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <h5 className={cn("font-bold text-base", isSelected ? "text-northpeak-green" : "text-white")}>
+            {item.title}
+          </h5>
+          {item.tag && (
+            <span className="text-[9px] font-mono font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-northpeak-text-dim">
+              {item.tag}
+            </span>
+          )}
+        </div>
         <span className="font-mono text-sm font-bold bg-white/5 px-3 py-1 rounded-full border border-white/5">${item.price.toLocaleString()}</span>
       </div>
       <p className="text-sm text-northpeak-text-dim leading-relaxed">{item.desc}</p>
@@ -113,11 +121,11 @@ export default function RemodelacionesNovaFinalProposal() {
     return () => clearInterval(timer);
   }, []);
 
-  const services: Record<string, { id: string; title: string; price: number; desc: string }> = useMemo(() => ({
-    infra: { id: "infra", title: "Cimentación Digital", price: 4500, desc: "Tu marca protegida en internet: Dominio (.com), correos profesionales con tu nombre y el lugar donde vivirá tu web." },
-    web: { id: "web", title: "Exhibición Premium Moderno", price: 12500, desc: "Tu portafolio de lujo adaptado a celulares. Rápido, elegante y diseñado para que te contacten." },
-    auto: { id: "auto", title: "Aviso Inmediato (Vendedor 24/7)", price: 5000, desc: "Sistema que te avisa por WhatsApp en segundos cuando alguien pide informes, para que no pierdas ventas." },
-    seo: { id: "seo", title: "Presencia en Google Monterrey", price: 2500, desc: "Configuramos todo para que cuando la gente busque remodelaciones en NL, tú seas la primera opción." },
+  const services: Record<string, { id: string; title: string; price: number; desc: string; tag: string }> = useMemo(() => ({
+    infra: { id: "infra", tag: "Página Web", title: "Cimentación Digital", price: 4500, desc: "Tu marca protegida en internet: Dominio (.com), correos profesionales con tu nombre y el lugar donde vivirá tu web." },
+    web: { id: "web", tag: "Página Web", title: "Exhibición Premium Moderno", price: 12500, desc: "Tu portafolio de lujo adaptado a celulares. Rápido, elegante y diseñado para que te contacten." },
+    auto: { id: "auto", tag: "Automatización con IA", title: "Aviso Inmediato (Vendedor 24/7)", price: 5000, desc: "Sistema que te avisa por WhatsApp en segundos cuando alguien pide informes, para que no pierdas ventas." },
+    seo: { id: "seo", tag: "Publicidad & SEO", title: "Presencia en Google Monterrey", price: 2500, desc: "Configuramos todo para que cuando la gente busque remodelaciones en NL, tú seas la primera opción." },
   }), []);
 
   const subtotal = useMemo(() => {
