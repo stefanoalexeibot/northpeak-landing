@@ -411,21 +411,21 @@ export default function RemodelacionesNovaFinalProposal() {
                       <div className="h-2 w-2 rounded-full bg-green-500/50" />
                       <div className="ml-2 h-4 w-32 bg-white/10 rounded-full" />
                     </div>
-                    <div className="absolute inset-0 group-hover:scale-110 transition-transform duration-1000">
+                     <div className="absolute inset-0 flex items-center justify-center p-4">
                       <img 
                         src="/nova-luxury-spanish.png" 
                         alt="Preview de tu nueva oficina digital" 
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-700"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-northpeak-bg via-transparent to-transparent opacity-60" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-northpeak-bg/40 via-transparent to-transparent pointer-events-none" />
                     </div>
                     <div className="absolute inset-x-0 bottom-4 text-center pointer-events-none z-20">
                       <p className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] italic">*Imagen con fines ilustrativos</p>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center p-8 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 group-hover:opacity-0 transition-opacity duration-500">
-                        <Building2 className="h-10 w-10 text-northpeak-green mx-auto mb-4" />
-                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-black text-white">Tu Página de Ejemplo</p>
+                      <div className="text-center p-10 rounded-[2rem] bg-black/60 backdrop-blur-xl border border-white/10 group-hover:opacity-0 transition-opacity duration-700">
+                        <Building2 className="h-12 w-12 text-northpeak-green mx-auto mb-6" />
+                        <p className="font-mono text-xs uppercase tracking-[0.4em] font-black text-white">Tu Página de Ejemplo</p>
                       </div>
                     </div>
                   </div>
