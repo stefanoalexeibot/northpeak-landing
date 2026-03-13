@@ -6,7 +6,8 @@ import {
   CheckCircle2, Globe, TrendingUp, 
   Sparkles, Building2,
   PhoneCall, Rocket, Plus, Info, 
-  BookOpen, Timer, Tag, AlertCircle
+  BookOpen, Timer, Tag, AlertCircle,
+  ArrowRight, MousePointer2, MessageSquare
 } from "lucide-react";
 import AnimatedBackground from "@/components/portal/animated-background";
 import DotGrid from "@/components/portal/dot-grid";
@@ -303,6 +304,114 @@ export default function RemodelacionesNovaFinalProposal() {
                 />
               </FadeIn>
             </div>
+          </div>
+        </section>
+
+        {/* ── Sales Funnel Strategy ── */}
+        <section className="py-24 px-6 sm:px-12 bg-northpeak-green/5 relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none opacity-20">
+             <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-northpeak-green/20 blur-[100px] rounded-full" />
+          </div>
+          <div className="max-w-7xl mx-auto relative z-10">
+            <FadeIn className="text-center mb-20">
+              <h2 className="font-heading font-black text-4xl sm:text-6xl text-white mb-6">Tu Maquinaria de Ventas</h2>
+              <p className="text-northpeak-text-muted text-lg max-w-2xl mx-auto italic">
+                &quot;No es solo una página, es un embudo diseñado para convertir desconocidos en clientes leales.&quot;
+              </p>
+            </FadeIn>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {[
+                { 
+                  icon: Globe, 
+                  step: "1. Tráfico Elevado", 
+                  desc: "La gente te encuentra en Google o Instagram buscando 'Deck Monterrey' o 'Diseño de Interiores'.",
+                  color: "text-blue-400"
+                },
+                { 
+                  icon: MousePointer2, 
+                  step: "2. Convencimiento", 
+                  desc: "Llegan a tu nueva página premium. Ven tus mejores obras y el estatus de excelencia de Nova.",
+                  color: "text-northpeak-green"
+                },
+                { 
+                  icon: MessageSquare, 
+                  step: "3. Contacto Directo", 
+                  desc: "Con un solo clic, te escriben por WhatsApp. La IA los califica y te avisa al instante.",
+                  color: "text-yellow-500"
+                },
+                { 
+                  icon: Rocket, 
+                  step: "4. Cierre de Obra", 
+                  desc: "Tú cierras la venta. El sistema sigue trabajando para traerte el siguiente proyecto.",
+                  color: "text-red-500"
+                }
+              ].map((item, i) => (
+                <FadeIn key={i} delay={i * 0.1} className="relative group">
+                  <div className="p-10 rounded-[3rem] bg-northpeak-bg border border-white/5 hover:border-northpeak-green/20 transition-all duration-500 text-center flex flex-col items-center h-full">
+                    <div className={cn("h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-8 border border-white/10 group-hover:scale-110 transition-transform", item.color)}>
+                      <item.icon className="h-8 w-8" />
+                    </div>
+                    <h5 className="text-xl font-black text-white mb-4 uppercase tracking-tighter">{item.step}</h5>
+                    <p className="text-sm text-northpeak-text-muted leading-relaxed">{item.desc}</p>
+                  </div>
+                  {i < 3 && (
+                    <div className="hidden lg:block absolute top-1/2 -right-4 -translate-y-1/2 z-20">
+                      <ArrowRight className="h-8 w-8 text-white/10" />
+                    </div>
+                  )}
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Infrastructure & Domain ── */}
+        <section className="py-24 px-6 sm:px-12 bg-white/[0.01]">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+            <FadeIn className="lg:w-1/2">
+               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-northpeak-green/20 bg-northpeak-green/5 text-northpeak-green text-[10px] font-mono tracking-widest mb-6">
+                 INFRAESTRUCTURA PREMIUM
+               </div>
+               <h2 className="font-heading font-black text-4xl sm:text-6xl text-white mb-8 leading-tight tracking-tighter">
+                 Tu nueva propiedad <br /> en el mundo digital.
+               </h2>
+               <div className="space-y-6">
+                 {[
+                   { title: "Dominio Propio", desc: "remodelacionesnova.com será tuyo. Da una imagen de empresa sólida y establecida." },
+                   { title: "Correos Corporativos", desc: "vendedores@remodelacionesnova.com. Deja de usar @gmail para cerrar contratos de lujo." },
+                   { title: "Hosting de Alta Velocidad", desc: "Tu página cargará en milisegundos. Un cliente de lujo no espera." }
+                 ].map((feat, i) => (
+                   <div key={i} className="flex gap-5 group">
+                     <div className="h-6 w-6 rounded-full bg-northpeak-green/20 border border-northpeak-green/30 flex items-center justify-center shrink-0 mt-1">
+                       <CheckCircle2 className="h-3 w-3 text-northpeak-green" />
+                     </div>
+                     <div>
+                       <h4 className="text-white font-bold mb-1 group-hover:text-northpeak-green transition-colors">{feat.title}</h4>
+                       <p className="text-sm text-northpeak-text-dim">{feat.desc}</p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+            </FadeIn>
+            <FadeIn delay={0.3} className="lg:w-1/2 w-full">
+               <div className="p-3 rounded-[3rem] bg-gradient-to-br from-white/10 to-transparent border border-white/10 shadow-2xl overflow-hidden group">
+                  <div className="aspect-video rounded-[2.5rem] bg-northpeak-bg overflow-hidden relative">
+                    <div className="absolute top-0 left-0 w-full h-8 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+                      <div className="h-2 w-2 rounded-full bg-red-500/50" />
+                      <div className="h-2 w-2 rounded-full bg-yellow-500/50" />
+                      <div className="h-2 w-2 rounded-full bg-green-500/50" />
+                      <div className="ml-2 h-4 w-32 bg-white/10 rounded-full" />
+                    </div>
+                    <div className="flex items-center justify-center h-full p-20 opacity-30 blur-[2px] group-hover:opacity-100 group-hover:blur-0 transition-all duration-700">
+                      <div className="text-center">
+                        <Building2 className="h-16 w-16 text-northpeak-green mx-auto mb-6" />
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-black">Tu Página de Ejemplo</p>
+                      </div>
+                    </div>
+                  </div>
+               </div>
+            </FadeIn>
           </div>
         </section>
 
