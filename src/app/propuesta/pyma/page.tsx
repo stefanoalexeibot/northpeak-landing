@@ -4,9 +4,9 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { 
   CheckCircle2, Globe, TrendingUp, 
-  Sparkles, Factory, Shield, 
-  PhoneCall, Rocket, Plus, Info, 
-  BookOpen, Timer, Tag, AlertCircle,
+  Factory, Shield, 
+  Rocket, Plus, Info, 
+  BookOpen, Timer, Tag,
   ArrowRight, MousePointer2, MessageSquare,
   Cog, HardHat
 } from "lucide-react";
