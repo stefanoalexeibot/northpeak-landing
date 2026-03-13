@@ -161,8 +161,8 @@ export default function RemodelacionesNovaFinalProposal() {
                    {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
                  </span>
                </div>
-               <Link href="https://wa.me/8124262186" className="text-[11px] font-black uppercase tracking-widest px-6 py-3 bg-northpeak-green text-northpeak-bg rounded-xl hover:scale-105 transition-all shadow-lg shadow-northpeak-green/20">
-                 Hablar con mi Estratega
+               <Link href="https://wa.me/528121980008" className="text-[11px] font-bold uppercase tracking-widest px-4 py-2 border border-northpeak-green/30 rounded-lg hover:bg-northpeak-green/5 transition-all text-northpeak-green">
+                 Hablar con Estratega
                </Link>
             </div>
           </div>
@@ -226,19 +226,19 @@ export default function RemodelacionesNovaFinalProposal() {
               </FadeIn>
               <FadeIn delay={0.2}>
                 <FeatureCard 
-                  icon={Database}
-                  title="Atracción de Proyectos"
-                  why="El ahorro en luz es lo que todos buscan hoy en Monterrey. Tienes un gran servicio, pero necesita ser expuesto."
-                  forWhat="Implementamos una calculadora que atrae a la gente interesada en paneles solares. Ellos dejan sus datos y tú recibes prospectos listos."
+                  icon={Sparkles}
+                  title="Especialistas en Lujo"
+                  why="El mercado residencial premium en Monterrey exige acabados de alta gama como Lambrín, Decks y carpintería fina."
+                  forWhat="Tu web resaltará estos detalles mediante galerías táctiles de alta definición, posicionándote como un artesano del lujo, no solo un constructor."
                   color="bg-blue-500"
                 />
               </FadeIn>
               <FadeIn delay={0.3}>
                 <FeatureCard 
-                  icon={ShieldCheck}
-                  title="Cero Oportunidades Perdidas"
-                  why="Si un cliente te busca y no contestas en 5 minutos, ya está viendo la página de otro."
-                  forWhat="Automatizamos tus mensajes para que cuando alguien pida una cotización, tú recibas un WhatsApp al instante para cerrar la venta."
+                  icon={Building2}
+                  title="Poder Industrial"
+                  why="El sector industrial busca proveedores con capacidad de mantenimiento mayor, instalaciones HVAC y albañilería pesada."
+                  forWhat="Diseñamos una sección técnica específica para empresas, detallando tu capacidad operativa en plomería, electricidad y aire acondicionado."
                   color="bg-yellow-500"
                 />
               </FadeIn>
@@ -352,7 +352,7 @@ export default function RemodelacionesNovaFinalProposal() {
                    </div>
 
                    <Link 
-                     href={`https://wa.me/8124262186?text=Hola%20NorthPeak!%20Acepto%20la%20propuesta%20de%20Nova%20con%20descuento%20(Modulos:%20${selectedServices.join(',%20')})`}
+                     href={`https://wa.me/528121980008?text=Hola%20NorthPeak!%20Acepto%20la%20propuesta%20de%20Nova%20con%20descuento%20(Modulos:%20${selectedServices.join(',%20')})`}
                      className="w-full sm:w-auto inline-flex items-center justify-center gap-4 px-14 py-7 rounded-[2rem] bg-northpeak-green text-northpeak-bg font-black text-xl hover:scale-105 transition-all shadow-2xl shadow-northpeak-green/30 active:scale-95"
                    >
                      <Rocket className="h-7 w-7" />
