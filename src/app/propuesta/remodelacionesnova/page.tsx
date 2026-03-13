@@ -402,30 +402,24 @@ export default function RemodelacionesNovaFinalProposal() {
                  ))}
                </div>
             </FadeIn>
-            <FadeIn delay={0.3} className="lg:w-1/2 w-full">
-               <div className="p-3 rounded-[3rem] bg-gradient-to-br from-white/10 to-transparent border border-white/10 shadow-2xl overflow-hidden group">
-                  <div className="aspect-video rounded-[2.5rem] bg-northpeak-bg overflow-hidden relative">
-                    <div className="absolute top-0 left-0 w-full h-8 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
-                      <div className="h-2 w-2 rounded-full bg-red-500/50" />
-                      <div className="h-2 w-2 rounded-full bg-yellow-500/50" />
-                      <div className="h-2 w-2 rounded-full bg-green-500/50" />
-                      <div className="ml-2 h-4 w-32 bg-white/10 rounded-full" />
-                    </div>
-                     <div className="absolute inset-0 flex items-center justify-center p-4">
+            <FadeIn delay={0.3} className="lg:w-1/2 w-full flex justify-center">
+               <div className="p-2 rounded-[3.5rem] bg-gradient-to-br from-white/10 to-transparent border border-white/10 shadow-2xl overflow-hidden group max-w-[450px]">
+                  <div className="rounded-[3rem] bg-northpeak-bg overflow-hidden relative">
+                    <div className="relative group-hover:scale-[1.02] transition-transform duration-700">
                       <img 
                         src="/nova-luxury-spanish.png" 
                         alt="Preview de tu nueva oficina digital" 
-                        className="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-all duration-700"
+                        className="w-full h-auto opacity-95 group-hover:opacity-100 transition-all duration-700 block"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-northpeak-bg/40 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                     </div>
-                    <div className="absolute inset-x-0 bottom-4 text-center pointer-events-none z-20">
-                      <p className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em] italic">*Imagen con fines ilustrativos</p>
+                    <div className="absolute inset-x-0 bottom-6 text-center pointer-events-none z-20">
+                      <p className="text-[10px] font-mono text-white/50 uppercase tracking-[0.3em] italic font-black">*Imagen con fines ilustrativos</p>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center p-10 rounded-[2rem] bg-black/60 backdrop-blur-xl border border-white/10 group-hover:opacity-0 transition-opacity duration-700">
-                        <Building2 className="h-12 w-12 text-northpeak-green mx-auto mb-6" />
-                        <p className="font-mono text-xs uppercase tracking-[0.4em] font-black text-white">Tu Página de Ejemplo</p>
+                      <div className="text-center p-10 rounded-[2.5rem] bg-black/60 backdrop-blur-xl border border-white/10 group-hover:opacity-0 transition-opacity duration-700">
+                        <Building2 className="h-14 w-14 text-northpeak-green mx-auto mb-6" />
+                        <p className="font-mono text-sm uppercase tracking-[0.5em] font-black text-white">Tu Página de Ejemplo</p>
                       </div>
                     </div>
                   </div>
