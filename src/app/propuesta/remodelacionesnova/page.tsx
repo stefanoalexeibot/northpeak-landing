@@ -405,7 +405,7 @@ export default function RemodelacionesNovaFinalProposal() {
                     </div>
                     <div className="absolute inset-0 group-hover:scale-110 transition-transform duration-1000">
                       <img 
-                        src="/nova-mockup.png" 
+                        src="/nova-luxury-spanish.png" 
                         alt="Preview de tu nueva oficina digital" 
                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       />
