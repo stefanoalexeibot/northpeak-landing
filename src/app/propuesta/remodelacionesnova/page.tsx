@@ -3,8 +3,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { 
-  CheckCircle2, Globe, Database, TrendingUp, 
-  ShieldCheck, Sparkles, Building2,
+  CheckCircle2, Globe, TrendingUp, 
+  Sparkles, Building2,
   PhoneCall, Rocket, Plus, Info, 
   BookOpen, Timer, Tag, AlertCircle
 } from "lucide-react";
