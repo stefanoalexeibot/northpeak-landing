@@ -5,7 +5,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Public paths — no auth required
-  if (path === "/portal/login" || path === "/socio/login") {
+  if (path === "/portal/login" || path === "/socio/login" || path === "/comisionista/login") {
     return NextResponse.next({ request });
   }
 
@@ -47,7 +47,13 @@ export async function updateSession(request: NextRequest) {
   // Not authenticated — redirect to appropriate login
   if (!user) {
     const url = request.nextUrl.clone();
-    url.pathname = path.startsWith("/socio") ? "/socio/login" : "/portal/login";
+    if (path.startsWith("/socio")) {
+      url.pathname = "/socio/login";
+    } else if (path.startsWith("/comisionista")) {
+      url.pathname = "/comisionista/login";
+    } else {
+      url.pathname = "/portal/login";
+    }
     return NextResponse.redirect(url);
   }
 
