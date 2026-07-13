@@ -10,6 +10,7 @@ import OnboardingChecklist from "@/components/admin/onboarding-checklist";
 import ClientNotes from "@/components/admin/client-notes";
 import ClientStatusSelect from "@/components/admin/client-status-select";
 import ClientTasksChecklist from "@/components/admin/client-tasks-checklist";
+import ComisionFlowPanel from "@/components/admin/comision-flow-panel";
 
 export default async function ClientDetailPage({
   params,
@@ -104,6 +105,20 @@ export default async function ClientDetailPage({
         </CardHeader>
         <CardContent>
           <ClientTasksChecklist clientId={client.id} />
+        </CardContent>
+      </Card>
+
+      {/* Flujo de Comisionista */}
+      <Card className="bg-northpeak-card border-northpeak-surface">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2.5">
+            <CardTitle className="text-northpeak-text font-heading text-base">Comisionista / Referido</CardTitle>
+            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold">Growth Partner</span>
+          </div>
+          <p className="text-xs text-northpeak-text-muted">Flujo completo si este cliente fue traído por un comisionista</p>
+        </CardHeader>
+        <CardContent>
+          <ComisionFlowPanel clientId={client.id} clientName={client.name} />
         </CardContent>
       </Card>
 
