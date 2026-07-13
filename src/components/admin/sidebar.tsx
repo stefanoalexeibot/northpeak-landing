@@ -52,10 +52,10 @@ const navItems = [
 ];
 
 const SocioItems = [
-  { label: "Socios", href: "/admin/Socios", icon: Handshake },
-  { label: "Pipeline", href: "/admin/Socios/pipeline", icon: Kanban },
-  { label: "Comisiones", href: "/admin/Socios/comisiones", icon: DollarSign },
-  { label: "Reportes", href: "/admin/Socios/reportes", icon: PieChart },
+  { label: "Socios", href: "/admin/socios", icon: Handshake },
+  { label: "Pipeline", href: "/admin/socios/pipeline", icon: Kanban },
+  { label: "Comisiones", href: "/admin/socios/comisiones", icon: DollarSign },
+  { label: "Reportes", href: "/admin/socios/reportes", icon: PieChart },
 ];
 
 export default function AdminSidebar() {
@@ -137,8 +137,8 @@ export default function AdminSidebar() {
             Socios
           </p>
           {SocioItems.map((item) => {
-            const isActiveExact = item.href === "/admin/Socios"
-              ? pathname === "/admin/Socios"
+            const isActiveExact = item.href === "/admin/socios"
+              ? pathname === "/admin/socios"
               : pathname.startsWith(item.href);
 
             return (
@@ -212,3 +212,4 @@ export default function AdminSidebar() {
     </>
   );
 }
+

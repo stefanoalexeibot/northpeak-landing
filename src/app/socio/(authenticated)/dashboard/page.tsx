@@ -86,7 +86,7 @@ export default function SocioDashboard() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetch("/api/Socio/dashboard");
+      const res = await fetch("/api/socio/dashboard");
       if (res.ok) {
         setData(await res.json());
       } else {
@@ -101,7 +101,7 @@ export default function SocioDashboard() {
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/Socio/login");
+    router.push("/socio/login");
   }
 
   function copyLink(token: string) {
@@ -323,3 +323,4 @@ export default function SocioDashboard() {
     </div>
   );
 }
+

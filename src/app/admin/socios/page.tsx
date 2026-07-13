@@ -61,7 +61,7 @@ export default function SociosPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/Socios");
+      const res = await fetch("/api/admin/socios");
       if (res.ok) setSocios(await res.json());
     } catch {
       addToast("Error al cargar Socios", "error");
@@ -77,7 +77,7 @@ export default function SociosPage() {
       return;
     }
     setSaving(true);
-    const res = await fetch("/api/admin/Socios", {
+    const res = await fetch("/api/admin/socios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -111,7 +111,7 @@ export default function SociosPage() {
 
   async function handleSaveEdit(id: string) {
     setSaving(true);
-    const res = await fetch("/api/admin/Socios", {
+    const res = await fetch("/api/admin/socios", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -135,7 +135,7 @@ export default function SociosPage() {
   }
 
   async function handleToggleActivo(c: SocioWithStats) {
-    await fetch("/api/admin/Socios", {
+    await fetch("/api/admin/socios", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: c.id, activo: !c.activo }),
@@ -146,7 +146,7 @@ export default function SociosPage() {
   async function handleDelete(id: string) {
     if (!confirm("¿Seguro que quieres eliminar este Socio?")) return;
     setDeletingId(id);
-    const res = await fetch("/api/admin/Socios", {
+    const res = await fetch("/api/admin/socios", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
@@ -396,3 +396,4 @@ export default function SociosPage() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Public paths — no auth required
-  if (path === "/portal/login") {
+  if (path === "/portal/login" || path === "/socio/login") {
     return NextResponse.next({ request });
   }
 
@@ -44,10 +44,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Not authenticated — redirect to login
+  // Not authenticated — redirect to appropriate login
   if (!user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/portal/login";
+    url.pathname = path.startsWith("/socio") ? "/socio/login" : "/portal/login";
     return NextResponse.redirect(url);
   }
 

@@ -83,7 +83,7 @@ export default function SociosPipelinePage() {
     try {
       const [analisisRes, SociosRes] = await Promise.all([
         fetch("/api/admin/analisis"),
-        fetch("/api/admin/Socios"),
+        fetch("/api/admin/socios"),
       ]);
       if (analisisRes.ok) {
         const all: ProspectoCard[] = await analisisRes.json();
@@ -328,3 +328,4 @@ export default function SociosPipelinePage() {
     </div>
   );
 }
+

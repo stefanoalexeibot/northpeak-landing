@@ -289,7 +289,7 @@ function AnalizadorContent() {
         setVendedoresOpts(data.filter((v) => v.activo).map((v) => v.nombre))
       )
       .catch(() => {});
-    fetch("/api/admin/Socios")
+    fetch("/api/admin/socios")
       .then((r) => r.ok ? r.json() : [])
       .then((data: Array<{ id: string; nombre: string; activo: boolean }>) =>
         setSociosOpts(data.filter((c) => c.activo).map((c) => ({ id: c.id, nombre: c.nombre })))
@@ -1470,3 +1470,4 @@ function AnalizadorContent() {
     </div>
   );
 }
+

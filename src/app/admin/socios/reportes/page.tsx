@@ -47,7 +47,7 @@ export default function SociosReportesPage() {
     async function load() {
       try {
         const [cRes, coRes] = await Promise.all([
-          fetch("/api/admin/Socios"),
+          fetch("/api/admin/socios"),
           fetch("/api/admin/comisiones"),
         ]);
         if (cRes.ok) setSocios(await cRes.json());
@@ -261,3 +261,4 @@ export default function SociosReportesPage() {
     </div>
   );
 }
+

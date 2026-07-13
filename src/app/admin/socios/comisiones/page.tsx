@@ -76,7 +76,7 @@ export default function ComisionesPage() {
 
       const [comisionesRes, SociosRes] = await Promise.all([
         fetch(`/api/admin/comisiones?${params}`),
-        fetch("/api/admin/Socios"),
+        fetch("/api/admin/socios"),
       ]);
       if (comisionesRes.ok) setComisiones(await comisionesRes.json());
       if (SociosRes.ok) setSocios(await SociosRes.json());
@@ -425,3 +425,4 @@ export default function ComisionesPage() {
     </div>
   );
 }
+
