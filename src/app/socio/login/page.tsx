@@ -30,7 +30,7 @@ export default function SocioLoginPage() {
 
     // Verify that this user is a Socio
     const { data: Socio } = await supabase
-      .from("Socios")
+      .from("socios")
       .select("id, activo")
       .eq("user_id", data.user.id)
       .single();
@@ -49,7 +49,7 @@ export default function SocioLoginPage() {
       return;
     }
 
-    window.location.href = "/Socio/dashboard";
+    window.location.href = "/socio/dashboard";
   }
 
   return (

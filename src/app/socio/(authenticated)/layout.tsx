@@ -8,17 +8,17 @@ export default async function SocioAuthLayout({
 }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/Socio/login");
+  if (!user) redirect("/socio/login");
 
   const adminSb = createAdminClient();
   const { data: Socio } = await adminSb
-    .from("Socios")
+    .from("socios")
     .select("id, nombre, activo")
     .eq("user_id", user.id)
     .single();
 
   if (!Socio || !Socio.activo) {
-    redirect("/Socio/login");
+    redirect("/socio/login");
   }
 
   return (
