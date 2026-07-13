@@ -25,6 +25,9 @@ import {
   UserCheck,
   TrendingUp,
   Zap,
+  Handshake,
+  DollarSign,
+  PieChart,
 } from "lucide-react";
 import NotificationBell from "./notification-bell";
 
@@ -46,6 +49,13 @@ const navItems = [
   { label: "Catálogo", href: "/admin/catalogo", icon: Package },
   { label: "Cotizador", href: "/admin/cotizador", icon: Calculator },
   { label: "Reportes", href: "/admin/reports", icon: BarChart3 },
+];
+
+const SocioItems = [
+  { label: "Socios", href: "/admin/Socios", icon: Handshake },
+  { label: "Pipeline", href: "/admin/Socios/pipeline", icon: Kanban },
+  { label: "Comisiones", href: "/admin/Socios/comisiones", icon: DollarSign },
+  { label: "Reportes", href: "/admin/Socios/reportes", icon: PieChart },
 ];
 
 export default function AdminSidebar() {
@@ -120,6 +130,36 @@ export default function AdminSidebar() {
             </Link>
           );
         })}
+
+        {/* Sección Socios */}
+        <div className="pt-3 mt-2">
+          <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-northpeak-text-muted/60">
+            Socios
+          </p>
+          {SocioItems.map((item) => {
+            const isActive = pathname.startsWith(item.href) &&
+              !(item.href === "/admin/Socios" && pathname.startsWith("/admin/Socios/"));
+            const isActiveExact = item.href === "/admin/Socios"
+              ? pathname === "/admin/Socios"
+              : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActiveExact
+                    ? "bg-amber-500/10 text-amber-400"
+                    : "text-northpeak-text-muted hover:bg-northpeak-surface hover:text-northpeak-text"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       <div className="border-t border-northpeak-surface p-3">

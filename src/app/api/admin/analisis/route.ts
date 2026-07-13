@@ -21,11 +21,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const { datos, hallazgos, client_id, vendedor } = (await request.json()) as {
+  const { datos, hallazgos, client_id, vendedor, socio_id } = (await request.json()) as {
     datos: DatosNegocio;
     hallazgos: Hallazgos;
     client_id?: string;
     vendedor?: string;
+    socio_id?: string;
   };
 
   // Calculate score
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
       report_url: urlData.publicUrl,
       client_id: client_id || null,
       vendedor: vendedor || null,
+      socio_id: socio_id || null,
     })
     .select()
     .single();

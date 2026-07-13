@@ -71,6 +71,7 @@ export interface DatosNegocio {
   contacto: string;
   telefono: string;
   vendedor?: string;
+  socio_id?: string;
 }
 
 export function calcularScore(h: Hallazgos): number {

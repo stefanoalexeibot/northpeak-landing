@@ -250,6 +250,7 @@ function AnalizadorContent() {
   const [tab, setTab] = useState<"form" | "history">("form");
   const [aiLoading, setAiLoading] = useState(false);
   const [vendedoresOpts, setVendedoresOpts] = useState<string[]>([]);
+  const [SociosOpts, setSociosOpts] = useState<Array<{ id: string; nombre: string }>>([]);
   const [showTemplates, setShowTemplates] = useState<string | null>(null);
   const [copiedTemplate, setCopiedTemplate] = useState<string | null>(null);
 
@@ -286,6 +287,12 @@ function AnalizadorContent() {
       .then((r) => r.ok ? r.json() : [])
       .then((data: Array<{ nombre: string; activo: boolean }>) =>
         setVendedoresOpts(data.filter((v) => v.activo).map((v) => v.nombre))
+      )
+      .catch(() => {});
+    fetch("/api/admin/Socios")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Array<{ id: string; nombre: string; activo: boolean }>) =>
+        setSociosOpts(data.filter((c) => c.activo).map((c) => ({ id: c.id, nombre: c.nombre })))
       )
       .catch(() => {});
   }, []);
@@ -336,7 +343,13 @@ function AnalizadorContent() {
       const res = await fetch("/api/admin/analisis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ datos, hallazgos, client_id: linkedClientId, vendedor: datos.vendedor || null }),
+        body: JSON.stringify({
+          datos,
+          hallazgos,
+          client_id: linkedClientId,
+          vendedor: datos.vendedor || null,
+          socio_id: datos.socio_id || null,
+        }),
       });
 
       const data = await res.json();
@@ -373,7 +386,7 @@ function AnalizadorContent() {
   }
 
   function resetForm() {
-    setDatos({ nombre: "", giro: "", zona: "", contacto: "", telefono: "" });
+    setDatos({ nombre: "", giro: "", zona: "", contacto: "", telefono: "", vendedor: "", socio_id: "" });
     setHallazgos(getDefaultHallazgos());
     setResult(null);
   }
@@ -1071,6 +1084,19 @@ function AnalizadorContent() {
                       className="bg-northpeak-bg border-northpeak-surface text-northpeak-text h-9"
                     />
                   )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-northpeak-text text-xs">Socio</Label>
+                  <select
+                    value={datos.socio_id || ""}
+                    onChange={(e) => setDatos({ ...datos, socio_id: e.target.value })}
+                    className="flex w-full h-9 rounded-md border border-northpeak-surface bg-northpeak-bg px-3 text-sm text-northpeak-text"
+                  >
+                    <option value="">Ninguno</option>
+                    {SociosOpts.map((c) => (
+                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </CardContent>

@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "client";
+export type UserRole = "admin" | "client" | "Socio";
 
 export interface Profile {
   id: string;
@@ -181,4 +181,35 @@ export interface Tarea {
   completada: boolean;
   fecha_limite?: string;
   created_at: string;
+}
+
+export interface Socio {
+  id: string;
+  user_id?: string | null;
+  nombre: string;
+  email: string;
+  telefono?: string | null;
+  porcentaje_comision: number;
+  activo: boolean;
+  notas?: string | null;
+  created_at: string;
+}
+
+export type ComisionStatus = "pendiente" | "pagada" | "cancelada";
+
+export interface Comision {
+  id: string;
+  Socio_id: string;
+  analisis_id?: string | null;
+  client_id?: string | null;
+  nombre_negocio: string;
+  monto_venta: number;
+  porcentaje_aplicado: number;
+  monto_comision: number;
+  status: ComisionStatus;
+  paid_at?: string | null;
+  notas?: string | null;
+  created_at: string;
+  // Joined
+  Socios?: { nombre: string; email: string } | null;
 }
