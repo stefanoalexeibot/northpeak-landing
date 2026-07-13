@@ -24,7 +24,7 @@ export async function GET() {
 
   // Get stats from analisis_digital
   const ids = (data ?? []).map((c) => c.id);
-  let statsMap: Record<string, { prospectos: number; ganados: number }> = {};
+  const statsMap: Record<string, { prospectos: number; ganados: number }> = {};
 
   if (ids.length > 0) {
     const { data: analisis } = await sb
@@ -41,7 +41,7 @@ export async function GET() {
   }
 
   // Get comision totals
-  let comisionMap: Record<string, number> = {};
+  const comisionMap: Record<string, number> = {};
   if (ids.length > 0) {
     const { data: comisiones } = await sb
       .from("comisiones")

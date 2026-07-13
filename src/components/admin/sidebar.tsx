@@ -137,8 +137,6 @@ export default function AdminSidebar() {
             Socios
           </p>
           {SocioItems.map((item) => {
-            const isActive = pathname.startsWith(item.href) &&
-              !(item.href === "/admin/Socios" && pathname.startsWith("/admin/Socios/"));
             const isActiveExact = item.href === "/admin/Socios"
               ? pathname === "/admin/Socios"
               : pathname.startsWith(item.href);
