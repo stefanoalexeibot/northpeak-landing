@@ -336,9 +336,78 @@
     .wp-citas-t { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; color: #F2EEE8; }
     .wp-citas-s { font-size: 10px; color: rgba(255,255,255,0.45); }
     .wp-citas-btn { margin-left: auto; padding: 5px 12px; border-radius: 6px; background: linear-gradient(135deg, #F4D0C4, #C98B6E); color: #1A0A10; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; flex-shrink: 0; }
+
+    /* ===== SCROLL PROGRESS ===== */
+    .scroll-prog { position: fixed; top: 0; left: 0; height: 2.5px; background: linear-gradient(90deg, #F4D0C4, #C070A8, #00E5A0); z-index: 200; width: 0%; pointer-events: none; transition: width 0.08s linear; }
+
+    /* ===== MOBILE HAMBURGER ===== */
+    .menu-btn { display: none; width: 38px; height: 38px; border-radius: 9px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
+    .menu-bar { width: 18px; height: 1.5px; background: #F2EEE8; border-radius: 2px; transition: all 0.28s; }
+    .menu-btn.open .menu-bar:nth-child(1) { transform: rotate(45deg) translate(4.6px, 4.6px); }
+    .menu-btn.open .menu-bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .menu-btn.open .menu-bar:nth-child(3) { transform: rotate(-45deg) translate(4.6px, -4.6px); }
+    @media (max-width: 800px) { .menu-btn { display: flex; } }
+    .mobile-nav { display: none; position: fixed; top: 60px; left: 0; right: 0; background: rgba(15,9,18,0.97); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border-bottom: 1px solid rgba(255,255,255,0.07); z-index: 99; padding: 16px 24px 28px; flex-direction: column; }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 18px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); transition: color 0.2s; }
+    .mobile-nav a:hover { color: var(--rose); }
+    .mobile-nav .mn-cta { border-bottom: none; padding: 14px 24px; text-align: center; color: #1A0A10 !important; background: linear-gradient(135deg, #F4D0C4, #C98B6E); border-radius: 12px; margin-top: 10px; }
+
+    /* ===== HERO SPLIT ===== */
+    .hero { position: relative; min-height: 94vh; display: flex; align-items: center; padding: 110px 24px 88px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(155deg, rgba(192,112,168,0.14) 0%, rgba(212,146,122,0.08) 50%, transparent 80%); pointer-events: none; }
+    .hero-glow { position: absolute; top: 30%; right: -10%; width: 700px; height: 700px; background: radial-gradient(ellipse at center, rgba(192,112,168,0.18) 0%, rgba(240,200,188,0.08) 40%, transparent 70%); pointer-events: none; border-radius: 50%; filter: blur(60px); }
+    .hero-inner { display: grid; grid-template-columns: 1fr 420px; gap: 56px; align-items: center; width: 100%; max-width: 1100px; margin: 0 auto; }
+    .hero-body { position: relative; z-index: 1; }
+    @media (max-width: 980px) { .hero-inner { grid-template-columns: 1fr; gap: 40px; } }
+    .hero-visual { position: relative; z-index: 1; animation: slideUp 1.1s ease 0.35s both; }
+    @media (max-width: 980px) { .hero-visual { display: none; } }
+    .hero-img-wrap { border-radius: 22px; overflow: hidden; position: relative; aspect-ratio: 3/4; box-shadow: 0 40px 90px rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.08); }
+    .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-img-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(15,9,18,0.72) 100%); }
+    .hero-img-badge { position: absolute; bottom: 20px; left: 16px; right: 16px; background: rgba(15,9,18,0.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(240,200,188,0.2); border-radius: 14px; padding: 14px 16px; z-index: 2; display: flex; align-items: center; gap: 12px; }
+    .hib-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, rgba(240,200,188,0.14), rgba(192,112,168,0.1)); border: 1px solid rgba(240,200,188,0.18); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+    .hib-text .ht { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; color: #F2EEE8; }
+    .hib-text .hs { font-size: 10px; color: rgba(255,255,255,0.42); margin-top: 2px; }
+    .hib-stat { margin-left: auto; text-align: right; flex-shrink: 0; }
+    .hib-stat .hv { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; background: linear-gradient(130deg, #F4D0C4, #D4927A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.1; }
+    .hib-stat .hl { font-size: 9px; color: rgba(255,255,255,0.32); font-family: 'JetBrains Mono', monospace; }
+    .hero-img-tag { position: absolute; top: 16px; left: 16px; z-index: 2; padding: 5px 12px; border-radius: 99px; background: rgba(15,9,18,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--rose); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* ===== IMAGE SECTION BACKGROUNDS ===== */
+    .img-bg { position: relative; }
+    .img-bg::before { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: 0; }
+    .img-bg > .c, .img-bg > div { position: relative; z-index: 1; }
+    .bg-studio { background-image: url('hero-studio.jpg'); background-size: cover; background-position: center; }
+    .bg-studio::before { background: linear-gradient(155deg, rgba(26,14,32,0.93), rgba(20,12,16,0.91)); }
+    .bg-barre { background-image: url('barre-class.jpg'); background-size: cover; background-position: center 25%; }
+    .bg-barre::before { background: linear-gradient(155deg, rgba(22,13,30,0.92), rgba(28,12,22,0.90)); }
+    .bg-woman { background-image: url('pilates-woman.jpg'); background-size: cover; background-position: center top; }
+    .bg-woman::before { background: linear-gradient(145deg, rgba(42,14,34,0.94), rgba(26,12,16,0.92)); }
+
+    /* ===== GALLERY STRIP ===== */
+    .gallery-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 62px; }
+    @media (max-width: 640px) { .gallery-strip { grid-template-columns: 1fr 1fr; } }
+    .gal-item { border-radius: var(--r); overflow: hidden; position: relative; cursor: pointer; aspect-ratio: 4/3; }
+    .gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.55s ease; filter: saturate(0.8) brightness(0.9); }
+    .gal-item:hover img { transform: scale(1.07); filter: saturate(1.05) brightness(1); }
+    .gal-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(15,9,18,0.75) 100%); }
+    .gal-label { position: absolute; bottom: 14px; left: 16px; z-index: 1; }
+    .gal-label strong { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #F2EEE8; display: block; }
+    .gal-label span { font-size: 10.5px; color: rgba(255,255,255,0.5); }
+    .gal-tag { position: absolute; top: 12px; right: 12px; z-index: 1; padding: 3px 10px; border-radius: 99px; background: rgba(15,9,18,0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--rose); font-weight: 600; }
+
+    /* ===== STICKY MOBILE CTA ===== */
+    .sticky-cta-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 88; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(15,9,18,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(240,200,188,0.16); }
+    @media (max-width: 768px) { .sticky-cta-bar { display: block; } .fwa { bottom: 80px; } }
+    .sticky-cta-bar a { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, #F4D0C4, #C98B6E 55%, #C070A8); color: #1A0A10; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; box-shadow: 0 4px 22px rgba(192,112,168,0.32); }
+
   </style>
 </head>
 <body>
+
+<!-- Scroll Progress -->
+<div class="scroll-prog" id="scrollProg"></div>
 
 <div class="bg-canvas">
   <div class="orb orb-1"></div>
@@ -347,8 +416,24 @@
   <div class="orb orb-4"></div>
 </div>
 
+<!-- Mobile Nav -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#paquetes" onclick="closeMobileNav()">Paquetes</a>
+  <a href="#como-funciona" onclick="closeMobileNav()">Proceso</a>
+  <a href="#resultados" onclick="closeMobileNav()">Resultados</a>
+  <a href="#faq" onclick="closeMobileNav()">FAQ</a>
+  <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s" class="mn-cta" target="_blank">📞 Platica gratis →</a>
+</nav>
+
 <!-- Floating WA -->
 <a href="https://wa.me/528110000000?text=Hola%20NorthPeak%2C%20vi%20tu%20p%C3%A1gina%20de%20Pilates%20SPGG%20y%20quiero%20saber%20m%C3%A1s" class="fwa" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta-bar">
+  <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" target="_blank">
+    📲 Agendar plática gratis
+  </a>
+</div>
 
 <!-- NAV -->
 <nav class="z">
@@ -366,13 +451,18 @@
     <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20los%20servicios%20de%20NorthPeak%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="nav-btn" target="_blank">
       📞 Platica gratis →
     </a>
+    <button class="menu-btn" id="menuBtn" onclick="toggleMobileNav()" aria-label="Menú">
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+    </button>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero z">
   <div class="hero-glow"></div>
-  <div class="c">
+  <div class="hero-inner">
     <div class="hero-body">
 
       <div class="eyebrow">
@@ -409,6 +499,26 @@
       </div>
 
     </div>
+
+    <!-- Hero Visual -->
+    <div class="hero-visual">
+      <div class="hero-img-wrap">
+        <div class="hero-img-tag">Studio · SPGG</div>
+        <img src="pilates-woman.jpg" alt="Pilates Reformer Studio en San Pedro Garza García" loading="eager">
+        <div class="hero-img-badge">
+          <div class="hib-icon">📅</div>
+          <div class="hib-text">
+            <div class="ht">Citas agendadas hoy</div>
+            <div class="hs">Sistema automático 24/7</div>
+          </div>
+          <div class="hib-stat">
+            <div class="hv">+12</div>
+            <div class="hl">esta semana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -686,7 +796,7 @@
   <div class="c" style="padding:0 24px;">
     <div class="roi-bar fi">
       <div class="roi-cell">
-        <div class="roi-val rv-r">2 sem</div>
+        <div class="roi-val rv-r"><span data-count="2" data-suffix=" sem">2 sem</span></div>
         <div class="roi-lbl">Entrega web</div>
         <div class="roi-sub">desde el primer pago</div>
       </div>
@@ -696,12 +806,12 @@
         <div class="roi-sub">sin intervención tuya</div>
       </div>
       <div class="roi-cell">
-        <div class="roi-val rv-t">3km</div>
+        <div class="roi-val rv-t"><span data-count="3" data-suffix="km">3km</span></div>
         <div class="roi-lbl">Radio de publicidad</div>
         <div class="roi-sub">exacto en SPGG</div>
       </div>
       <div class="roi-cell">
-        <div class="roi-val rv-r">+8</div>
+        <div class="roi-val rv-r">+<span data-count="8" data-suffix="">8</span></div>
         <div class="roi-lbl">Alumnas nuevas</div>
         <div class="roi-sub">promedio primer mes de ads</div>
       </div>
@@ -742,7 +852,7 @@
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="sec sec-border sec-plum z" id="resultados">
+<section class="sec sec-border sec-plum bg-barre img-bg z" id="resultados">
   <div class="c">
     <div class="sh ctr fi">
       <span class="lbl lr">— Resultados</span>
@@ -783,6 +893,35 @@
         </div>
       </div>
     </div>
+
+    <!-- Gallery Strip -->
+    <div class="gallery-strip fi">
+      <div class="gal-item">
+        <div class="gal-tag">Reformer</div>
+        <img src="hero-studio.jpg" alt="Reformer Studio" loading="lazy">
+        <div class="gal-label">
+          <strong>Pilates Reformer</strong>
+          <span>La clase estrella</span>
+        </div>
+      </div>
+      <div class="gal-item">
+        <div class="gal-tag">Barre</div>
+        <img src="barre-class.jpg" alt="Barre Class" loading="lazy">
+        <div class="gal-label">
+          <strong>Barre Boutique</strong>
+          <span>Fuerza y gracia</span>
+        </div>
+      </div>
+      <div class="gal-item">
+        <div class="gal-tag">Mat</div>
+        <img src="pilates-woman.jpg" alt="Mat Pilates" loading="lazy">
+        <div class="gal-label">
+          <strong>Mat Pilates</strong>
+          <span>Todos los niveles</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -841,7 +980,7 @@
 </section>
 
 <!-- FINAL CTA -->
-<section class="fcta sec-cta z">
+<section class="fcta sec-cta bg-woman img-bg z">
   <div class="c">
     <div class="fi">
       <span class="lbl lr" style="display:block;text-align:center;margin-bottom:20px;">— Empecemos</span>
@@ -875,11 +1014,57 @@
 </footer>
 
 <script>
-  /* Scroll fade-in */
+  /* ===== SCROLL PROGRESS ===== */
+  const prog = document.getElementById('scrollProg');
+  window.addEventListener('scroll', () => {
+    const st = window.scrollY;
+    const dh = document.documentElement.scrollHeight - window.innerHeight;
+    prog.style.width = (st / dh * 100) + '%';
+  }, { passive: true });
+
+  /* ===== MOBILE NAV ===== */
+  function toggleMobileNav() {
+    const nav = document.getElementById('mobileNav');
+    const btn = document.getElementById('menuBtn');
+    nav.classList.toggle('open');
+    btn.classList.toggle('open');
+    document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('menuBtn').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ===== SCROLL FADE IN ===== */
   const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('v'); }), { threshold: 0.09, rootMargin: '0px 0px -50px 0px' });
   document.querySelectorAll('.fi').forEach(el => obs.observe(el));
 
-  /* FAQ */
+  /* ===== ANIMATED COUNTERS ===== */
+  function animateCount(el, target, suffix, duration) {
+    let start = 0;
+    const isDecimal = target % 1 !== 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      el.textContent = (isDecimal ? start.toFixed(1) : Math.floor(start)) + suffix;
+      if (start >= target) clearInterval(timer);
+    }, 16);
+  }
+  const countObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const val = parseFloat(el.dataset.count);
+        const suffix = el.dataset.suffix || '';
+        animateCount(el, val, suffix, 1400);
+        countObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
+
+  /* ===== FAQ ===== */
   function faq(btn) {
     const item = btn.closest('.faq-item');
     const body = item.querySelector('.faq-body');
@@ -888,7 +1073,7 @@
     if (!open) { item.classList.add('open'); body.style.maxHeight = body.scrollHeight + 'px'; }
   }
 
-  /* Mouse parallax on orbs */
+  /* ===== MOUSE PARALLAX ===== */
   let rid;
   window.addEventListener('mousemove', e => {
     cancelAnimationFrame(rid);
