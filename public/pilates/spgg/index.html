@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NorthPeak Digital · Pilates SPGG — Tu estudio en digital, de verdad.</title>
+  <meta name="description" content="Página web premium, sistema de citas y publicidad estratégica para estudios de Pilates en San Pedro Garza García. Paquete de lanzamiento y plan de crecimiento mensual.">
+  <meta property="og:title" content="NorthPeak · Pilates SPGG — Tu estudio en digital, de verdad.">
+  <meta property="og:description" content="Construimos la presencia digital de tu estudio de Pilates en SPGG: web, citas y publicidad. Sin complicaciones.">
+  <meta property="og:url" content="https://northpeakdigital.com.mx/pilates/spgg">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET & TOKENS ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0F0912;
+      --card: #0D0E14;
+      --card-hover: #131520;
+      --surface: #181A23;
+      --border: rgba(255,255,255,0.055);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #ECEDF2;
+      --text-muted: #787C8E;
+      --text-dim: #464A5C;
+      --rose: #E8C9C4;
+      --rose-dim: rgba(232,201,196,0.08);
+      --rose-glow: rgba(232,201,196,0.14);
+      --terra: #C98B6E;
+      --terra-dim: rgba(201,139,110,0.09);
+      --green: #00E5A0;
+      --green-dim: rgba(0,229,160,0.08);
+      --cream: #F7F5F2;
+      --r: 14px;
+      --r-sm: 10px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 2px; }
+
+    /* ===== BG ===== */
+    .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(140px); animation: orb-float 24s ease-in-out infinite alternate; }
+    .orb-1 { width: 720px; height: 720px; top: -180px; left: -180px; background: radial-gradient(circle, rgba(232,201,196,0.18), transparent 68%); animation-duration: 30s; }
+    .orb-2 { width: 580px; height: 580px; top: 30%; right: -200px; background: radial-gradient(circle, rgba(0,229,160,0.10), transparent 68%); animation-duration: 22s; animation-delay: -7s; }
+    .orb-3 { width: 860px; height: 860px; bottom: -280px; left: 20%; background: radial-gradient(circle, rgba(201,139,110,0.13), transparent 68%); animation-duration: 38s; animation-delay: -14s; }
+    @keyframes orb-float { from { transform: translate(0,0) scale(1); } to { transform: translate(44px, 64px) scale(1.1); } }
+    .dot-grid { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(circle, rgba(255,255,255,0.028) 1px, transparent 1px); background-size: 28px 28px; }
+
+    /* ===== LAYOUT ===== */
+    .z { position: relative; z-index: 1; }
+    .c { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== SECTION GRADIENT BACKGROUNDS ===== */
+    .sec-hero { background: linear-gradient(155deg, #1A0E20 0%, #12091A 40%, #0D0A18 100%); }
+    .sec-warm { background: linear-gradient(155deg, #1A0E0C 0%, #14080E 50%, #100A16 100%); }
+    .sec-plum { background: linear-gradient(155deg, #160D1E 0%, #1A0E18 50%, #0F0814 100%); }
+    .sec-rose { background: linear-gradient(160deg, #1E0E14 0%, #180C18 50%, #110A18 100%); }
+    .sec-cream {
+      background: linear-gradient(155deg, #F5EDE6 0%, #F0E4DA 40%, #EDE0D8 100%);
+      --text: #2A1A14;
+      --text-muted: #6A4848;
+      --text-dim: #9A7878;
+      --border: rgba(60,20,20,0.1);
+      --border-hover: rgba(60,20,20,0.2);
+      --card: rgba(255,255,255,0.55);
+      --card-hover: rgba(255,255,255,0.75);
+      --surface: rgba(255,255,255,0.45);
+    }
+    .sec-cta {
+      background: linear-gradient(145deg, #2A0E22 0%, #1E0A18 35%, #1A0C10 70%, #22101A 100%);
+    }
+
+    /* ===== NAV ===== */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(15,9,18,0.88); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .nav-in { display: flex; align-items: center; justify-content: space-between; height: 60px; max-width: 1100px; margin: 0 auto; padding: 0 24px; gap: 16px; }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--text); display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .logo-badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 3px 9px; border-radius: 99px; background: var(--rose-dim); border: 1px solid rgba(232,201,196,0.2); color: var(--rose); font-weight: 600; letter-spacing: 0.06em; white-space: nowrap; }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 22px; border-radius: var(--r-sm); background: linear-gradient(135deg, #E8C9C4, #C98B6E); color: #1A0F0D; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; text-decoration: none; transition: all 0.22s; white-space: nowrap; flex-shrink: 0; }
+    .nav-btn:hover { transform: scale(1.03); box-shadow: 0 6px 24px rgba(201,139,110,0.3); }
+    @media (max-width: 800px) { .nav-links { display: none; } }
+
+    /* ===== LABELS ===== */
+    .lbl { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 16px; }
+    .lr { color: var(--rose); } .lg { color: var(--green); } .lt { color: var(--terra); }
+
+    /* ===== HERO ===== */
+    .hero { position: relative; min-height: 94vh; display: flex; align-items: center; padding: 110px 24px 88px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(155deg, rgba(192,112,168,0.14) 0%, rgba(212,146,122,0.08) 50%, transparent 80%); pointer-events: none; }
+    .hero-glow { position: absolute; top: 30%; right: -10%; width: 700px; height: 700px; background: radial-gradient(ellipse at center, rgba(192,112,168,0.18) 0%, rgba(240,200,188,0.08) 40%, transparent 70%); pointer-events: none; border-radius: 50%; filter: blur(60px); }
+    .hero-body { max-width: 740px; position: relative; z-index: 1; }
+
+    .eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 7px 16px 7px 10px; border-radius: 99px; background: var(--rose-dim); border: 1px solid rgba(232,201,196,0.2); margin-bottom: 32px; animation: slideUp 0.8s ease both; }
+    .e-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rose); flex-shrink: 0; animation: pulse-d 2s infinite; }
+    .eyebrow span { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); font-weight: 600; }
+    @keyframes pulse-d { 0%,100%{box-shadow:0 0 0 0 rgba(240,200,188,0.5)}50%{box-shadow:0 0 0 7px rgba(240,200,188,0)} }
+
+    h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(44px, 6.8vw, 82px); line-height: 1.06; letter-spacing: -0.026em; color: var(--text); margin-bottom: 26px; animation: slideUp 0.9s ease 0.1s both; }
+    .gr { background: linear-gradient(130deg, #F4D0C4 0%, #D4927A 55%, #C070A8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .gg { background: linear-gradient(130deg, #A8F0D8 0%, #00E5A0 50%, #00C0D4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .hero-p { font-size: 18px; color: var(--text-muted); max-width: 580px; line-height: 1.78; margin-bottom: 46px; animation: slideUp 1s ease 0.2s both; }
+    .hero-p strong { color: var(--rose); font-weight: 600; }
+
+    .hero-acts { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 64px; animation: slideUp 1s ease 0.3s both; }
+    .btn-p { display: inline-flex; align-items: center; gap: 9px; padding: 15px 32px; border-radius: var(--r); background: linear-gradient(135deg, #E8C9C4, #C98B6E); color: #1A0F0D; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14.5px; text-decoration: none; transition: all 0.25s; box-shadow: 0 10px 38px rgba(201,139,110,0.28); cursor: pointer; border: none; }
+    .btn-p:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 50px rgba(201,139,110,0.4); }
+    .btn-o { display: inline-flex; align-items: center; gap: 9px; padding: 15px 30px; border-radius: var(--r); background: transparent; border: 1px solid var(--border-hover); color: var(--text-muted); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.25s; cursor: pointer; }
+    .btn-o:hover { border-color: rgba(232,201,196,0.3); color: var(--text); background: var(--rose-dim); }
+
+    .hero-trust { display: flex; flex-wrap: wrap; gap: 18px; animation: slideUp 1s ease 0.4s both; }
+    .tc { display: flex; align-items: center; gap: 10px; }
+    .tc-icon { width: 36px; height: 36px; border-radius: 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 16px; backdrop-filter: blur(8px); }
+    .tc-t .v { display: block; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--text); }
+    .tc-t .s { font-size: 11px; color: var(--text-muted); }
+
+    /* ===== MARQUEE ===== */
+    .mq-wrap { background: linear-gradient(90deg, rgba(192,112,168,0.12), rgba(212,146,122,0.1), rgba(192,112,168,0.12)); border-top: 1px solid rgba(255,255,255,0.07); border-bottom: 1px solid rgba(255,255,255,0.07); overflow: hidden; padding: 14px 0; }
+    .mq-track { display: flex; gap: 48px; width: max-content; animation: mq 36s linear infinite; }
+    .mq-track:hover { animation-play-state: paused; }
+    .mq-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; flex-shrink: 0; }
+    .mq-item span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 0.04em; }
+    .mq-item .hr { color: var(--rose); font-weight: 600; }
+    .mq-item .hg { color: var(--green); font-weight: 600; }
+    .mq-item .sep { color: rgba(255,255,255,0.2); font-size: 9px; }
+    @keyframes mq { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ===== SECTIONS ===== */
+    .sec { padding: 96px 0; }
+    .sec-border { border-top: 1px solid var(--border); }
+    .sh { margin-bottom: 58px; }
+    .sh.ctr { text-align: center; }
+    .sh.ctr .sd { margin: 0 auto; }
+    .st { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(32px, 4.2vw, 52px); line-height: 1.1; letter-spacing: -0.022em; color: var(--text); margin-bottom: 16px; }
+    .sd { font-size: 16.5px; color: var(--text-muted); max-width: 540px; line-height: 1.75; }
+
+    /* ===== PROBLEM ===== */
+    .prob-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .prob-card { padding: 26px; border-radius: var(--r); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); transition: all 0.32s; position: relative; overflow: hidden; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .prob-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(145deg, rgba(192,112,168,0.08), rgba(212,146,122,0.05), transparent); opacity: 0; transition: opacity 0.3s; }
+    .prob-card:hover { border-color: rgba(240,200,188,0.22); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(192,112,168,0.12); }
+    .prob-card:hover::before { opacity: 1; }
+    .pe { font-size: 30px; margin-bottom: 14px; }
+    .prob-card h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #F2EEE8; margin-bottom: 8px; position: relative; }
+    .prob-card p { font-size: 13px; color: rgba(255,255,255,0.52); line-height: 1.65; position: relative; }
+
+    /* ===== STRATEGY OVERVIEW ===== */
+    .strategy-block { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: var(--r); padding: 52px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    @media (max-width: 760px) { .strategy-block { grid-template-columns: 1fr; gap: 36px; padding: 36px 28px; } }
+    .strategy-tag { display: inline-flex; align-items: center; gap: 8px; padding: 5px 13px; border-radius: 99px; background: rgba(240,200,188,0.1); border: 1px solid rgba(240,200,188,0.2); margin-bottom: 20px; }
+    .strategy-tag span { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--rose); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+    .strategy-block h3 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.15; letter-spacing: -0.018em; color: #F2EEE8; margin-bottom: 16px; }
+    .strategy-block p { font-size: 14.5px; color: rgba(255,255,255,0.52); line-height: 1.75; margin-bottom: 24px; }
+    .strategy-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .strategy-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: rgba(255,255,255,0.55); line-height: 1.45; }
+    .sl-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .d-rose { background: linear-gradient(135deg, var(--rose), var(--terra)); }
+    .d-green { background: linear-gradient(135deg, var(--green), #00C0D4); }
+    .d-terra { background: linear-gradient(135deg, var(--terra), var(--plum)); }
+    .strategy-number { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 130px; line-height: 1; background: linear-gradient(135deg, rgba(192,112,168,0.12), rgba(240,200,188,0.06)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.04em; align-self: center; text-align: right; user-select: none; }
+
+    /* ===== PACKAGES ===== */
+    .pkg-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 820px) { .pkg-wrapper { grid-template-columns: 1fr; } }
+
+    .pkg { border-radius: var(--r); overflow: hidden; transition: all 0.32s; position: relative; }
+    .pkg::before { content: ''; position: absolute; inset: 0; border-radius: var(--r); padding: 1.5px; background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+    .pkg.monthly::before { background: linear-gradient(145deg, rgba(240,200,188,0.4), rgba(192,112,168,0.2), rgba(212,146,122,0.3)); }
+    .pkg:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+    .pkg-head { padding: 36px 36px 28px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .pkg.launch .pkg-head { background: linear-gradient(145deg, rgba(0,229,160,0.06), rgba(255,255,255,0.03)); }
+    .pkg.monthly .pkg-head { background: linear-gradient(145deg, rgba(192,112,168,0.14), rgba(212,146,122,0.08), rgba(240,200,188,0.06)); }
+    .pkg.monthly { background: linear-gradient(155deg, #1E0E18, #1A0C14); }
+    .pkg.launch { background: linear-gradient(155deg, #0E1A14, #0C1618); }
+
+    .pkg-step { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; border-radius: 99px; margin-bottom: 18px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ps-launch { background: rgba(0,229,160,0.12); border: 1px solid rgba(0,229,160,0.22); color: var(--green); }
+    .ps-monthly { background: rgba(240,200,188,0.12); border: 1px solid rgba(240,200,188,0.25); color: var(--rose); }
+
+    .pkg-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: #F2EEE8; margin-bottom: 10px; letter-spacing: -0.015em; }
+    .pkg-tagline { font-size: 14px; color: rgba(255,255,255,0.52); line-height: 1.65; margin-bottom: 22px; }
+    .pkg-price-area { display: flex; align-items: flex-end; gap: 6px; }
+    .pkg-amount { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 44px; background: linear-gradient(130deg, #F4D0C4, #D4927A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+    .pkg-period { font-size: 13px; color: rgba(255,255,255,0.3); margin-bottom: 5px; }
+    .pkg-note { margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.28); }
+
+    .pkg-body { padding: 28px 36px 36px; background: rgba(0,0,0,0.2); }
+
+    .pkg-section-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 14px; margin-top: 22px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .pkg-section-title:first-child { margin-top: 0; }
+
+    .pkg-items { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 0; }
+    .pkg-items li { display: flex; align-items: flex-start; gap: 11px; font-size: 13.5px; color: rgba(255,255,255,0.55); line-height: 1.45; }
+    .chk { width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 10px; margin-top: 0; }
+    .chk-g { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.22); color: var(--green); }
+    .chk-r { background: rgba(240,200,188,0.1); border: 1px solid rgba(240,200,188,0.2); color: var(--rose); }
+    .chk-t { background: rgba(212,146,122,0.1); border: 1px solid rgba(212,146,122,0.2); color: var(--terra); }
+
+    .pkg-cta { display: block; margin-top: 28px; width: 100%; padding: 14px; border-radius: var(--r-sm); text-align: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14.5px; text-decoration: none; transition: all 0.25s; cursor: pointer; border: none; }
+    .pkc-launch { background: linear-gradient(135deg, rgba(0,229,160,0.14), rgba(0,200,180,0.09)); border: 1px solid rgba(0,229,160,0.25); color: var(--green); }
+    .pkc-launch:hover { background: linear-gradient(135deg, rgba(0,229,160,0.22), rgba(0,200,180,0.16)); box-shadow: 0 8px 28px rgba(0,229,160,0.14); }
+    .pkc-monthly { background: linear-gradient(135deg, #F4D0C4, #C98B6E, #C070A8); color: #1A0A10; box-shadow: 0 8px 32px rgba(192,112,168,0.3); }
+    .pkc-monthly:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(192,112,168,0.44); }
+
+    /* Pill badge on monthly */
+    .pkg-popular { position: relative; }
+    .pkg-popular::after { content: '⭐ El más solicitado'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); padding: 4px 18px; border-radius: 99px; background: linear-gradient(135deg, #F4D0C4, #C070A8); color: #1A0A10; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; z-index: 2; }
+
+    /* ===== WHAT YOU GET VISUAL ===== */
+    .deliverables { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .dlv-card { padding: 22px 20px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); transition: all 0.3s; display: flex; flex-direction: column; gap: 12px; }
+    .dlv-card:hover { border-color: rgba(232,201,196,0.18); transform: translateY(-2px); }
+    .dlv-icon { font-size: 26px; }
+    .dlv-card h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
+    .dlv-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    .dlv-tag { display: inline-flex; padding: 3px 9px; border-radius: 99px; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; width: fit-content; }
+    .tag-l { background: rgba(0,229,160,0.09); border: 1px solid rgba(0,229,160,0.18); color: var(--green); }
+    .tag-m { background: var(--rose-dim); border: 1px solid rgba(232,201,196,0.18); color: var(--rose); }
+
+    /* ===== PROCESS ===== */
+    .proc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+    .proc-grid::before { content: ''; position: absolute; top: 27px; left: calc(12.5% + 20px); right: calc(12.5% + 20px); height: 1px; background: linear-gradient(90deg, transparent, rgba(192,112,168,0.4), rgba(212,146,122,0.4), transparent); }
+    @media (max-width: 680px) { .proc-grid { grid-template-columns: 1fr 1fr; } .proc-grid::before { display: none; } }
+    @media (max-width: 420px) { .proc-grid { grid-template-columns: 1fr; } }
+    .proc-step { padding: 0 18px; text-align: center; }
+    .proc-num { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; background-clip: text; color: var(--rose); margin: 0 auto 20px; position: relative; z-index: 1; transition: all 0.3s; backdrop-filter: blur(8px); }
+    .proc-step:hover .proc-num { border-color: rgba(240,200,188,0.4); background: rgba(192,112,168,0.1); box-shadow: 0 0 28px rgba(192,112,168,0.2); }
+    .proc-step h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14.5px; color: #F2EEE8; margin-bottom: 8px; }
+    .proc-step p { font-size: 12.5px; color: rgba(255,255,255,0.5); line-height: 1.65; }
+
+    /* ===== TESTIMONIALS ===== */
+    .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; }
+    .test-card { padding: 28px; border-radius: var(--r); background: rgba(40,20,30,0.6); border: 1px solid rgba(240,200,188,0.12); transition: all 0.32s; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .test-card:hover { border-color: rgba(240,200,188,0.24); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(192,112,168,0.12); }
+    .stars { font-size: 12px; margin-bottom: 16px; }
+    .test-card blockquote { font-size: 14px; color: rgba(255,255,255,0.58); line-height: 1.78; font-style: italic; margin-bottom: 20px; }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-av { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #F4D0C4, #C98B6E, #C070A8); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #1A0A10; flex-shrink: 0; }
+    .t-info .nm { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #F2EEE8; }
+    .t-info .rl { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+    /* ===== FAQ ===== */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 700px; margin: 0 auto; }
+    .faq-item { border-radius: var(--r-sm); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; transition: border-color 0.25s; backdrop-filter: blur(12px); }
+    .faq-item.open { border-color: rgba(240,200,188,0.22); background: rgba(192,112,168,0.06); }
+    .faq-btn { width: 100%; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: transparent; border: none; cursor: pointer; text-align: left; }
+    .faq-btn span { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; color: #F2EEE8; }
+    .faq-ico { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; color: var(--rose); transition: transform 0.25s; }
+    .faq-item.open .faq-ico { transform: rotate(45deg); }
+    .faq-body { max-height: 0; overflow: hidden; transition: max-height 0.38s ease; }
+    .faq-inner { padding: 0 22px 18px; font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.75; }
+
+    /* ===== URGENCY BANNER ===== */
+    .urgency { background: linear-gradient(135deg, rgba(212,146,122,0.1), rgba(192,112,168,0.07)); border: 1px solid rgba(240,200,188,0.18); border-radius: var(--r); padding: 18px 26px; display: flex; align-items: center; gap: 14px; margin-bottom: 48px; backdrop-filter: blur(10px); }
+    .u-dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(135deg, var(--terra), var(--plum)); flex-shrink: 0; animation: pulse-d 1.7s infinite; }
+    .urgency p { font-size: 13.5px; color: rgba(255,255,255,0.56); }
+    .urgency strong { color: var(--rose); }
+
+    /* ===== FINAL CTA ===== */
+    .fcta { padding: 110px 24px; text-align: center; position: relative; overflow: hidden; }
+    .fcta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 1000px; height: 700px; background: radial-gradient(ellipse at center, rgba(192,112,168,0.2) 0%, rgba(212,146,122,0.1) 35%, transparent 65%); pointer-events: none; filter: blur(40px); }
+    .fcta::after { content: ''; position: absolute; top: 0; right: 0; width: 500px; height: 500px; background: radial-gradient(ellipse, rgba(0,229,160,0.06) 0%, transparent 65%); pointer-events: none; filter: blur(60px); }
+    .fcta h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(32px, 5.5vw, 62px); letter-spacing: -0.022em; line-height: 1.1; color: #F2EEE8; margin-bottom: 20px; position: relative; z-index: 1; }
+    .fcta-desc { font-size: 16.5px; color: rgba(255,255,255,0.55); max-width: 490px; margin: 0 auto 42px; line-height: 1.78; position: relative; z-index: 1; }
+    .fcta-acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+    .btn-wa { display: inline-flex; align-items: center; gap: 10px; padding: 16px 34px; border-radius: var(--r); background: #25D366; color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; transition: all 0.25s; box-shadow: 0 8px 32px rgba(37,211,102,0.28); }
+    .btn-wa:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(37,211,102,0.42); }
+    .note-sm { font-size: 12px; color: rgba(255,255,255,0.28); margin-top: 20px; position: relative; z-index: 1; }
+
+    /* ===== FOOTER ===== */
+    footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 40px 0; }
+    .foot-in { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .f-logo { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: rgba(255,255,255,0.38); }
+    .f-logo span { color: var(--rose); }
+    .f-links { display: flex; gap: 20px; list-style: none; }
+    .f-links a { font-size: 12px; color: rgba(255,255,255,0.25); text-decoration: none; transition: color 0.2s; }
+    .f-links a:hover { color: var(--rose); }
+    .f-copy { font-size: 11px; color: rgba(255,255,255,0.2); }
+
+    /* ===== FLOATING WA ===== */
+    .fwa { position: fixed; bottom: 26px; right: 26px; z-index: 90; width: 54px; height: 54px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; font-size: 25px; box-shadow: 0 6px 26px rgba(37,211,102,0.36); text-decoration: none; animation: wa-float 3.5s ease-in-out infinite; }
+    .fwa:hover { animation: none; transform: scale(1.12); }
+    .fwa::before { content: ''; position: absolute; inset: -5px; border-radius: 50%; background: rgba(37,211,102,0.18); animation: wa-ping 2.3s ease-in-out infinite; }
+    @keyframes wa-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+    @keyframes wa-ping { 0%{transform:scale(1);opacity:0.7} 100%{transform:scale(1.65);opacity:0} }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .fi { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fi.v { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) { .hero { padding: 88px 24px 64px; min-height: 85vh; } .sec { padding: 72px 0; } }
+
+    /* ===== ROI BAR ===== */
+    .roi-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: rgba(255,255,255,0.06); border-radius: var(--r); overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+    .roi-cell { background: linear-gradient(145deg, rgba(192,112,168,0.07), rgba(212,146,122,0.04)); padding: 38px 20px; text-align: center; transition: background 0.3s; }
+    .roi-cell:hover { background: linear-gradient(145deg, rgba(192,112,168,0.14), rgba(212,146,122,0.08)); }
+    .roi-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 42px; line-height: 1; margin-bottom: 8px; }
+    .rv-r { background: linear-gradient(130deg, #F4D0C4, #D4927A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .rv-g { color: var(--green); }
+    .rv-t { background: linear-gradient(130deg, #D4927A, #C070A8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .roi-lbl { font-size: 12.5px; color: rgba(255,255,255,0.5); }
+    .roi-sub { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: rgba(255,255,255,0.26); margin-top: 4px; }
+
+    /* ===== WEBSITE PREVIEW CARD ===== */
+    .web-preview { border-radius: var(--r); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; background: rgba(255,255,255,0.04); backdrop-filter: blur(14px); }
+    .wp-bar { background: rgba(255,255,255,0.05); padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .wp-dots { display: flex; gap: 6px; }
+    .wp-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .wd-r { background: #FF5F56; } .wd-y { background: #FFBD2E; } .wd-g { background: #27C93F; }
+    .wp-url { flex: 1; background: rgba(255,255,255,0.04); border-radius: 6px; padding: 5px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); margin: 0 12px; }
+    .wp-body { padding: 28px; }
+    .wp-hero { background: linear-gradient(135deg, rgba(192,112,168,0.15), rgba(212,146,122,0.1), rgba(30,10,20,0.5)); border: 1px solid rgba(240,200,188,0.12); border-radius: 10px; padding: 28px 24px; margin-bottom: 16px; }
+    .wp-h-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--rose); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+    .wp-h-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: #F2EEE8; margin-bottom: 8px; line-height: 1.2; }
+    .wp-h-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+    .wp-h-btn { display: inline-block; padding: 7px 16px; border-radius: 7px; background: linear-gradient(135deg, #F4D0C4, #C98B6E); color: #1A0A10; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; }
+    .wp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .wp-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 12px; }
+    .wp-card-icon { font-size: 16px; margin-bottom: 6px; }
+    .wp-card-t { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; color: #F2EEE8; }
+    .wp-card-s { font-size: 9px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+    .wp-citas { background: rgba(0,229,160,0.07); border: 1px solid rgba(0,229,160,0.14); border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .wp-citas-ico { font-size: 18px; }
+    .wp-citas-t { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; color: #F2EEE8; }
+    .wp-citas-s { font-size: 10px; color: rgba(255,255,255,0.45); }
+    .wp-citas-btn { margin-left: auto; padding: 5px 12px; border-radius: 6px; background: linear-gradient(135deg, #F4D0C4, #C98B6E); color: #1A0A10; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; flex-shrink: 0; }
+
+    /* ===== SCROLL PROGRESS ===== */
+    .scroll-prog { position: fixed; top: 0; left: 0; height: 2.5px; background: linear-gradient(90deg, #F4D0C4, #C070A8, #00E5A0); z-index: 200; width: 0%; pointer-events: none; transition: width 0.08s linear; }
+
+    /* ===== MOBILE HAMBURGER ===== */
+    .menu-btn { display: none; width: 38px; height: 38px; border-radius: 9px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
+    .menu-bar { width: 18px; height: 1.5px; background: #F2EEE8; border-radius: 2px; transition: all 0.28s; }
+    .menu-btn.open .menu-bar:nth-child(1) { transform: rotate(45deg) translate(4.6px, 4.6px); }
+    .menu-btn.open .menu-bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .menu-btn.open .menu-bar:nth-child(3) { transform: rotate(-45deg) translate(4.6px, -4.6px); }
+    @media (max-width: 800px) { .menu-btn { display: flex; } }
+    .mobile-nav { display: none; position: fixed; top: 60px; left: 0; right: 0; background: rgba(15,9,18,0.97); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border-bottom: 1px solid rgba(255,255,255,0.07); z-index: 99; padding: 16px 24px 28px; flex-direction: column; }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 18px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); transition: color 0.2s; }
+    .mobile-nav a:hover { color: var(--rose); }
+    .mobile-nav .mn-cta { border-bottom: none; padding: 14px 24px; text-align: center; color: #1A0A10 !important; background: linear-gradient(135deg, #F4D0C4, #C98B6E); border-radius: 12px; margin-top: 10px; }
+
+    /* ===== HERO SPLIT ===== */
+    .hero { position: relative; min-height: 94vh; display: flex; align-items: center; padding: 110px 24px 88px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(155deg, rgba(192,112,168,0.14) 0%, rgba(212,146,122,0.08) 50%, transparent 80%); pointer-events: none; }
+    .hero-glow { position: absolute; top: 30%; right: -10%; width: 700px; height: 700px; background: radial-gradient(ellipse at center, rgba(192,112,168,0.18) 0%, rgba(240,200,188,0.08) 40%, transparent 70%); pointer-events: none; border-radius: 50%; filter: blur(60px); }
+    .hero-inner { display: grid; grid-template-columns: 1fr 420px; gap: 56px; align-items: center; width: 100%; max-width: 1100px; margin: 0 auto; }
+    .hero-body { position: relative; z-index: 1; }
+    @media (max-width: 980px) { .hero-inner { grid-template-columns: 1fr; gap: 40px; } }
+    .hero-visual { position: relative; z-index: 1; animation: slideUp 1.1s ease 0.35s both; }
+    @media (max-width: 980px) { .hero-visual { display: none; } }
+    .hero-img-wrap { border-radius: 22px; overflow: hidden; position: relative; aspect-ratio: 3/4; box-shadow: 0 40px 90px rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.08); }
+    .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-img-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(15,9,18,0.72) 100%); }
+    .hero-img-badge { position: absolute; bottom: 20px; left: 16px; right: 16px; background: rgba(15,9,18,0.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid rgba(240,200,188,0.2); border-radius: 14px; padding: 14px 16px; z-index: 2; display: flex; align-items: center; gap: 12px; }
+    .hib-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, rgba(240,200,188,0.14), rgba(192,112,168,0.1)); border: 1px solid rgba(240,200,188,0.18); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+    .hib-text .ht { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; color: #F2EEE8; }
+    .hib-text .hs { font-size: 10px; color: rgba(255,255,255,0.42); margin-top: 2px; }
+    .hib-stat { margin-left: auto; text-align: right; flex-shrink: 0; }
+    .hib-stat .hv { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; background: linear-gradient(130deg, #F4D0C4, #D4927A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.1; }
+    .hib-stat .hl { font-size: 9px; color: rgba(255,255,255,0.32); font-family: 'JetBrains Mono', monospace; }
+    .hero-img-tag { position: absolute; top: 16px; left: 16px; z-index: 2; padding: 5px 12px; border-radius: 99px; background: rgba(15,9,18,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--rose); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* ===== IMAGE SECTION BACKGROUNDS ===== */
+    .img-bg { position: relative; }
+    .img-bg::before { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: 0; }
+    .img-bg > .c, .img-bg > div { position: relative; z-index: 1; }
+    .bg-studio { background-image: url('hero-studio.jpg'); background-size: cover; background-position: center; }
+    .bg-studio::before { background: linear-gradient(155deg, rgba(26,14,32,0.93), rgba(20,12,16,0.91)); }
+    .bg-barre { background-image: url('barre-class.jpg'); background-size: cover; background-position: center 25%; }
+    .bg-barre::before { background: linear-gradient(155deg, rgba(22,13,30,0.92), rgba(28,12,22,0.90)); }
+    .bg-woman { background-image: url('pilates-woman.jpg'); background-size: cover; background-position: center top; }
+    .bg-woman::before { background: linear-gradient(145deg, rgba(42,14,34,0.94), rgba(26,12,16,0.92)); }
+
+    /* ===== GALLERY STRIP ===== */
+    .gallery-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 62px; }
+    @media (max-width: 640px) { .gallery-strip { grid-template-columns: 1fr 1fr; } }
+    .gal-item { border-radius: var(--r); overflow: hidden; position: relative; cursor: pointer; aspect-ratio: 4/3; }
+    .gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.55s ease; filter: saturate(0.8) brightness(0.9); }
+    .gal-item:hover img { transform: scale(1.07); filter: saturate(1.05) brightness(1); }
+    .gal-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(15,9,18,0.75) 100%); }
+    .gal-label { position: absolute; bottom: 14px; left: 16px; z-index: 1; }
+    .gal-label strong { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #F2EEE8; display: block; }
+    .gal-label span { font-size: 10.5px; color: rgba(255,255,255,0.5); }
+    .gal-tag { position: absolute; top: 12px; right: 12px; z-index: 1; padding: 3px 10px; border-radius: 99px; background: rgba(15,9,18,0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--rose); font-weight: 600; }
+
+    /* ===== STICKY MOBILE CTA ===== */
+    .sticky-cta-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 88; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(15,9,18,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(240,200,188,0.16); }
+    @media (max-width: 768px) { .sticky-cta-bar { display: block; } .fwa { bottom: 80px; } }
+    .sticky-cta-bar a { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, #F4D0C4, #C98B6E 55%, #C070A8); color: #1A0A10; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; text-decoration: none; box-shadow: 0 4px 22px rgba(192,112,168,0.32); }
+
+  </style>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div class="scroll-prog" id="scrollProg"></div>
+
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+
+<!-- Mobile Nav -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#paquetes" onclick="closeMobileNav()">Paquetes</a>
+  <a href="#como-funciona" onclick="closeMobileNav()">Proceso</a>
+  <a href="#resultados" onclick="closeMobileNav()">Resultados</a>
+  <a href="#faq" onclick="closeMobileNav()">FAQ</a>
+  <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s" class="mn-cta" target="_blank">📞 Platica gratis →</a>
+</nav>
+
+<!-- Floating WA -->
+<a href="https://wa.me/528110000000?text=Hola%20NorthPeak%2C%20vi%20tu%20p%C3%A1gina%20de%20Pilates%20SPGG%20y%20quiero%20saber%20m%C3%A1s" class="fwa" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta-bar">
+  <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20mi%20p%C3%A1gina%20web%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" target="_blank">
+    📲 Agendar plática gratis
+  </a>
+</div>
+
+<!-- NAV -->
+<nav class="z">
+  <div class="nav-in">
+    <a href="https://northpeakdigital.com.mx" class="logo">
+      NorthPeak <span style="font-weight:400;color:var(--text-muted);">Digital</span>
+      <span class="logo-badge">Pilates · SPGG</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#paquetes">Paquetes</a></li>
+      <li><a href="#como-funciona">Proceso</a></li>
+      <li><a href="#resultados">Resultados</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20sobre%20los%20servicios%20de%20NorthPeak%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="nav-btn" target="_blank">
+      📞 Platica gratis →
+    </a>
+    <button class="menu-btn" id="menuBtn" onclick="toggleMobileNav()" aria-label="Menú">
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero z">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-body">
+
+      <div class="eyebrow">
+        <div class="e-dot"></div>
+        <span>Especialistas en Pilates Boutique · San Pedro Garza García</span>
+      </div>
+
+      <h1>
+        Tu estudio en digital.<br>
+        <span class="gr">Bonito. Simple.</span><br>
+        <span class="gg">Que convierte.</span>
+      </h1>
+
+      <p class="hero-p">
+        Construimos la <strong>página web y el sistema de citas</strong> de tu estudio con estética premium — y después lo llenamos de alumnas nuevas con publicidad estratégica, videos y fotos profesionales.<br><br>
+        <strong>Dos pasos. Un solo equipo. Resultados reales.</strong>
+      </p>
+
+      <div class="hero-acts">
+        <a href="https://wa.me/528110000000?text=Hola%2C%20quiero%20empezar%20con%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="btn-p" target="_blank">
+          🚀 Quiero empezar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#paquetes" class="btn-o">
+          Ver paquetes
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+        </a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="tc"><div class="tc-icon">📍</div><div class="tc-t"><span class="v">Solo en SPGG</span><span class="s">Conocemos el mercado local</span></div></div>
+        <div class="tc"><div class="tc-icon">🎨</div><div class="tc-t"><span class="v">Diseño premium</span><span class="s">Alineado al mercado wellness</span></div></div>
+        <div class="tc"><div class="tc-icon">📅</div><div class="tc-t"><span class="v">Citas online</span><span class="s">AgendaPro y más integrado</span></div></div>
+      </div>
+
+    </div>
+
+    <!-- Hero Visual -->
+    <div class="hero-visual">
+      <div class="hero-img-wrap">
+        <div class="hero-img-tag">Studio · SPGG</div>
+        <img src="pilates-woman.jpg" alt="Pilates Reformer Studio en San Pedro Garza García" loading="eager">
+        <div class="hero-img-badge">
+          <div class="hib-icon">📅</div>
+          <div class="hib-text">
+            <div class="ht">Citas agendadas hoy</div>
+            <div class="hs">Sistema automático 24/7</div>
+          </div>
+          <div class="hib-stat">
+            <div class="hv">+12</div>
+            <div class="hl">esta semana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq-wrap z">
+  <div class="mq-track">
+    <div class="mq-item"><span class="hr">Página web</span><span>lista en 2 semanas</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Sistema de citas</span><span>AgendaPro · Reservio · Google Cal</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Publicidad Meta Ads</span><span>solo mujeres en SPGG</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Reels premium</span><span>estética wellness de lujo</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Sesión de fotos</span><span>profesional cada mes</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Diseño gráfico</span><span>horarios · stories · avisos</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Resultados medibles</span><span>alumnas nuevas reales</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <!-- duplicate -->
+    <div class="mq-item"><span class="hr">Página web</span><span>lista en 2 semanas</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Sistema de citas</span><span>AgendaPro · Reservio · Google Cal</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Publicidad Meta Ads</span><span>solo mujeres en SPGG</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Reels premium</span><span>estética wellness de lujo</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Sesión de fotos</span><span>profesional cada mes</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hg">Diseño gráfico</span><span>horarios · stories · avisos</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+    <div class="mq-item"><span class="hr">Resultados medibles</span><span>alumnas nuevas reales</span></div>
+    <div class="mq-item"><span class="sep">✦</span></div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="sec sec-border sec-warm z" id="dolor">
+  <div class="c">
+    <div class="sh fi">
+      <span class="lbl lr">— ¿Te identificas?</span>
+      <h2 class="st">El estudio es increíble.<br>El digital, todavía no.</h2>
+      <p class="sd">Tu estudio merece una presencia digital a la altura. Si tienes alguno de estos problemas, sabemos exactamente cómo ayudarte.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="prob-card fi d1">
+        <div class="pe">🌐</div>
+        <h3>No tienes página web o la que tienes se ve anticuada</h3>
+        <p>Tu competencia ya tiene web bonita y sistema de citas. Las clientas buscan en Google y no te encuentran.</p>
+      </div>
+      <div class="prob-card fi d2">
+        <div class="pe">📅</div>
+        <h3>Las citas se gestionan por WhatsApp y es caótico</h3>
+        <p>Mensajes por todos lados, doble-agendamientos, cancelaciones sin aviso. Pierdes tiempo que debería ir a tus alumnas.</p>
+      </div>
+      <div class="prob-card fi d3">
+        <div class="pe">📸</div>
+        <h3>Tu Instagram no refleja la calidad de tu estudio</h3>
+        <p>Las fotos son del celular, los posts irregulares y los Reels no tienen la estética que tu clientela de SPGG espera.</p>
+      </div>
+      <div class="prob-card fi d1">
+        <div class="pe">📣</div>
+        <h3>Dependes del boca en boca para conseguir alumnas</h3>
+        <p>No tienes un sistema activo que traiga clientas nuevas cada mes. El crecimiento es lento y no lo controlas.</p>
+      </div>
+      <div class="prob-card fi d2">
+        <div class="pe">⏰</div>
+        <h3>Haces todo tú sola y no hay tiempo para nada</h3>
+        <p>Enseñas, administras, contestas, subes stories... Es un ciclo agotador que no puede seguir así.</p>
+      </div>
+      <div class="prob-card fi d3">
+        <div class="pe">💰</div>
+        <h3>No sabes si la publicidad que haces está funcionando</h3>
+        <p>Has probado boostear posts o correr ads sin resultados claros. No hay número de alumnas nuevas que lo justifique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRATEGY OVERVIEW -->
+<section class="sec sec-border sec-plum z">
+  <div class="c">
+    <div class="sh ctr fi">
+      <span class="lbl lr">— La estrategia</span>
+      <h2 class="st">Primero la base.<br>Después el crecimiento.</h2>
+      <p class="sd">No tiene sentido hacer publicidad si no tienes dónde aterrizar a tus clientas. Por eso empezamos con lo que construye confianza.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="strategy-block fi">
+        <div>
+          <div class="strategy-tag"><span>Paso 1 — Lanzamiento</span></div>
+          <h3>Primero: tu estudio necesita una base digital sólida.</h3>
+          <p>Antes de anunciar, antes de publicar contenido — tu estudio necesita una web que enamore, un sistema de citas que funcione y una presencia que comunique lo que realmente eres.</p>
+          <ul class="strategy-list">
+            <li><span class="sl-dot d-green"></span>Página web premium (mobile-first, rápida y bonita)</li>
+            <li><span class="sl-dot d-green"></span>Sistema de citas integrado (AgendaPro o equivalente)</li>
+            <li><span class="sl-dot d-green"></span>Información clave: horarios, servicios, ubicación, precios</li>
+            <li><span class="sl-dot d-green"></span>Optimización para que te encuentren en Google Maps</li>
+            <li><span class="sl-dot d-green"></span>Link de bio de Instagram conectado</li>
+          </ul>
+        </div>
+        <div class="strategy-number">01</div>
+      </div>
+      <div class="strategy-block fi" style="border-color: rgba(240,200,188,0.14);">
+        <div class="strategy-number">02</div>
+        <div>
+          <div class="strategy-tag" style="background: var(--rose-dim);"><span>Paso 2 — Crecimiento mensual</span></div>
+          <h3>Después: atraes alumnas nuevas todos los meses.</h3>
+          <p>Con la base lista, activamos el motor de crecimiento. Publicidad que llega a las mujeres correctas en San Pedro, contenido que las enamora y fotos que comunican lujo.</p>
+          <ul class="strategy-list">
+            <li><span class="sl-dot d-rose"></span>Meta Ads gestionados (Facebook + Instagram)</li>
+            <li><span class="sl-dot d-rose"></span>Reels y videos editados con estética wellness premium</li>
+            <li><span class="sl-dot d-rose"></span>Sesión de fotos profesional mensual</li>
+            <li><span class="sl-dot d-rose"></span>Diseño gráfico: horarios, stories, avisos y más</li>
+            <li><span class="sl-dot d-rose"></span>Mantenimiento de tu web y sistema de citas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section class="sec sec-border sec-rose z" id="paquetes">
+  <div class="c">
+    <div class="sh ctr fi">
+      <span class="lbl lr">— Paquetes</span>
+      <h2 class="st">Simple de entender.<br>Fácil de empezar.</h2>
+      <p class="sd">Dos paquetes. Sin contratos complicados. Empieza con el Lanzamiento y cuando quieras, activamos el crecimiento.</p>
+    </div>
+
+    <div class="urgency fi">
+      <div class="u-dot"></div>
+      <p>Cupo limitado: Solo tomamos <strong>3 estudios nuevos por mes</strong> para garantizar calidad y atención. Actualmente quedan <strong>2 lugares disponibles.</strong></p>
+    </div>
+
+    <div class="pkg-wrapper">
+
+      <!-- LAUNCH -->
+      <div class="pkg launch fi">
+        <div class="pkg-head">
+          <div class="pkg-step ps-launch">🚀 Paso 1</div>
+          <div class="pkg-name">Lanzamiento Digital</div>
+          <p class="pkg-tagline">Tu estudio en digital de una vez por todas. Página web premium + sistema de citas + todo configurado. Cambio visible desde el día de entrega.</p>
+          <div class="pkg-price-area">
+            <div class="pkg-amount">$9,900</div>
+            <div class="pkg-period">MXN · pago único</div>
+          </div>
+          <div class="pkg-note">✓ Sin mensualidad · Se entrega en 10-14 días hábiles</div>
+        </div>
+        <div class="pkg-body">
+          <div class="pkg-section-title">Diseño web</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-g">✓</span>Página web de 5 secciones (diseño premium mobile-first)</li>
+            <li><span class="chk chk-g">✓</span>Paleta de colores y tipografía alineada a tu marca</li>
+            <li><span class="chk chk-g">✓</span>Sección de servicios, horarios, precios y ubicación</li>
+            <li><span class="chk chk-g">✓</span>Formulario de contacto y botón de WhatsApp</li>
+            <li><span class="chk chk-g">✓</span>Velocidad optimizada y SSL incluido</li>
+          </ul>
+          <div class="pkg-section-title">Sistema de citas</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-g">✓</span>Integración con AgendaPro (o plataforma de tu elección)</li>
+            <li><span class="chk chk-g">✓</span>Reservas online 24/7 sin intervención tuya</li>
+            <li><span class="chk chk-g">✓</span>Confirmaciones automáticas por WhatsApp o email</li>
+            <li><span class="chk chk-g">✓</span>Link de citas en tu Instagram bio</li>
+          </ul>
+          <div class="pkg-section-title">Extras de lanzamiento</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-g">✓</span>Alta y optimización en Google My Business</li>
+            <li><span class="chk chk-g">✓</span>1 sesión de fotos de tu estudio (2 horas)</li>
+            <li><span class="chk chk-g">✓</span>Capacitación de 30 min para usar el sistema de citas</li>
+          </ul>
+          <a href="https://wa.me/528110000000?text=Quiero%20el%20Paquete%20Lanzamiento%20Digital%20de%20NorthPeak%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="pkg-cta pkc-launch" target="_blank">
+            Quiero mi página web →
+          </a>
+        </div>
+      </div>
+
+      <!-- MONTHLY -->
+      <div class="pkg monthly pkg-popular fi d1">
+        <div class="pkg-head">
+          <div class="pkg-step ps-monthly">📈 Paso 2 — Mensual</div>
+          <div class="pkg-name">Crecimiento Continuo</div>
+          <p class="pkg-tagline">El motor que trae alumnas nuevas cada mes. Publicidad, contenido visual y mantenimiento — todo gestionado por nosotros.</p>
+          <div class="pkg-price-area">
+            <div class="pkg-amount">$7,500</div>
+            <div class="pkg-period">MXN / mes</div>
+          </div>
+          <div class="pkg-note">✓ Sin contrato largo · Cancela cuando quieras</div>
+        </div>
+        <div class="pkg-body">
+          <div class="pkg-section-title">Publicidad estratégica</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-r">✓</span>Meta Ads (Facebook + Instagram) gestionados</li>
+            <li><span class="chk chk-r">✓</span>Segmentación hiper-local en SPGG (3-5 km)</li>
+            <li><span class="chk chk-r">✓</span>Anuncios de "Clase de Prueba" y "Pase de Bienvenida"</li>
+            <li><span class="chk chk-r">✓</span>Optimización semanal y reporte de resultados</li>
+          </ul>
+          <div class="pkg-section-title">Contenido visual</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-r">✓</span>3 Reels editados con estética premium</li>
+            <li><span class="chk chk-r">✓</span>1 sesión de fotos profesional (mensual)</li>
+            <li><span class="chk chk-r">✓</span>6 diseños gráficos (horarios, stories, avisos)</li>
+            <li><span class="chk chk-r">✓</span>Guiones de contenido para grabar en 1 hora</li>
+          </ul>
+          <div class="pkg-section-title">Mantenimiento</div>
+          <ul class="pkg-items">
+            <li><span class="chk chk-r">✓</span>Actualizaciones de tu página web (horarios, precios, etc.)</li>
+            <li><span class="chk chk-r">✓</span>Monitoreo del sistema de citas</li>
+            <li><span class="chk chk-r">✓</span>Reporte mensual: alumnas nuevas, costo por lead, alcance</li>
+          </ul>
+          <a href="https://wa.me/528110000000?text=Me%20interesa%20el%20Plan%20Crecimiento%20Continuo%20de%20NorthPeak%20para%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="pkg-cta pkc-monthly" target="_blank">
+            Activar crecimiento mensual ✨
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- What you get visual -->
+    <div style="margin-top: 48px;">
+      <p class="fi" style="text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.18em; text-transform:uppercase; margin-bottom:20px;">— Así se ve la entrega del Paquete Lanzamiento —</p>
+      <div class="web-preview fi">
+        <div class="wp-bar">
+          <div class="wp-dots">
+            <div class="wp-dot wd-r"></div>
+            <div class="wp-dot wd-y"></div>
+            <div class="wp-dot wd-g"></div>
+          </div>
+          <div class="wp-url">northpeakdigital.com.mx/tu-estudio</div>
+        </div>
+        <div class="wp-body">
+          <div class="wp-hero">
+            <div class="wp-h-label">Pilates Boutique · San Pedro Garza García</div>
+            <div class="wp-h-title">Transforma tu cuerpo.<br>Recarga tu energía.</div>
+            <div class="wp-h-sub">Clases de Reformer, Mat y Barre en San Pedro.</div>
+            <div class="wp-h-btn">Reserva tu clase →</div>
+          </div>
+          <div class="wp-grid">
+            <div class="wp-card">
+              <div class="wp-card-icon">🏋️‍♀️</div>
+              <div class="wp-card-t">Reformer</div>
+              <div class="wp-card-s">Nivel principiante a avanzado</div>
+            </div>
+            <div class="wp-card">
+              <div class="wp-card-icon">🧘‍♀️</div>
+              <div class="wp-card-t">Mat Pilates</div>
+              <div class="wp-card-s">Todos los niveles</div>
+            </div>
+            <div class="wp-card">
+              <div class="wp-card-icon">🩰</div>
+              <div class="wp-card-t">Barre</div>
+              <div class="wp-card-s">Lunes, Miér y Viernes</div>
+            </div>
+          </div>
+          <div class="wp-citas">
+            <div class="wp-citas-ico">📅</div>
+            <div>
+              <div class="wp-citas-t">Sistema de citas online</div>
+              <div class="wp-citas-s">Reserva en segundos · Sin WhatsApp</div>
+            </div>
+            <div class="wp-citas-btn">Reservar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROI -->
+<div class="z sec-border" style="padding:0;">
+  <div class="c" style="padding:0 24px;">
+    <div class="roi-bar fi">
+      <div class="roi-cell">
+        <div class="roi-val rv-r"><span data-count="2" data-suffix=" sem">2 sem</span></div>
+        <div class="roi-lbl">Entrega web</div>
+        <div class="roi-sub">desde el primer pago</div>
+      </div>
+      <div class="roi-cell">
+        <div class="roi-val rv-g">24/7</div>
+        <div class="roi-lbl">Sistema de citas</div>
+        <div class="roi-sub">sin intervención tuya</div>
+      </div>
+      <div class="roi-cell">
+        <div class="roi-val rv-t"><span data-count="3" data-suffix="km">3km</span></div>
+        <div class="roi-lbl">Radio de publicidad</div>
+        <div class="roi-sub">exacto en SPGG</div>
+      </div>
+      <div class="roi-cell">
+        <div class="roi-val rv-r">+<span data-count="8" data-suffix="">8</span></div>
+        <div class="roi-lbl">Alumnas nuevas</div>
+        <div class="roi-sub">promedio primer mes de ads</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section class="sec sec-border sec-warm z" id="como-funciona">
+  <div class="c">
+    <div class="sh ctr fi">
+      <span class="lbl lg">— Cómo funciona</span>
+      <h2 class="st">De plática a página web<br>en menos de 2 semanas</h2>
+    </div>
+    <div class="proc-grid fi">
+      <div class="proc-step">
+        <div class="proc-num">01</div>
+        <h3>Plática de diagnóstico</h3>
+        <p>30 minutos gratis. Conocemos tu estudio, tu mercado en SPGG y definimos exactamente qué necesitas.</p>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num">02</div>
+        <h3>Diseño y propuesta</h3>
+        <p>Te mostramos una primera versión de tu web antes de empezar. Tú apruebas, nosotros construimos.</p>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num">03</div>
+        <h3>Entrega y capacitación</h3>
+        <p>Tu web está lista, el sistema de citas funciona. Te explicamos cómo usarlo en 30 minutos.</p>
+      </div>
+      <div class="proc-step">
+        <div class="proc-num">04</div>
+        <h3>Arrancamos crecimiento</h3>
+        <p>Cuando quieras, activamos el plan mensual: publicidad, Reels, fotos y más alumnas cada mes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec sec-border sec-plum bg-barre img-bg z" id="resultados">
+  <div class="c">
+    <div class="sh ctr fi">
+      <span class="lbl lr">— Resultados</span>
+      <h2 class="st">Lo que dicen las dueñas<br>que ya trabajan con nosotros</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card fi">
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <blockquote>"Mi página web quedó increíble. Mis alumnas me la comparan con estudios de Miami. El sistema de citas es lo mejor que me ha pasado — ya no contesto WhatsApp para agendar."</blockquote>
+        <div class="t-author">
+          <div class="t-av">MF</div>
+          <div class="t-info">
+            <div class="nm">Mariana F.</div>
+            <div class="rl">Dueña · Studio Pilates Reformer · Valle Oriente, SPGG</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card fi d1">
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <blockquote>"Empecé con la página web y al mes quise el paquete de crecimiento. En 3 semanas de publicidad ya tenía 11 alumnas nuevas pagadas. Nunca pensé que fuera tan rápido."</blockquote>
+        <div class="t-author">
+          <div class="t-av">SD</div>
+          <div class="t-info">
+            <div class="nm">Sofía D.</div>
+            <div class="rl">Instructora y dueña · Pilates Boutique · Centrito Valle</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card fi d2">
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <blockquote>"Los Reels y fotos que hacen cada mes hacen que mi estudio se vea de lujo. La gente llega y me dice 'vi tus fotos en Instagram y supe que era aquí'. Eso no tiene precio."</blockquote>
+        <div class="t-author">
+          <div class="t-av">AL</div>
+          <div class="t-info">
+            <div class="nm">Ana L.</div>
+            <div class="rl">Fundadora · Barre & Pilates Studio · Chipinque, SPGG</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery Strip -->
+    <div class="gallery-strip fi">
+      <div class="gal-item">
+        <div class="gal-tag">Reformer</div>
+        <img src="hero-studio.jpg" alt="Reformer Studio" loading="lazy">
+        <div class="gal-label">
+          <strong>Pilates Reformer</strong>
+          <span>La clase estrella</span>
+        </div>
+      </div>
+      <div class="gal-item">
+        <div class="gal-tag">Barre</div>
+        <img src="barre-class.jpg" alt="Barre Class" loading="lazy">
+        <div class="gal-label">
+          <strong>Barre Boutique</strong>
+          <span>Fuerza y gracia</span>
+        </div>
+      </div>
+      <div class="gal-item">
+        <div class="gal-tag">Mat</div>
+        <img src="pilates-woman.jpg" alt="Mat Pilates" loading="lazy">
+        <div class="gal-label">
+          <strong>Mat Pilates</strong>
+          <span>Todos los niveles</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec sec-border sec-rose z" id="faq">
+  <div class="c">
+    <div class="sh ctr fi">
+      <span class="lbl lr">— FAQ</span>
+      <h2 class="st">Preguntas directas.<br>Respuestas directas.</h2>
+    </div>
+    <div class="faq-list fi">
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Cuánto tarda en estar lista mi página web?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">Entre 10 y 14 días hábiles desde la primera sesión de trabajo. Primero te mostramos un borrador para que apruebes la dirección visual, después finalizamos y entregamos.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Qué sistema de citas usan?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">Lo adaptamos a lo que ya tienes o a lo que mejor le conviene a tu estudio. Las opciones más comunes para Pilates en México son AgendaPro, Reservio, Acuity y Google Calendar. Si ya usas alguno, lo integramos. Si empiezas de cero, te recomendamos el que mejor se adapte a tu caso.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Tengo que firmar contrato o comprometerme a un tiempo mínimo?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">No. El Paquete Lanzamiento es un pago único y ya. El plan mensual de Crecimiento Continuo es mes a mes — puedes pausarlo o cancelarlo cuando quieras con un aviso de 15 días. Sin contratos complicados ni letras pequeñas.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Puedo empezar solo con la página web y después agregar la publicidad?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">Exactamente así está diseñado. El Paquete Lanzamiento es el primer paso. Cuando tu estudio esté listo visualmente y tengas el sistema de citas funcionando, activamos el plan mensual para traer alumnas nuevas. Puedes esperar el tiempo que quieras entre un paso y otro.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Qué pasa si no me gustan los resultados de la publicidad?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">Si al final del primer mes no tienes ninguna alumna nueva derivada de los ads, extendemos el siguiente mes sin costo. Confiamos en lo que hacemos y lo respaldamos.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">
+          <span>¿Solo trabajan con estudios de Pilates en SPGG?</span>
+          <div class="faq-ico">+</div>
+        </button>
+        <div class="faq-body"><div class="faq-inner">Esta división está 100% enfocada en Pilates, Barre y Yoga Boutique en San Pedro Garza García. Conocemos las colonias (Arboleda, Calzada del Valle, Centrito, Chipinque, Vía Cordillera), el perfil de clienta y los horarios que funcionan. Esa especialización es lo que nos diferencia de cualquier agencia genérica.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="fcta sec-cta bg-woman img-bg z">
+  <div class="c">
+    <div class="fi">
+      <span class="lbl lr" style="display:block;text-align:center;margin-bottom:20px;">— Empecemos</span>
+      <h2>Una plática de 30 min<br>puede cambiar tu estudio.</h2>
+      <p class="fcta-desc">Sin compromiso. Te cuento exactamente cómo quedaría tu web, cuánto tiempo tarda y qué esperar. Gratis.</p>
+      <div class="fcta-acts">
+        <a href="https://wa.me/528110000000?text=Hola%20NorthPeak%2C%20quiero%20una%20pl%C3%A1tica%20de%2030%20minutos%20para%20hablar%20de%20mi%20estudio%20de%20Pilates%20en%20SPGG" class="btn-wa" target="_blank">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Agendar plática gratis por WhatsApp
+        </a>
+        <a href="#paquetes" class="btn-o">Ver paquetes y precios</a>
+      </div>
+      <p class="note-sm">⏳ Solo quedan 2 lugares disponibles este mes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="z">
+  <div class="c">
+    <div class="foot-in">
+      <div class="f-logo">NorthPeak <span>Digital</span> <span style="color:var(--text-dim);font-weight:400;font-size:12px;margin-left:6px;">· Pilates & Wellness SPGG</span></div>
+      <ul class="f-links">
+        <li><a href="https://northpeakdigital.com.mx">Inicio</a></li>
+        <li><a href="https://northpeakdigital.com.mx/privacidad">Privacidad</a></li>
+        <li><a href="https://wa.me/528110000000">WhatsApp</a></li>
+      </ul>
+      <p class="f-copy">© 2026 NorthPeak Digital · Monterrey, NL</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ===== SCROLL PROGRESS ===== */
+  const prog = document.getElementById('scrollProg');
+  window.addEventListener('scroll', () => {
+    const st = window.scrollY;
+    const dh = document.documentElement.scrollHeight - window.innerHeight;
+    prog.style.width = (st / dh * 100) + '%';
+  }, { passive: true });
+
+  /* ===== MOBILE NAV ===== */
+  function toggleMobileNav() {
+    const nav = document.getElementById('mobileNav');
+    const btn = document.getElementById('menuBtn');
+    nav.classList.toggle('open');
+    btn.classList.toggle('open');
+    document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('menuBtn').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ===== SCROLL FADE IN ===== */
+  const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('v'); }), { threshold: 0.09, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+  /* ===== ANIMATED COUNTERS ===== */
+  function animateCount(el, target, suffix, duration) {
+    let start = 0;
+    const isDecimal = target % 1 !== 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      el.textContent = (isDecimal ? start.toFixed(1) : Math.floor(start)) + suffix;
+      if (start >= target) clearInterval(timer);
+    }, 16);
+  }
+  const countObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const val = parseFloat(el.dataset.count);
+        const suffix = el.dataset.suffix || '';
+        animateCount(el, val, suffix, 1400);
+        countObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
+
+  /* ===== FAQ ===== */
+  function faq(btn) {
+    const item = btn.closest('.faq-item');
+    const body = item.querySelector('.faq-body');
+    const open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(x => { x.classList.remove('open'); x.querySelector('.faq-body').style.maxHeight = '0'; });
+    if (!open) { item.classList.add('open'); body.style.maxHeight = body.scrollHeight + 'px'; }
+  }
+
+  /* ===== MOUSE PARALLAX ===== */
+  let rid;
+  window.addEventListener('mousemove', e => {
+    cancelAnimationFrame(rid);
+    rid = requestAnimationFrame(() => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 26;
+      const y = (e.clientY / window.innerHeight - 0.5) * 26;
+      document.querySelectorAll('.orb').forEach((o, i) => {
+        o.style.transform = `translate(${x*(i+1)*0.25}px, ${y*(i+1)*0.25}px)`;
+      });
+    });
+  });
+</script>
+</body>
+</html>
