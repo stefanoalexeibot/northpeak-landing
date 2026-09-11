@@ -1,0 +1,25 @@
+﻿commit f31cae669acb67a7af24f8c366a312d66975382e
+Author: Alex <hola@northpeakdigital.com.mx>
+Date:   Sun Feb 22 12:26:33 2026 -0600
+
+    feat(propiedades-mty): fix RLS bugs, add terrain/construction m2, visit photos, agent column
+
+ src/app/admin/clients/[id]/page.tsx        |  4 ++--
+ src/app/admin/clients/page.tsx             |  4 ++--
+ src/app/admin/leads/page.tsx               |  4 ++--
+ src/app/admin/messages/page.tsx            |  4 ++--
+ src/app/admin/page.tsx                     | 33 ++++++++++++++++--------------
+ src/app/admin/referrals/page.tsx           |  4 ++--
+ src/app/admin/reports/page.tsx             |  4 ++--
+ src/app/admin/testimonials/page.tsx        |  4 ++--
+ src/app/api/admin/analisis/[id]/route.ts   |  4 ++--
+ src/app/api/admin/analisis/route.ts        | 26 ++++++++---------------
+ src/app/api/admin/client-tasks/route.ts    |  4 ++--
+ src/app/api/admin/confirm-payment/route.ts |  9 ++++----
+ src/app/api/admin/create-client/route.ts   | 11 +++-------
+ src/app/api/admin/notifications/route.ts   | 16 ++++++++-------
+ src/app/api/admin/payments/route.ts        | 23 ++++++++++++---------
+ src/app/api/admin/resultados/route.ts      |  4 ++--
+ src/app/api/admin/tareas/route.ts          | 16 +++++++--------
+ src/lib/supabase/server.ts                 | 23 +++++++++++++++++++++
+ 18 files changed, 107 insertions(+), 90 deletions(-)

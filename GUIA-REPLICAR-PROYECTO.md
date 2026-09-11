@@ -1,0 +1,1343 @@
+# Guia Completa para Replicar el Sistema NorthPeak
+
+> Este documento describe ABSOLUTAMENTE TODO lo que se construyo en el portal de NorthPeak Digital. El objetivo es que puedas enviar este archivo a Claude y replicar (o mejorar) el sistema completo para tu agencia inmobiliaria.
+
+---
+
+## 1. RESUMEN EJECUTIVO
+
+**Que es:** Un sistema SaaS dual (Admin Panel + Portal de Cliente) para gestionar clientes de una agencia de marketing digital. Incluye: CRM, gestion de proyectos, documentos, pagos, mensajeria, analisis con IA, cuestionario dinamico con cotizacion personalizada por IA, pipeline Kanban de prospectos, integracion WhatsApp, catalogo de servicios, cotizador rapido, tareas por cliente, pagos recurrentes automatizados, generador de link de pago y automatizaciones.
+
+**Stack tecnologico:**
+- **Frontend/Backend:** Next.js 14.2 (App Router) + TypeScript + Tailwind CSS
+- **Base de datos + Auth + Storage:** Supabase (PostgreSQL, Auth, Storage, Realtime)
+- **UI Components:** shadcn/ui (Radix UI + Tailwind)
+- **PDF Generation:** jsPDF + jspdf-autotable + JSZip
+- **Charts:** Recharts
+- **Email:** Resend (transaccional)
+- **IA:** Anthropic Claude SDK (@anthropic-ai/sdk)
+- **Firmas digitales:** react-signature-canvas
+- **Deploy:** Vercel (auto-deploy en push a master)
+
+**Estructura del proyecto:**
+```
+src/
+  app/              → Paginas y API routes (Next.js App Router)
+    admin/          → Panel de administracion
+      analizador/   → Analizador digital + cuestionario inline
+      pipeline/     → Pipeline Kanban de prospectos
+      catalogo/     → Catalogo de servicios y paquetes
+      cotizador/    → Cotizador rapido para prospectos
+    portal/         → Portal del cliente
+    cuestionario/   → Pagina publica de cuestionario (sin auth)
+    pago/           → Pagina publica de pago (sin auth, token-based)
+    api/            → Endpoints del backend
+      cuestionario/ → API publica del cuestionario (token-based)
+      ai/           → Endpoints de IA (analyze, content, strategy, pricing)
+      pago/         → Endpoint publico de confirmacion de pago
+  components/       → Componentes React
+    admin/          → Componentes del admin (sidebar, tabs, charts, etc.)
+    portal/         → Componentes del portal (nav, efectos visuales, etc.)
+    ui/             → shadcn/ui (button, card, dialog, input, etc.)
+  lib/              → Utilidades y helpers
+    supabase/       → Clientes de Supabase (server + client)
+    ai/             → Integracion con Claude (helper askClaude)
+    email/          → Templates y envio de emails
+    pdf/            → Generacion de documentos PDF
+    analizador/     → Logica del analizador digital + cuestionario + pricing
+    theme/          → Provider de tema dark/light
+  hooks/            → Custom hooks (media query, realtime notifications)
+  middleware.ts     → Auth middleware (protege /admin y /portal)
+```
+
+---
+
+## 2. BASE DE DATOS (Supabase PostgreSQL)
+
+### 2.1 Tablas
+
+#### `profiles`
+Se crea automaticamente al registrar usuario en Supabase Auth.
+```sql
+id          uuid PRIMARY KEY (references auth.users)
+role        text NOT NULL DEFAULT 'client'  -- 'admin' | 'client'
+theme       text DEFAULT 'dark'
+created_at  timestamptz DEFAULT now()
+```
+
+#### `clients`
+Registro principal del cliente. Se vincula a un usuario de auth.
+```sql
+id                    uuid PRIMARY KEY DEFAULT gen_random_uuid()
+user_id               uuid REFERENCES auth.users ON DELETE CASCADE
+name                  text NOT NULL
+email                 text NOT NULL
+company               text
+phone                 text
+photo_url             text
+cover_url             text
+status                text DEFAULT 'active'  -- 'active' | 'paused'
+admin_notes           text
+welcome_email_sent_at timestamptz
+created_at            timestamptz DEFAULT now()
+```
+
+#### `documents`
+Contratos, notas de venta, documentos de bienvenida, propuestas comerciales.
+```sql
+id              uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id       uuid REFERENCES clients ON DELETE CASCADE
+type            text NOT NULL  -- 'contract' | 'welcome' | 'invoice' | 'proposal'
+title           text NOT NULL
+file_url        text
+content         jsonb          -- Para invoices: {items, discount, notes}
+seen_by_client  boolean DEFAULT false
+signed          boolean DEFAULT false
+signature_data  text           -- Base64 de la firma
+signed_at       timestamptz
+created_at      timestamptz DEFAULT now()
+```
+
+#### `projects`
+Proyectos asignados a clientes.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+name        text NOT NULL
+description text
+status      text DEFAULT 'planning'  -- planning|in_progress|review|completed|paused
+start_date  date
+end_date    date
+created_at  timestamptz DEFAULT now()
+```
+
+#### `deliverables`
+Entregables dentro de un proyecto.
+```sql
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+project_id       uuid REFERENCES projects ON DELETE CASCADE
+name             text NOT NULL
+description      text
+status           text DEFAULT 'pending'  -- pending|in_progress|review|completed
+order_index      integer DEFAULT 0
+client_approved  boolean                 -- Aprobado por el cliente
+client_feedback  text                    -- Comentarios del cliente
+approved_at      timestamptz
+scheduled_date   date                    -- Fecha programada (para agenda de contenido)
+created_at       timestamptz DEFAULT now()
+```
+
+#### `project_milestones`
+Hitos del proyecto (usados en calendario).
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+project_id  uuid REFERENCES projects ON DELETE CASCADE
+title       text NOT NULL
+due_date    date
+completed   boolean DEFAULT false
+created_at  timestamptz DEFAULT now()
+```
+
+#### `media`
+Archivos compartidos (imagenes, PDFs, videos).
+```sql
+id             uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id      uuid REFERENCES clients ON DELETE CASCADE
+name           text NOT NULL
+file_url       text NOT NULL
+file_type      text NOT NULL
+file_size      bigint NOT NULL
+seen_by_client boolean DEFAULT false
+uploaded_by    text  -- 'admin' | 'client'
+created_at     timestamptz DEFAULT now()
+```
+
+#### `messages`
+Chat entre admin y cliente.
+```sql
+id              uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id       uuid REFERENCES clients ON DELETE CASCADE
+sender_id       uuid REFERENCES auth.users
+sender_role     text NOT NULL  -- 'admin' | 'client'
+content         text NOT NULL
+attachment_url  text
+attachment_name text
+read            boolean DEFAULT false
+created_at      timestamptz DEFAULT now()
+```
+
+#### `payments`
+Registro de pagos y cobros.
+```sql
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id        uuid REFERENCES clients ON DELETE CASCADE
+amount           decimal NOT NULL
+concept          text NOT NULL
+payment_method   text DEFAULT 'transfer'  -- transfer|card|cash|other
+status           text DEFAULT 'pending'   -- pending|completed|failed|refunded
+reference_number text
+notes            text
+due_date         date
+paid_at          timestamptz
+pago_token       text UNIQUE            -- Token publico para link de pago
+datos_bancarios  jsonb                  -- {banco, clabe, titular, referencia}
+created_at       timestamptz DEFAULT now()
+```
+
+#### `referrals`
+Referidos enviados por clientes.
+```sql
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id        uuid REFERENCES clients ON DELETE CASCADE
+referred_name    text NOT NULL
+referred_email   text
+referred_phone   text
+referred_company text
+notes            text
+status           text DEFAULT 'pending'  -- pending|contacted|converted|rejected
+created_at       timestamptz DEFAULT now()
+```
+
+#### `testimonials`
+Resenas/testimonios de clientes.
+```sql
+id           uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id    uuid REFERENCES clients ON DELETE CASCADE
+rating       integer NOT NULL  -- 1-5
+title        text
+content      text NOT NULL
+is_approved  boolean DEFAULT false
+is_published boolean DEFAULT false
+submitted_at timestamptz DEFAULT now()
+```
+
+#### `notifications`
+Notificaciones del sistema.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+type        text NOT NULL  -- contract_signed|message_received|referral_submitted|testimonial_submitted|payment_overdue|file_uploaded|cuestionario_completed|payment_received
+title       text NOT NULL
+description text
+client_id   uuid REFERENCES clients ON DELETE SET NULL
+read        boolean DEFAULT false
+link        text
+created_at  timestamptz DEFAULT now()
+```
+> Hay un check constraint en `type` — al agregar nuevos tipos hay que actualizar el constraint con `ALTER TABLE notifications DROP CONSTRAINT ...` y recrearlo.
+
+#### `analisis_digital`
+Resultados del analizador de presencia digital.
+```sql
+id              uuid PRIMARY KEY DEFAULT gen_random_uuid()
+nombre_negocio  text NOT NULL
+giro            text NOT NULL
+zona            text
+contacto        text
+telefono        text
+hallazgos       jsonb NOT NULL
+score           integer NOT NULL
+nivel           text NOT NULL  -- CRITICO|BAJO|MEDIO|ALTO
+oportunidades   jsonb
+cotizacion      jsonb          -- Cotizacion generica automatica
+report_url      text
+client_id       uuid REFERENCES clients ON DELETE SET NULL
+etapa           text DEFAULT 'nuevo'  -- nuevo|cuestionario_enviado|cuestionario_completado|en_negociacion|cerrado_ganado|cerrado_perdido
+created_at      timestamptz DEFAULT now()
+```
+
+#### `cuestionarios`
+Cuestionarios dinamicos para cotizacion personalizada. Vinculados a un analisis digital.
+```sql
+id                        uuid PRIMARY KEY DEFAULT gen_random_uuid()
+analisis_id               uuid NOT NULL REFERENCES analisis_digital(id)
+token                     text UNIQUE NOT NULL    -- Token publico para acceso sin auth
+status                    text NOT NULL DEFAULT 'pending'  -- pending|completed
+respuestas                jsonb                   -- Respuestas del prospecto
+cotizacion_personalizada  jsonb                   -- Paquetes generados por IA
+created_at                timestamptz DEFAULT now()
+completed_at              timestamptz
+```
+> Sin RLS — acceso solo via service role desde API routes publicas.
+
+#### `tareas`
+Tareas internas del admin vinculadas a un cliente.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+titulo      text NOT NULL
+descripcion text
+status      text DEFAULT 'pendiente'  -- pendiente|en_progreso|completada
+prioridad   text DEFAULT 'media'      -- baja|media|alta
+due_date    date
+created_at  timestamptz DEFAULT now()
+```
+
+#### `catalogo_servicios`
+Catalogo de servicios y paquetes que ofrece la agencia.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+nombre      text NOT NULL
+descripcion text
+precio      decimal NOT NULL
+categoria   text NOT NULL  -- marketing|diseno|desarrollo|consultoria|paquete
+activo      boolean DEFAULT true
+created_at  timestamptz DEFAULT now()
+```
+> Pre-poblado con ~30 servicios y paquetes al crear el proyecto.
+
+#### `pagos_recurrentes`
+Configuracion de cobros automatizados mensuales.
+```sql
+id                  uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id           uuid REFERENCES clients ON DELETE CASCADE
+concepto            text NOT NULL
+monto               decimal NOT NULL
+dia_cobro           integer NOT NULL  -- 1-28 (dia del mes)
+activo              boolean DEFAULT true
+fecha_inicio        date NOT NULL
+fecha_fin           date             -- NULL = sin fin
+ultimo_pago_creado  date
+created_at          timestamptz DEFAULT now()
+```
+
+#### `ai_strategies`
+Estrategias generadas por IA.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+analisis_id uuid REFERENCES analisis_digital ON DELETE SET NULL
+content     text NOT NULL
+created_at  timestamptz DEFAULT now()
+```
+
+#### `client_tasks`
+Checklist interactivo de tareas visible por el cliente en su portal.
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+label       text NOT NULL
+done        boolean DEFAULT false
+done_at     timestamptz
+sort_order  integer DEFAULT 0
+created_at  timestamptz DEFAULT now()
+```
+> Distinto de `tareas` (que son notas internas del admin). Estas las ve el cliente como un checklist de pendientes en su portal.
+
+#### `propuestas`
+Propuestas comerciales públicas enviadas a prospectos (sin auth, token-based).
+```sql
+id               uuid PRIMARY KEY DEFAULT gen_random_uuid()
+token            text UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex')
+nombre_prospecto text NOT NULL
+empresa          text
+servicios        jsonb DEFAULT '[]'   -- [{nombre, precio, descripcion}]
+precio_total     decimal
+mensaje          text                 -- Mensaje personalizado del admin
+vigencia_dias    integer DEFAULT 7
+status           text DEFAULT 'pendiente'  -- pendiente|vista|aceptada|rechazada
+visto_at         timestamptz
+vistas_count     int DEFAULT 0        -- Conteo de cada vez que se abre la propuesta
+ultima_vista_at  timestamptz
+created_at       timestamptz DEFAULT now()
+```
+
+#### `resultados_cliente`
+Resultados/scorecard registrados por el admin para mostrar al cliente (KPIs alcanzados).
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+client_id   uuid REFERENCES clients ON DELETE CASCADE
+mes         date NOT NULL            -- Mes al que corresponde el resultado
+categoria   text NOT NULL            -- 'alcance' | 'engagement' | 'leads' | 'ventas' | 'otro'
+descripcion text NOT NULL            -- Ej: "Seguidores nuevos en Instagram"
+valor       decimal                  -- Valor numerico (opcional)
+unidad      text                     -- Ej: "seguidores", "%", "consultas"
+created_at  timestamptz DEFAULT now()
+```
+
+#### `vendedores`
+Equipo de vendedores/agentes de la agencia (para CRM de ventas).
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+nombre      text NOT NULL
+email       text
+telefono    text
+activo      boolean DEFAULT true
+created_at  timestamptz DEFAULT now()
+```
+
+### 2.2 Row Level Security (RLS)
+
+Todas las tablas tienen RLS habilitado. Patron general:
+- **Admin:** acceso completo (SELECT, INSERT, UPDATE, DELETE) verificando `profiles.role = 'admin'`
+- **Client:** solo ve sus propios registros (`client_id = auth.uid()` o `user_id = auth.uid()`)
+
+### 2.3 Storage Buckets
+
+- **`client-files`** — Archivos subidos (documentos, media). Estructura: `{client_id}/docs/`, `{client_id}/media/`, y `comprobantes/{client_id}/{payment_id}.{ext}` (comprobantes de pago subidos por clientes)
+- **`reportes`** — Reportes HTML del analizador digital
+
+### 2.4 Realtime
+
+Habilitado en la tabla `notifications` para push en tiempo real al portal del cliente.
+
+---
+
+## 3. AUTENTICACION Y MIDDLEWARE
+
+### 3.1 Flujo de auth
+1. Usuario visita `/portal/login`
+2. Ingresa email + password
+3. Supabase Auth valida credenciales y devuelve JWT
+4. Se verifica el rol en tabla `profiles`
+5. Admin → redirect a `/admin`, Client → redirect a `/portal/dashboard`
+6. Middleware valida JWT en cada request a rutas protegidas
+
+### 3.2 Middleware (`src/middleware.ts`)
+- Aplica a: `/portal/*` y `/admin/*`
+- Excluye: `/portal/login` (publica)
+- `/admin/*` requiere rol admin
+- `/portal/*` requiere usuario autenticado
+- Redirige a `/portal/login` si no hay sesion
+
+### 3.3 Helpers de Supabase
+- **Server** (`src/lib/supabase/server.ts`): Usa `createServerClient` de `@supabase/ssr` con manejo de cookies. Para Server Components y API routes.
+- **Client** (`src/lib/supabase/client.ts`): Usa `createBrowserClient`. Para Client Components ("use client").
+
+---
+
+## 4. PANEL DE ADMINISTRACION
+
+### 4.1 Layout
+- Sidebar fijo a la izquierda (64px de ancho, responsive — drawer en mobile)
+- Links: Dashboard, Clientes, Documentos, Mensajes, Referidos, Testimonios, Analizador, Pipeline, Propuestas, Catalogo, Cotizador, Ventas, Reportes
+- Boton de cerrar sesion
+- Logo de la marca arriba
+- Contenido principal con padding izquierdo de 64px
+
+### 4.2 Dashboard (`/admin`)
+**Server component** que obtiene datos y los pasa a componentes cliente.
+
+KPIs mostrados:
+- Ingreso del mes actual (suma de pagos completados)
+- Pagos pendientes (count)
+- Contratos sin firmar (count)
+- Mensajes sin leer (count)
+- Pagos vencidos (count)
+- Clientes activos / total
+
+Secciones:
+- 4 graficas (Recharts): Ingresos por mes, Clientes por mes, Proyectos por status, Referidos
+- Card de pagos vencidos (muestra dias de atraso)
+- Card de pagos proximos (proximos 7 dias)
+- Activity feed (ultimas acciones)
+- Ultimos 5 clientes creados
+
+### 4.3 Clientes (`/admin/clients`)
+- Lista con avatar, nombre, empresa, email, fecha de creacion
+- Filtro por status (activo/pausado/todos)
+- Boton exportar CSV
+- Boton crear nuevo cliente
+- Click en cliente lleva a detalle
+
+### 4.4 Crear Cliente (`/admin/clients/new`)
+Formulario con onboarding automatizado:
+- Campos: nombre, email, empresa, telefono, password temporal
+- Checkboxes de onboarding:
+  - Auto-crear contrato
+  - Auto-crear nota de venta (con monto y concepto)
+  - Auto-crear proyecto (con nombre)
+- Al guardar:
+  1. Crea usuario en Supabase Auth (con service role key)
+  2. Crea registro en tabla `clients`
+  3. Crea profile con role 'client'
+  4. Auto-genera documentos/proyectos segun checkboxes
+  5. Envia email de bienvenida con credenciales temporales
+  6. Redirige al detalle del cliente
+
+### 4.5 Detalle del Cliente (`/admin/clients/[id]`)
+**Server component** que carga: client, documents, projects+deliverables, media, payments, analyses.
+
+Secciones superiores:
+- Nombre + badge de status (editable)
+- Empresa + email
+- Boton eliminar cliente
+- Card de onboarding checklist (email enviado, contrato, nota de venta, bienvenida, proyecto)
+- Card de notas del admin (textarea editable, se guarda en `admin_notes`)
+
+Tabs (componente `client-detail-tabs.tsx`):
+1. **Info** — Editar nombre, empresa, telefono. Boton reenviar email de bienvenida. Card de **Tareas** (CRUD de tareas internas con prioridad, fecha y status).
+2. **Documentos** — Lista de docs, subir nuevo, editor de nota de venta (items + descuento + notas).
+3. **Proyectos** — CRUD de proyectos + entregables. Templates de proyecto. Duplicar proyecto. Cambiar status.
+4. **Archivos** — Subir y ver archivos compartidos con el cliente.
+5. **Pagos** — Registrar pagos (monto, concepto con autocompletado, metodo, status, referencia, fecha vencimiento, notas). Boton "Link de pago" por cada pago pendiente (genera URL publica con datos bancarios). Card de **Pagos Recurrentes** (configurar cobros automaticos mensuales).
+6. **Actividad** — Timeline de actividad del cliente.
+7. **Analisis** — Analisis digitales vinculados. Link para crear nuevo analisis.
+8. **IA** — Generador de contenido para redes + Estrategia IA (playbook 30 dias).
+
+**Flujo de link de pago:**
+1. Admin presiona icono de enlace en un pago pendiente
+2. Se abre dialog para ingresar: banco, CLABE, titular, referencia
+3. Al generar: API crea un token unico y guarda datos bancarios en `payments`
+4. Admin copia la URL publica `/pago/{token}` y la envia al cliente
+5. Cliente abre la pagina, ve instrucciones de transferencia y boton "Ya pague"
+6. Al confirmar: pago se marca como completado y se crea notificacion `payment_received`
+
+### 4.6 Documentos (`/admin/documents`)
+Generador de PDFs con jsPDF:
+- 4 tipos: Bienvenida, Contrato, Propuesta, Cotizacion
+- Selector de cliente (auto-llena datos)
+- Campos editables: nombre, empresa, telefono, email, giro, zona, fecha inicio
+- Genera PDFs y descarga como ZIP
+- Guarda docs en tabla media
+
+### 4.7 Mensajes (`/admin/messages`)
+Centro de mensajeria:
+- Lista de clientes con ultimo mensaje y count de no leidos
+- Al seleccionar cliente, abre hilo de chat
+- Envio de texto + archivos adjuntos
+- Marca mensajes como leidos
+
+### 4.8 Referidos (`/admin/referrals`)
+- Lista de referidos con datos del referidor
+- Status updater inline: pendiente → contactado → convertido → rechazado
+
+### 4.9 Testimonios (`/admin/testimonials`)
+- Lista con rating de 5 estrellas
+- Botones para aprobar/publicar/rechazar
+- Muestra cliente y empresa
+
+### 4.10 Reportes (`/admin/reports`)
+Dashboard de metricas:
+- Ingresos: este mes, mes pasado, total, % crecimiento
+- Pagos pendientes: count y monto
+- Clientes: total, activos, pausados
+- Referidos: total, convertidos, tasa de conversion
+- Testimonios: total, aprobados, rating promedio
+- Proyectos: activos, completados
+- Tiempo de respuesta: promedio minutos entre mensaje de cliente y respuesta admin
+- Grafica de ingresos 12 meses
+
+### 4.11 Analizador Digital (`/admin/analizador`)
+> **Nota:** El campo "Giro" usa `ComboboxInput` con 55+ giros predefinidos. El campo "Zona/Ubicacion" usa `ComboboxInput` con 60+ ciudades de Mexico (enfocado en AMM). Ver seccion 10.2.
+
+**Alertas de seguimiento:**
+- Los prospectos en el historial muestran badge de dias en la etapa actual (`etapa_updated_at`)
+- Si llevan >3 dias: badge amarillo "warn" (X dias sin avance)
+- Si llevan >7 dias: badge rojo "urgent" (X dias, requiere atencion urgente)
+- Seccion "Requieren atencion" al inicio del historial muestra solo los urgentes/warn
+
+**Plantillas de WhatsApp por etapa:**
+- Boton de mensajeria por cada prospecto abre dropdown de templates
+- Templates predefinidos segun etapa actual: nuevo, cuestionario_enviado, cuestionario_completado, en_negociacion
+- Click en template lo copia al clipboard
+- Los templates usan el nombre del negocio y contacto del prospecto
+
+Herramienta para analizar la presencia digital de prospectos:
+- Form de datos: nombre, giro (dropdown con ~23 opciones), zona, contacto, telefono
+- Boton "Llenar con IA" — llama a Claude para estimar hallazgos
+- 6 secciones colapsables con toggles y inputs:
+  - Google Maps (25 pts): perfil, resenas, rating, fotos, horarios, etc.
+  - Google Search (10 pts): aparece en busqueda, posicion, SEO
+  - Instagram (25 pts): cuenta, seguidores, posts, highlights, reels, calidad
+  - Facebook (15 pts): pagina, actividad, resenas, likes, messenger
+  - Sitio Web (15 pts): tiene sitio, responsive, WhatsApp, booking, SSL
+  - Publicidad (10 pts): Meta Ads, Google Ads
+- Genera score 0-100, nivel (CRITICO/BAJO/MEDIO/ALTO), oportunidades
+- Genera cotizacion automatica basada en oportunidades detectadas
+- Genera reporte HTML y lo sube a Supabase Storage
+- Historial de analisis previos con badge de etapa (pipeline status)
+- Se puede vincular a un cliente existente
+
+**Cuestionario y cotizacion personalizada:**
+- Al generar analisis, se crea automaticamente un token de cuestionario
+- Boton "Enviar por WhatsApp" — abre wa.me con mensaje pre-armado incluyendo nombre del negocio, contacto y link al cuestionario
+- Boton "Copiar link" — copia URL del cuestionario al clipboard
+- Boton "Llenar aqui" — abre cuestionario inline (paso a paso) dentro del admin
+- Si el prospecto completa el cuestionario, la IA genera una cotizacion personalizada con paquetes estrategicos
+- Boton "Copiar cotizacion" — formatea la cotizacion personalizada como texto para pegar en WhatsApp/email
+
+### 4.12 Pipeline de Prospectos (`/admin/pipeline`)
+Tablero Kanban para gestionar el embudo de ventas de prospectos analizados:
+- 6 columnas: Nuevos → Cuestionario enviado → Cotizacion lista → En negociacion → Ganados → Perdidos
+- Drag-and-drop nativo (HTML5) para mover prospectos entre columnas
+- Actualizacion optimista — la UI se actualiza inmediatamente y revierte si falla
+- Fila de estadisticas con conteo por columna
+- Cada tarjeta muestra: nombre del negocio, score, giro, zona, fecha
+- Acciones rapidas por tarjeta: enviar cuestionario por WhatsApp, copiar link de reporte, ver reporte
+- Scroll horizontal para las columnas
+- Sin dependencias externas de drag-and-drop (usa API nativa del navegador)
+
+### 4.13 Busqueda Rapida (Command Search)
+Componente `command-search.tsx` — paleta de comandos tipo Cmd+K para buscar clientes y navegar rapido.
+
+### 4.14 Catalogo de Servicios (`/admin/catalogo`)
+Catalogo completo de servicios y paquetes que ofrece la agencia:
+- CRUD de servicios: nombre, descripcion, precio, categoria, activo/inactivo
+- Categorias: Marketing, Diseno, Desarrollo, Consultoria, **Paquete** (verde)
+- Filtro por categoria con tabs
+- Busqueda por nombre o descripcion
+- Precios formateados en MXN
+- Toggle activo/inactivo inline
+- Pre-poblado con ~30 servicios al iniciar (ver seccion 17)
+
+### 4.15 Cotizador Rapido (`/admin/cotizador`)
+Generador de cotizaciones en tiempo real usando el catalogo:
+- Busqueda y seleccion de servicios del catalogo
+- Agregar servicios a la cotizacion con cantidad y precio unitario
+- Descuento global en %
+- Totales en tiempo real (subtotal, descuento, total)
+- Selector de cliente (opcional)
+- Generacion de PDF de cotizacion
+- El campo "concepto" en pagos usa `ComboboxInput` con conceptos predefinidos
+
+### 4.16 Propuestas Publicas (`/admin/propuestas`)
+Generador de propuestas comerciales con link publico para prospectos:
+- Crear propuesta: nombre prospecto, empresa, lista de servicios (nombre + precio), mensaje personalizado, vigencia en dias
+- Tabla de propuestas con: nombre, empresa, precio total, status, vistas
+- Contador de vistas: cuantas veces se abrio la propuesta + tiempo desde la ultima visita (ej: "3 vistas · hace 2h")
+- Status automatico: pendiente → vista (al primer acceso) → aceptada/rechazada
+- Boton copiar link por cada propuesta (URL publica `/propuesta/{token}`)
+- Sin autenticacion requerida para el prospecto
+
+### 4.17 Ventas — Guia y Playbook (`/admin/ventas`)
+Seccion de referencia rapida para el proceso de ventas:
+
+**Metricas de conversion (live):**
+- Prospectos activos (en etapas abiertas del pipeline)
+- Tasa de cierre: ganados / (ganados + perdidos) %
+- Dias promedio para cerrar
+- Etapa con mas prospectos atascados (cuello de botella)
+
+**5 escenarios de venta simulados** con dialogos paso a paso:
+1. Cliente encontrado por internet (llama curioso)
+2. Visita presencial a negocio (cold call en calle)
+3. Referido de cliente actual
+4. Prospecto que pide tiempo para pensarlo
+5. Prospecto con objeciones de precio
+
+**7 tarjetas de objeciones** con framing y respuesta sugerida:
+- "Es muy caro"
+- "No tengo tiempo"
+- "Ya tenemos alguien que nos lleva las redes"
+- "Dejame pensarlo"
+- etc.
+
+**8 templates de WhatsApp** copiables con un click:
+- Primer contacto
+- Follow-up post-demo
+- Envio de propuesta
+- Recordatorio de propuesta
+- Cierre de urgencia
+- etc.
+
+**Senales de compra:** checklist de senales positivas vs. de duda para leer al prospecto.
+
+---
+
+## 5. PORTAL DEL CLIENTE
+
+### 5.1 Layout
+- Navbar superior con: logo, links de navegacion, notificaciones en tiempo real, menu de usuario
+- Efectos visuales (solo desktop): animated background, cursor glow, dot grid, tilt cards
+- Hook `useDesktop()` para activar/desactivar efectos segun viewport
+- Theme toggle (dark/light)
+
+### 5.2 Login (`/portal/login`)
+- Email + password
+- Validacion contra Supabase Auth
+- Redirect segun rol (admin/client)
+- Diseno con branding de la marca
+
+### 5.3 Dashboard (`/portal/dashboard`)
+- Saludo personalizado con nombre del cliente
+- Quick links en grid: Contratos, Facturas, Propuestas, Proyectos, Archivos, Referidos, Soporte
+- Badge counts en cada link (proyectos activos, archivos nuevos, mensajes sin leer)
+- **Agenda de contenido:** deliverables con `scheduled_date >= hoy` agrupados por dia. Encabezados: "Hoy", "Manana", luego fecha corta. Punto de color por status (gris=pendiente, azul=en progreso, amarillo=revision, verde=completado con tachar). Solo se muestra si hay deliverables con fecha programada.
+- **Resultados recientes:** ultimos resultados del scorecard registrados por el admin. Cards con icono por categoria + descripcion + valor. Solo visible si el admin registro al menos 1 resultado. Link "Ver todos →" a `/portal/resultados`.
+
+### 5.4 Proyectos (`/portal/projects`)
+- Lista de proyectos con status badge y barra de progreso
+- Porcentaje basado en deliverables completados
+- Click lleva a detalle del proyecto
+
+### 5.5 Detalle Proyecto (`/portal/projects/[id]`)
+- Info del proyecto
+- Lista de entregables con status
+- Workflow de aprobacion: el cliente puede aprobar entregables en status "review"
+
+### 5.6 Archivos (`/portal/files`)
+- Grid de archivos compartidos
+- Preview de imagenes (thumbnails)
+- Descarga directa
+- Subida de archivos por el cliente
+- Marca como visto automaticamente
+
+### 5.7 Soporte/Chat (`/portal/support`)
+- Hilo de mensajes con el admin
+- Envio de texto + archivos adjuntos
+- Auto-scroll al ultimo mensaje
+- Marca mensajes del admin como leidos
+
+### 5.8 Contrato (`/portal/contract`)
+- Visualizacion del contrato
+- Firma digital con canvas (react-signature-canvas)
+- Guarda firma como base64 en `signature_data`
+- Actualiza `signed = true` y `signed_at`
+
+### 5.9 Bienvenida (`/portal/welcome`)
+- Muestra documento de bienvenida
+
+### 5.10 Factura/Nota de Venta (`/portal/invoice`)
+- Visualizacion de la nota de venta
+- Boton para descargar PDF (invoice-pdf-button.tsx)
+
+### 5.11 Pagos (`/portal/payments`)
+- Historial de pagos del cliente
+- Status de cada pago, fecha de vencimiento
+
+### 5.12 Calendario (`/portal/calendar`)
+- Vista de calendario con hitos del proyecto y fechas importantes
+- Deliverables con `scheduled_date` aparecen como eventos verdes diferenciados de milestones y pagos
+
+### 5.13 Referidos (`/portal/referrals`)
+- Formulario para enviar referidos (nombre, email, telefono, empresa, notas)
+- Historial de referidos enviados con status
+
+### 5.14 Testimonial (`/portal/testimonial`)
+- Formulario de resena: rating 1-5 estrellas, titulo, contenido
+- Envio y confirmacion
+
+### 5.15 Settings (`/portal/settings`)
+- Toggle de tema (dark/light)
+- Edicion de perfil
+
+### 5.16 Resultados / Scorecard (`/portal/resultados`)
+- Lista completa de resultados registrados por el admin agrupados por mes
+- Cards con categoria, descripcion, valor y unidad
+- Categorias con icono: alcance, engagement, leads, ventas, otro
+- Solo lectura para el cliente (el admin los registra desde el panel)
+
+---
+
+## 5B. PAGINA PUBLICA: CUESTIONARIO (`/cuestionario/[token]`)
+
+Pagina publica (sin autenticacion) para que el prospecto conteste un cuestionario dinamico:
+- **Multi-step typeform-style** — una pregunta por pantalla, avance automatico al seleccionar
+- **Diseno oscuro** consistente con el reporte (paleta: #05060A, #00E5A0)
+- **Progress bar** en la parte superior
+- **Mobile-first** — optimizado para que el prospecto conteste desde su celular
+- **Tipos de pregunta**: opcion multiple, si/no, numero
+- Al completar: muestra link al reporte actualizado con cotizacion personalizada
+- Si ya fue completado: muestra estado completado con link al reporte
+
+**Motor de preguntas dinamicas** (`src/lib/analizador/cuestionario.ts`):
+- 5 preguntas base (todos los giros): facturacion mensual, inversion en marketing, objetivo principal, plazo de resultados, tiene equipo de marketing
+- Preguntas por giro (~15 giros soportados): Restaurante, Cafeteria, Salon de Belleza, Barberia, Consultorio, Tienda, Gimnasio, Spa, Veterinaria, Inmobiliaria, etc.
+- Preguntas condicionales basadas en oportunidades detectadas (ej: si no tiene sitio web, pregunta si necesita citas online)
+- Funcion `generarPreguntas(giro, oportunidades)` genera el set completo
+- Funcion `filtrarPreguntasVisibles(preguntas, respuestas)` filtra por dependencias
+
+---
+
+## 5C. PAGINA PUBLICA: PROPUESTA (`/propuesta/[token]`)
+
+Pagina publica (sin autenticacion) para que el prospecto vea una propuesta comercial:
+- **Diseno oscuro** con branding de la marca
+- Muestra: nombre del prospecto, empresa, lista de servicios con precios, precio total, mensaje personalizado, vigencia restante
+- Al abrirse: incrementa `vistas_count` y guarda `ultima_vista_at`. Si es la primera visita (`status = pendiente`), cambia a `status = vista` y registra `visto_at`
+- Si la propuesta ha expirado: muestra pantalla de expirada con opciones de contacto
+- Si ya fue respondida: muestra estado correspondiente (aceptada/rechazada)
+
+> Implementacion: `src/app/propuesta/[token]/page.tsx` (cliente) + `src/app/api/propuesta/[token]/route.ts` (GET datos + POST/PUT tracking)
+
+---
+
+## 5D. PAGINA PUBLICA: ANALIZADOR PUBLICO (`/analizar`)
+
+Pagina publica donde cualquier persona puede analizar su presencia digital (sin auth):
+- Formulario publico: nombre negocio, giro, zona, contacto, telefono
+- Claude estima los hallazgos automaticamente
+- Genera reporte con score y oportunidades
+- Al finalizar: prospecto aparece en el historial del analizador admin con etapa "nuevo"
+- Sirve como herramienta de generacion de leads (el admin ve quien uso el analizador publico)
+
+> Implementacion: `src/app/analizar/page.tsx` + `src/app/api/analizar/route.ts`
+
+---
+
+## 5E. PAGINA PUBLICA: PAGO (`/pago/[token]`)
+
+Pagina publica (sin autenticacion) para que el cliente pague una factura pendiente:
+- **Diseno oscuro** con branding de la marca
+- Muestra: nombre del cliente, concepto, monto, datos bancarios (banco, CLABE, titular, referencia)
+- Instrucciones de transferencia paso a paso (5 pasos numerados con circulos verdes)
+- **Subida de comprobante:** zona de carga (click o drag-and-drop) para adjuntar imagen/PDF antes de confirmar
+  - Muestra nombre y tamano del archivo una vez seleccionado
+  - Boton para quitar el archivo si el usuario se equivoca
+- Boton "Ya realize mi pago" — envia `FormData` con el comprobante a `/api/pago/[token]`
+- Al confirmar: pago pasa a `status = completed`, se registra `paid_at`, se crea notificacion `payment_received` al admin con link al comprobante
+- Pantalla de exito: muestra badge "Comprobante adjunto y guardado" si se subio un archivo
+- Si el token no existe o ya fue pagado: muestra mensaje de estado correspondiente
+
+> Implementacion: `useRef<HTMLInputElement>` para el input oculto, `FormData` en el submit, un `useState` para `comprobante: File | null`.
+
+---
+
+## 6. API ROUTES (Backend)
+
+### Admin
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/admin/create-client` | POST | Crea usuario + cliente + onboarding automatizado |
+| `/api/admin/resend-welcome` | POST | Reenvia email de bienvenida |
+| `/api/admin/notifications` | GET | Obtiene notificaciones del admin |
+| `/api/admin/payments` | POST | Gestiona pagos |
+| `/api/admin/analisis` | POST/GET/PATCH | Genera/lista analisis digitales + actualiza etapa (pipeline) |
+| `/api/admin/catalogo` | GET/POST/PATCH/DELETE | CRUD del catalogo de servicios |
+| `/api/admin/tareas` | GET/POST/PATCH/DELETE | CRUD de tareas por cliente |
+| `/api/admin/pagos-recurrentes` | GET/POST/PATCH/DELETE | CRUD de cobros recurrentes |
+| `/api/admin/pago-link` | POST | Genera token de pago y guarda datos bancarios |
+| `/api/admin/propuestas` | GET/POST | Lista y crea propuestas publicas |
+| `/api/admin/resultados` | GET/POST/DELETE | CRUD de resultados del scorecard por cliente |
+
+### IA
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/ai/analyze` | POST | Estima hallazgos de presencia digital con Claude |
+| `/api/ai/content` | POST | Genera ideas de contenido para redes sociales |
+| `/api/ai/strategy` | POST | Genera playbook de 30 dias personalizado |
+| `/api/ai/pricing-personalizado` | POST | Genera cotizacion personalizada con IA basada en respuestas del cuestionario |
+
+### Cuestionario (publico, sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/cuestionario/[token]` | GET | Retorna preguntas + datos del negocio para un token valido |
+| `/api/cuestionario/[token]` | POST | Recibe respuestas, genera cotizacion IA, actualiza reporte HTML, envia notificacion |
+
+### Pago (publico, sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/pago/[token]` | GET | Retorna datos del pago: concepto, monto, datos bancarios, nombre del cliente, status, due_date |
+| `/api/pago/[token]` | POST | Acepta `FormData` con campo `comprobante` (File, opcional); sube archivo a Storage en `client-files/comprobantes/{client_id}/{payment_id}.{ext}` con `upsert: true`; marca pago completado; crea notificacion `payment_received` con link al comprobante (o al perfil del cliente si no hay archivo) |
+
+### Propuesta (publico, sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/propuesta/[token]` | GET | Retorna datos de la propuesta: servicios, precio, mensaje, vigencia, status |
+| `/api/propuesta/[token]` | POST | Registra cada visita: incrementa `vistas_count`, guarda `ultima_vista_at`. Si es primera visita cambia status a "vista" y registra `visto_at` |
+
+### Analizador publico (sin auth)
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/analizar` | POST | Recibe datos del negocio, llama a Claude para estimar hallazgos, crea registro en `analisis_digital` con etapa "nuevo". Accesible sin autenticacion — sirve como captacion de leads. |
+
+### Portal
+| Ruta | Metodo | Funcion |
+|------|--------|---------|
+| `/api/portal/sign-contract` | POST | Guarda firma digital del contrato |
+| `/api/portal/notify` | POST | Envia notificacion |
+| `/api/portal/deliverables/[id]/approve` | POST | Cliente aprueba entregable |
+| `/api/testimonials` | POST | Envia testimonio |
+
+### Cron
+| Ruta | Schedule | Funcion |
+|------|----------|---------|
+| `/api/cron/payment-reminders` | Diario 14:00 UTC | Envia recordatorios de pago por email |
+| `/api/cron/recurring-payments` | Diario 10:00 UTC | Crea pagos automaticamente segun `pagos_recurrentes` activos |
+| `/api/cron/weekly-summary` | Lunes 9:00 UTC | Envia resumen semanal al admin: ingresos, prospectos, pipeline, cobros vencidos |
+
+Patron de autenticacion en TODAS las API routes:
+```typescript
+const supabase = createClient();
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+// Para admin: verificar profile.role === 'admin'
+```
+
+---
+
+## 7. EMAILS (Resend)
+
+3 tipos de email configurados:
+1. **Bienvenida** (`send-welcome.ts`): Saludo + credenciales temporales + link al portal
+2. **Recordatorio de pago** (`send-payment-reminder.ts`): Concepto, monto, fecha vencimiento, si esta vencido o proximo
+3. **Notificacion al admin** (`notify-admin.ts`): Eventos importantes
+
+Configuracion:
+- Proveedor: Resend
+- Remitente: `hola@[tudominio]`
+- Emails HTML con branding
+
+---
+
+## 8. GENERACION DE PDFs
+
+4 tipos de documento en `src/lib/pdf/`:
+
+1. **Bienvenida** (`welcome.ts`) — Saludo personalizado, caja verde de acceso al portal, tabla de servicios con descripcion de valor, timeline del piloto, checkboxes de siguiente paso, caja de contacto
+2. **Contrato** (`contract.ts`) — Numero de contrato auto-generado, cuadros de Prestador/Cliente en dos columnas, 10 clausulas con barra verde izquierda, seccion de firma con lineas dibujadas
+3. **Propuesta** (`proposal.ts`) — "Preparado exclusivamente para", El reto, Nuestra propuesta, tabla de componentes incluidos con check verde, caja de inversion, bullets con circulos verdes rellenos, CTA
+4. **Cotizacion** (`quote.ts`) — Numero de cotizacion, fecha y vigencia, cuadros Emisor/Cliente, tabla de servicios, subtotal/IVA/TOTAL, caja de datos bancarios (Nu, CLABE 638180010141018767, Jose Alejandro Luna de Leon), notas con bullets
+
+**Utilidades de diseno** (`src/lib/pdf/utils.ts`):
+- `addHeader(doc, title)` — Banda oscura (`#05060A`) 32mm + franja verde 3mm en la parte superior + nombre de marca en blanco + tagline en verde + contacto derecha + titulo del documento con subrayado verde 1.5mm
+- `addFooter(doc)` — Fondo gris claro + texto de empresa centrado + numero de pagina a la derecha + franja verde 1.5mm al pie
+- `addSection(doc, title, y)` — Barra verde 3x9mm a la izquierda + titulo en color tableHeader. Retorna `y+10`
+- `addInfoBox(doc, title, lines, y, color)` — Caja redondeada con relleno claro + barra izquierda de color (green/amber/gray) + titulo en negrita + lineas de contenido
+- `addDivider(doc, y)` — Linea fina en color borde. Retorna `y+5`
+- `checkPageBreak(doc, y, margin)` — Agrega pagina nueva automaticamente si no hay espacio suficiente
+
+**Constantes** (`src/lib/pdf/constants.ts`):
+- `COMPANY` — nombre legal, brand, email, whatsapp
+- `COLORS` — tableHeader (verde), text, textMuted, border, white, tableRowAlt
+
+**Patron para cuadros de dos columnas** (Emisor/Cliente, Prestador/Cliente):
+```typescript
+const colW = (W - 45) / 2;
+const boxH = 28;
+doc.roundedRect(20, y, colW, boxH, 2, 2, "F");  // izquierda
+doc.roundedRect(25 + colW, y, colW, boxH, 2, 2, "F");  // derecha
+```
+
+**Nota tecnica (componentes cliente):** Usar dynamic import para jsPDF en paginas con `"use client"`:
+```typescript
+const jsPDF = (await import("jspdf")).default;
+const autoTable = (await import("jspdf-autotable")).default;
+// Castear doc como unknown, no como jsPDF (dynamic import devuelve valor, no tipo)
+(doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY
+```
+
+Se pueden descargar individuales o en ZIP (JSZip). Todos en espanol con branding de la marca.
+
+**Cotizador rapido** (`/admin/cotizador`): La generacion de PDF esta implementada con dynamic import de jsPDF. Genera PDF con header/footer de marca, cuadros Emisor/Cliente, tabla de servicios y totales. Se descarga como `cotizacion-{cliente}-{numero}.pdf`.
+
+---
+
+## 9. INTEGRACION CON IA
+
+### Helper compartido (`src/lib/ai/claude.ts`)
+```typescript
+// Inicializa cliente Anthropic (singleton)
+// Funcion askClaude(systemPrompt, userMessage, options?)
+// Usa modelo: claude-sonnet-4-5-20250929
+// Requiere: ANTHROPIC_API_KEY
+```
+
+### Feature 1: Auto-fill del Analizador
+- Endpoint: `/api/ai/analyze`
+- Input: nombre, giro, zona del negocio
+- Claude estima la presencia digital completa
+- Admin revisa y ajusta antes de generar reporte
+
+### Feature 2: Generador de Contenido
+- Endpoint: `/api/ai/content`
+- Input: datos del cliente + analisis
+- Output: 5 ideas de posts con formato, copy, hashtags
+- Componente: `ai-content-generator.tsx`
+
+### Feature 3: Estrategia IA (Playbook)
+- Endpoint: `/api/ai/strategy`
+- Input: hallazgos + oportunidades + datos del negocio
+- Output: Plan de 30 dias semana por semana con KPIs
+- Se guarda en tabla `ai_strategies`
+- Componente: `ai-strategy-card.tsx`
+
+### Feature 4: Cotizacion Personalizada con IA
+- Se activa cuando un prospecto completa el cuestionario dinamico
+- Input: oportunidades detectadas + respuestas del cuestionario + giro + zona
+- Funcion `buildPersonalizedPricingContext()` en `src/lib/analizador/pricing.ts` arma el contexto
+- Claude genera 2-3 paquetes estrategicos con:
+  - Nombres creativos relevantes al giro (no genericos como "Starter/Premium")
+  - Precios ajustados por facturacion, inversion actual, urgencia
+  - Servicios priorizados segun objetivo del prospecto
+  - ROI estimado realista por paquete
+  - Nivel de prioridad (inmediata, corto plazo, mediano plazo)
+- Se guarda en tabla `cuestionarios.cotizacion_personalizada`
+- Se muestra en el reporte HTML (reemplaza la cotizacion generica)
+- El admin puede copiar la cotizacion como texto formateado
+
+### Feature 5: Cotizacion Automatica (generica)
+- Se genera automaticamente al crear un analisis
+- Funcion `generarCotizacion()` en `src/lib/analizador/pricing.ts`
+- Basada en oportunidades detectadas con precios fijos por servicio
+- Sirve como cotizacion inicial antes de que el prospecto conteste el cuestionario
+- Se incluye en el reporte HTML
+
+---
+
+## 10. DISENO Y TEMA
+
+### Colores (Tailwind custom)
+```
+northpeak-bg:         #05060A   (fondo principal)
+northpeak-card:       #0C0D12   (cards)
+northpeak-card-hover: #12131A   (hover de cards)
+northpeak-surface:    #161821   (bordes, inputs)
+northpeak-text:       #E8E9ED   (texto principal)
+northpeak-text-muted: #7A7D8A   (texto secundario)
+northpeak-text-dim:   #4A4D5A   (texto terciario)
+northpeak-green:      #00E5A0   (accent/CTA principal)
+northpeak-blue:       #3B82F6   (accent secundario)
+```
+
+### Fuentes
+- Sans: DM Sans (texto general)
+- Heading: Syne (titulos)
+- Mono: JetBrains Mono (codigo)
+
+### Componentes shadcn/ui instalados
+avatar, badge, button, card, dialog, input, label, select, separator, tabs, textarea, toast
+
+### 10.2 ComboboxInput (autocompletado con sugerencias)
+Componente custom `src/components/ui/combobox-input.tsx` — typeahead reutilizable:
+- Filtra opciones en tiempo real mientras el usuario escribe
+- Navegacion con teclado (↑↓ flechas, Enter para seleccionar, Escape para cerrar)
+- Click fuera para cerrar
+- Si no hay texto: muestra todas las opciones
+- Usado en: giro del analizador, zona/ubicacion del analizador, concepto de pago, concepto de factura
+
+Listas de sugerencias (`src/lib/suggestions.ts`):
+- **`ZONAS_MEXICO`** — 60+ ciudades mexicanas (AMM primero: San Pedro, MTY, San Nicolas, Guadalupe, Apodaca, Escobedo, Santa Catarina, Juarez, Garcia, Cadereyta; luego CDMX, GDL, Puebla, QRO, etc.)
+- **`GIROS_NEGOCIO`** — 55+ tipos de negocio (Restaurante, Cafeteria, Salon de Belleza, Barberia, Consultorio, Veterinaria, Tienda en linea, Agencia de Marketing, etc.)
+- **`CONCEPTOS_PAGO`** — 20 conceptos comunes de pago (Mensualidad de servicios digitales, Gestion de redes sociales, Meta Ads, Diseno web, etc.)
+
+### 10.3 Dark-mode date picker
+Los inputs `type="date"` usan estilos en `src/app/globals.css`:
+```css
+input[type="date"] { color-scheme: dark; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+/* Portal en light-mode: override */
+.light input[type="date"] { color-scheme: light; }
+.light input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+```
+
+### Efectos visuales del portal (desktop only)
+- `animated-background.tsx` — Gradientes animados de fondo
+- `cursor-glow.tsx` — Resplandor que sigue al cursor
+- `dot-grid.tsx` — Grid de puntos de fondo
+- `tilt-card.tsx` — Efecto 3D en hover de cards
+
+---
+
+## 11. VARIABLES DE ENTORNO
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Email
+RESEND_API_KEY=re_xxx
+
+# IA
+ANTHROPIC_API_KEY=sk-ant-xxx
+
+# Cron (Vercel)
+CRON_SECRET=xxx  (opcional, para proteger cron endpoint)
+
+# Sitio
+NEXT_PUBLIC_SITE_URL=https://tudominio.com  (opcional, para links en emails)
+```
+
+---
+
+## 12. DEPLOY Y CONFIGURACION
+
+### Vercel
+1. Conectar repo de GitHub
+2. Branch de produccion: `master`
+3. Framework: Next.js (auto-detectado)
+4. Agregar TODAS las variables de entorno
+5. Deploy automatico en cada push
+
+### Vercel Cron (`vercel.json`)
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/payment-reminders",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/recurring-payments",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}
+```
+> Los 3 cron jobs usan autenticacion via header `Authorization: Bearer {CRON_SECRET}`. Vercel inyecta este header automaticamente.
+
+### Supabase
+1. Crear proyecto en supabase.com
+2. Ejecutar todos los CREATE TABLE (seccion 2.1)
+3. Habilitar RLS en TODAS las tablas
+4. Crear policies de RLS (admin full access, client solo sus datos)
+5. Crear buckets de storage: `client-files` y `reportes`
+6. Habilitar Realtime en tabla `notifications`
+7. Copiar URL + anon key + service role key
+
+---
+
+## 13. PASO A PASO PARA REPLICAR
+
+### Fase 1: Setup Inicial
+1. Crear proyecto Next.js 14 con App Router + TypeScript + Tailwind
+2. Instalar dependencias: `@supabase/ssr`, `@supabase/supabase-js`, shadcn/ui
+3. Configurar Tailwind con colores custom de tu marca
+4. Configurar fuentes
+5. Crear estructura de carpetas (app/admin, app/portal, components/admin, etc.)
+6. Setup de Supabase: proyecto + tablas + RLS + storage
+7. Configurar middleware de auth
+
+### Fase 2: Auth y Layout
+1. Pagina de login (`/portal/login`)
+2. Middleware que protege rutas
+3. Layout admin con sidebar
+4. Layout portal con navbar + efectos visuales
+5. Theme provider (dark/light)
+
+### Fase 3: CRUD Basico
+1. Dashboard admin con KPIs
+2. CRUD de clientes (lista, crear, detalle)
+3. Sistema de documentos (subir, listar, eliminar)
+4. Sistema de proyectos + entregables
+5. Sistema de archivos/media
+6. Sistema de pagos
+
+### Fase 4: Comunicacion
+1. Sistema de mensajeria (chat admin-cliente)
+2. Emails transaccionales (bienvenida, recordatorios)
+3. Notificaciones en tiempo real (Supabase Realtime)
+4. Referidos
+5. Testimonios
+
+### Fase 5: Automatizaciones
+1. Onboarding automatizado (crear cliente + docs + proyecto en 1 click)
+2. Cron de recordatorios de pago
+3. Generacion de PDFs (contratos, propuestas, cotizaciones)
+
+### Fase 6: IA
+1. Helper de Claude (`src/lib/ai/claude.ts`)
+2. Analizador con auto-fill IA
+3. Generador de contenido
+4. Estrategia IA (playbook)
+5. Cotizacion automatica (generica basada en oportunidades)
+6. Cotizacion personalizada con IA (basada en cuestionario)
+
+### Fase 7: Cuestionario y Pipeline
+1. Tabla `cuestionarios` en Supabase
+2. Motor de preguntas dinamicas (`src/lib/analizador/cuestionario.ts`)
+3. Pagina publica del cuestionario (`/cuestionario/[token]`) — multi-step, mobile-first
+4. API publica del cuestionario (`/api/cuestionario/[token]`) — GET preguntas, POST respuestas
+5. Generacion de cotizacion personalizada con IA al completar cuestionario
+6. Regeneracion del reporte HTML con cotizacion personalizada
+7. Notificacion al admin cuando se completa el cuestionario
+8. Integracion WhatsApp: envio de cuestionario con mensaje pre-armado
+9. Pipeline Kanban (`/admin/pipeline`) con drag-and-drop nativo
+10. Campo `etapa` en `analisis_digital` para rastrear el embudo de ventas
+
+### Fase 8: Reportes y Metricas
+1. Dashboard de reportes con graficas
+2. Export CSV de clientes
+3. Metricas de negocio (ingresos, conversion, tiempo de respuesta)
+
+### Fase 9: Productividad y Cobros
+1. Tabla `tareas` en Supabase (client_id, titulo, status, prioridad, due_date)
+2. Componente `tareas-list.tsx` — CRUD inline en el tab Info del cliente
+3. Tabla `pagos_recurrentes` en Supabase (dia_cobro, activo, ultimo_pago_creado)
+4. Componente `recurring-payments.tsx` — CRUD en el tab Pagos del cliente
+5. Cron `/api/cron/recurring-payments` — crea pagos diariamente segun configuracion
+6. Tabla `catalogo_servicios` + seed de ~30 servicios/paquetes (ver seccion 17)
+7. Pagina `/admin/catalogo` — CRUD del catalogo con filtros por categoria
+8. Pagina `/admin/cotizador` — cotizador rapido basado en el catalogo
+9. Columns `pago_token` y `datos_bancarios` en tabla `payments`
+10. API `/api/admin/pago-link` — genera token unico por pago pendiente
+11. Pagina publica `/pago/[token]` — cliente ve datos bancarios, adjunta comprobante (opcional) y confirma pago
+12. API `/api/pago/[token]` GET/POST — GET retorna datos del pago; POST acepta FormData con comprobante, sube a Storage, confirma pago y notifica al admin
+13. Componente `ComboboxInput` con listas de sugerencias (zonas, giros, conceptos)
+14. Cron `/api/cron/weekly-summary` — resumen semanal por email cada lunes
+15. Dark-mode styles para `input[type="date"]` en globals.css
+
+### Fase 10: Ventas y Seguimiento
+1. Tabla `propuestas` — token publico, servicios jsonb, vistas_count, ultima_vista_at, status
+2. Pagina `/admin/propuestas` — crear propuestas, ver vistas, copiar link
+3. Pagina publica `/propuesta/[token]` — prospecto ve propuesta sin auth
+4. API `/api/propuesta/[token]` — tracking de vistas en cada apertura
+5. Alertas de seguimiento en analizador — calcular dias en etapa, badges warn/urgent
+6. Plantillas de WhatsApp por etapa en analizador — dropdown copiable por prospecto
+7. Pagina `/admin/ventas` — playbook de ventas con escenarios, objeciones, templates WA y senales de compra
+8. Tabla `resultados_cliente` — KPIs/scorecard registrados por el admin
+9. API `/api/admin/resultados` — CRUD de resultados por cliente
+10. Pagina `/portal/resultados` — cliente ve su scorecard agrupado por mes
+11. Tabla `client_tasks` — checklist interactivo visible por el cliente
+12. Pagina publica `/analizar` + API `/api/analizar` — analizador publico para captacion de leads
+
+### Fase 11: Agenda de Contenido y Calendario
+1. `deliverables.scheduled_date` (date) — fecha programada por entregable
+2. Admin: input de fecha inline en el listado de entregables del proyecto (tab Proyectos)
+3. Plantillas de proyecto tipo "contenido": auto-asignar `scheduled_date` al crear (distribucion S1-S4 de lunes a viernes)
+4. Dashboard del cliente: seccion "Agenda de contenido" — deliverables agrupados por dia con `scheduled_date >= hoy`
+5. Calendario del portal: deliverables con scheduled_date aparecen como eventos verdes
+
+---
+
+## 14. ADAPTACIONES PARA AGENCIA INMOBILIARIA
+
+Al replicar, considera cambiar:
+
+### Terminologia
+- "Cliente" → "Cliente" o "Comprador/Vendedor"
+- "Proyecto" → "Propiedad" o "Operacion"
+- "Entregable" → "Documento legal" / "Tramite"
+- "Analisis digital" → "Valuacion" o "Analisis de mercado"
+- "Contenido para redes" → "Listing descriptions" / "Copy de propiedades"
+
+### Tablas adicionales sugeridas
+- `properties` — Propiedades en cartera (direccion, precio, fotos, status, tipo)
+- `showings` — Citas de visita a propiedades
+- `offers` — Ofertas recibidas por propiedad
+- `commissions` — Control de comisiones
+
+### Features especificas inmobiliarias
+- Catalogo de propiedades con filtros (zona, precio, tipo, recamaras)
+- Galeria de fotos por propiedad
+- Calendario de visitas/showings
+- Calculadora de hipoteca
+- **Pipeline Kanban ya existe** — solo cambiar etapas: Prospecto → Visita → Oferta → Negociacion → Cierre → Perdido
+- **Cuestionario dinamico ya existe** — adaptar preguntas: presupuesto, tipo de propiedad, zona deseada, financiamiento, urgencia
+- **Propuestas publicas ya existen** — ideal para enviar propuestas de inversion/listados con tracking de vistas (saber cuando el comprador la abre)
+- **Alertas de seguimiento ya existen** — saber cuando un prospecto lleva X dias sin avance en el pipeline
+- **Plantillas WA ya existen** — adaptar templates: primer contacto, seguimiento post-visita, envio de propuesta, cierre
+- **Playbook de ventas ya existe** — reemplazar con escenarios inmobiliarios: comprador por internet, visita fria, referido de cliente, negociacion de precio
+- **Scorecard / Resultados ya existen** — usar para reportar al propietario vendedor: visitas al listing, leads generados, ofertas recibidas, comparativo de mercado
+- **Agenda de contenido ya existe** — usar para mostrar al cliente el calendario de publicacion del listing (Instagram, portales, Open House)
+- **Analizador publico ya existe** — adaptar como "analizador de tu propiedad" o captacion de leads: formulario publico con datos de la propiedad
+- Generador de listings con IA
+- Analisis comparativo de mercado con IA
+- Portal del comprador con documentos, avance de tramites, timeline
+- **WhatsApp integration ya existe** — adaptar mensajes para envio de cuestionario/propiedades
+
+### Branding
+- Cambiar colores de northpeak-* a los de tu agencia
+- Cambiar fuentes
+- Cambiar logo y favicon
+- Cambiar textos y copy a terminologia inmobiliaria
+- Cambiar remitente de emails
+
+---
+
+## 15. DEPENDENCIAS COMPLETAS (package.json)
+
+```json
+{
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.479.0",
+    "next": "14.2.35",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-signature-canvas": "^1.0.7",
+    "recharts": "^2.15.3",
+    "resend": "^4.5.2",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/react-signature-canvas": "^1.0.7",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+```
+
+---
+
+---
+
+## 16. FLUJO COMPLETO DEL ANALIZADOR + CUESTIONARIO + PIPELINE
+
+```
+1. Admin abre /admin/analizador
+2. Llena datos del negocio (o usa "Llenar con IA")
+3. Ajusta hallazgos manualmente → genera analisis
+4. Sistema crea: score, oportunidades, cotizacion generica, reporte HTML, token de cuestionario
+5. Admin envia cuestionario por WhatsApp (boton directo) o copia link
+   → Prospecto aparece en Pipeline columna "Nuevos"
+
+6. Prospecto abre /cuestionario/{token} en su celular
+7. Contesta 8-12 preguntas dinamicas segun su giro
+8. IA genera cotizacion personalizada (paquetes estrategicos + precios ajustados + ROI)
+9. Reporte HTML se regenera con la cotizacion personalizada
+   → Prospecto se mueve automaticamente a "Cotizacion lista"
+   → Admin recibe notificacion
+
+10. Admin revisa cotizacion personalizada en el panel
+11. Admin mueve prospecto en Pipeline: En negociacion → Ganado/Perdido
+12. Si gana → puede crear cliente desde el analisis y continuar con el CRM completo
+```
+
+---
+
+## 17. SEED DEL CATALOGO DE SERVICIOS
+
+Al crear el proyecto ejecuta este SQL para poblar el catalogo inicial:
+
+```sql
+INSERT INTO catalogo_servicios (nombre, descripcion, precio, categoria) VALUES
+-- Marketing
+('Gestion de Redes Sociales', 'Manejo mensual de Facebook + Instagram: contenido, programacion, respuestas', 3500, 'marketing'),
+('Meta Ads (Facebook + Instagram)', 'Campanas de publicidad pagada en Meta. Incluye configuracion, creativos y reportes', 4500, 'marketing'),
+('Google Ads', 'Campanas en Google Search y Display. Incluye configuracion y optimizacion mensual', 5000, 'marketing'),
+('Email Marketing', 'Diseno y envio de newsletters y campanas de email. Hasta 5 envios por mes', 2500, 'marketing'),
+('SEO Local', 'Optimizacion de Google Business Profile + palabras clave locales', 3000, 'marketing'),
+('TikTok Ads', 'Campanas de publicidad en TikTok. Creativos + segmentacion', 4000, 'marketing'),
+-- Diseno
+('Diseno de Logotipo', 'Creacion de identidad de marca: logotipo + paleta de colores + tipografia', 4500, 'diseno'),
+('Manual de Marca', 'Guia completa de uso de marca: logo, colores, fuentes, aplicaciones', 6000, 'diseno'),
+('Diseno de Plantillas para Redes', 'Pack de 10 plantillas editables para Instagram/Facebook en Canva o Adobe', 2500, 'diseno'),
+('Fotografia de Producto', 'Sesion fotografica de productos. Hasta 20 fotos editadas', 3500, 'diseno'),
+-- Desarrollo
+('Pagina Web Basica', 'Sitio web de hasta 5 paginas. Responsive, con formulario de contacto y WhatsApp', 8000, 'desarrollo'),
+('Landing Page', 'Pagina de aterrizaje optimizada para conversiones. Incluye formulario y pixel de Meta', 5000, 'desarrollo'),
+('Tienda en Linea (E-commerce)', 'Tienda completa con carrito, pagos y gestion de inventario', 18000, 'desarrollo'),
+('Mantenimiento Web Mensual', 'Actualizaciones, backups, seguridad y soporte tecnico del sitio', 1500, 'desarrollo'),
+-- Consultoria
+('Consultoria Estrategica (1 hora)', 'Sesion de consultoria 1:1 para estrategia digital, marca o ventas', 1500, 'consultoria'),
+('Auditoria de Presencia Digital', 'Analisis completo de Google, redes sociales, sitio web y publicidad', 3000, 'consultoria'),
+-- Paquetes mensuales
+('Paquete Inicio Digital', 'Redes sociales (1 plataforma) + 8 posts/mes + reporte mensual', 4500, 'paquete'),
+('Paquete Crecimiento', 'Redes (2 plataformas) + Meta Ads + SEO local + reporte semanal', 9500, 'paquete'),
+('Paquete Dominancia Digital', 'Redes (3 plataformas) + Meta Ads + Google Ads + Email Marketing + estrategia mensual', 16000, 'paquete'),
+-- Paquetes unicos
+('Paquete Presencia Web Completa', 'Pagina web 5 paginas + logotipo + configuracion Google Business + 1 mes redes', 22000, 'paquete'),
+('Paquete Lanzamiento de Negocio', 'Todo lo de Presencia Web + Meta Ads 1 mes + estrategia digital 90 dias', 25000, 'paquete');
+```
+
+---
+
+> **Nota:** Este documento cubre el 100% de lo construido hasta febrero 2026, incluyendo: diseno profesional de PDFs, cotizador rapido con generacion de PDF, subida de comprobante de pago por el cliente, datos bancarios reales, propuestas publicas con tracking de vistas, scorecard de resultados para clientes, agenda de contenido en el portal, alertas de seguimiento de prospectos, plantillas de WhatsApp por etapa, playbook de ventas con escenarios/objeciones/scripts, analizador publico para captacion de leads, y checklist interactivo de tareas por cliente. Envialo a Claude junto con la instruccion de replicar para tu agencia inmobiliaria, y tendra todo el contexto necesario para construirlo desde cero o adaptarlo.
+>
+> **Tablas DB actuales:** profiles, clients, documents, projects, deliverables, project_milestones, media, messages, payments, referrals, testimonials, notifications, analisis_digital, cuestionarios, tareas, catalogo_servicios, pagos_recurrentes, ai_strategies, propuestas, resultados_cliente, client_tasks, vendedores

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="circle-clip">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+  <!-- Background circle: navy blue -->
+  <circle cx="50" cy="50" r="50" fill="#1B2672"/>
+  <g clip-path="url(#circle-clip)">
+    <!-- White mountain peaks -->
+    <polygon points="50,18 72,60 28,60" fill="white"/>
+    <polygon points="30,36 46,62 14,62" fill="white" opacity="0.75"/>
+    <polygon points="70,40 86,62 54,62" fill="white" opacity="0.6"/>
+    <!-- Blue foreground hill -->
+    <polygon points="0,65 20,50 40,62 60,48 80,58 100,50 100,105 0,105" fill="#4477E0"/>
+  </g>
+</svg>

@@ -1,0 +1,95 @@
+﻿a653617e chore: force redeploy to ensure NorthPeak landing is active
+81d37a23 feat: integrate flipping ecosystem (landing, roi-calculator, opportunities-listing, portal-updates)
+f31cae66 feat(propiedades-mty): fix RLS bugs, add terrain/construction m2, visit photos, agent column
+7a6aeb3d fix: prevent admin crash - use maybeSingle and add try-catch for data fetching
+7f677bb6 Remove cursor glow, fix mobile performance on landing
+10ebff12 feat: add 9 React Bits animated components (DecryptedText, BlurText, RollingNumber, ClickSpark, Aurora, SplashCursor, Magnet, Dock, Stack) with landing + admin integrations
+9aa6567a feat: UX/UI improvements - parallax hero, testimonials carousel, Sonner toasts, skeleton loading, breadcrumbs, empty states, page transitions
+660e35a5 feat: integrar React Bits - componentes animados para landing
+7531ae36 refactor: migrar mutaciones de client-detail-tabs a API route centralizado
+deb32876 fix: agregar revalidatePath para sincronizaci├│n en tiempo real
+86ac285a refactor: mejoras de c├│digo, seguridad y arquitectura
+7da890d1 Add leads page to admin panel
+88bc55d7 Add OG image for social sharing previews
+ceeec25e Add hero live feed, stats marquee, WA button, animated case studies
+cf3ac8ed Add chatbot demo, quick form, mobile nav, animated counters, OG tags
+06313793 Add one-time services, super offer, bigger logo, SVG favicon
+f032f101 Rebrand to AI for sales + premium FAQ + favicon + framer-motion
+87cbb779 Redesign landing page premium + add privacy policy page
+69b866e6 Redesign landing UX/UI + ROI calculator + portal onboarding guide
+d2a250c3 Fix: remove unused 'Users' import in landing page (ESLint error)
+62799955 Add landing page + portal improvements (cases, pricing, FAQ, ROI calc, propuesta, monthly progress, quick approvals)
+ac4bba97 Fix: propuesta comercial document type (was incorrectly mapped to 'welcome')
+82efab62 Fix: rename BrandonΓåÆAlejandro, correct date timezone to America/Monterrey
+006fe30e Fix: escape quotes in ventas page JSX (react/no-unescaped-entities)
+9e2da047 Add sales tools: follow-up alerts, WA templates, proposal view tracking, and Ventas guide
+edaa8045 Add public self-fill analizador: /analizar page + /api/analizar endpoint
+3f060279 Fix 5 bugs found in full audit: admin + portal
+6f45d6bc Add scheduled_date to deliverables + portal agenda and calendar events
+df496f81 Add propuestas p├║blicas, scorecard de resultados y plantillas de contenido
+2c2f0a49 Fix portal dashboard: remove unused imports, rename Image to ImageIcon
+4489fec6 Improve admin and portal dashboards
+d235fe71 Fix file uploads + add interactive client tasks checklist
+2b5275a2 Fix: remove unused VendedorStats interface (ESLint error in build)
+fd404867 Add vendedores CRUD, seller dropdown in analizador, and prospect-to-client conversion in pipeline
+e7bd3572 Fix pipeline: add delete, fix FK cascade on client deletion
+b130f408 Fix payments page sync and comprobante URL newline
+b04f2234 Fix payments: delete, comprobante tab, and recurring auto-create
+0730d431 Fix comprobante upload + add calendars (portal & admin)
+b5293be3 Fix comprobante upload: client-side direct to Supabase Storage
+9c502b8c Fix payments page: add FK + fallback query for client join
+35ab0528 Fix: remove unused CardTitle import in payments page
+20c47bf3 Add global Payments page to admin panel
+26acf408 Fix payment flow: success feedback + comprobante in admin
+0ed9ab5d Fix pago GET: remove clients join that blocked anon access
+1d132ff3 Fix payment page access + pre-fill bank details
+745ad982 Fix all admin deletions via service role + add payment link in portal
+32d7af6a Fix payment method display labels in Spanish
+fc1b710b Fix document deletion and add payment confirmation flow
+b35c589b Add n8n Telegram webhook notification on payment
+96c5ac17 Update guides: PDF redesign, cotizador PDF, comprobante upload, bank details
+77cf1998 Add real bank details + comprobante upload on payment page
+368b3e38 Redesign all PDF documents ΓÇö visual and content overhaul
+0881900f Implement PDF generation in cotizador
+4b3c92ee Update project guide with all new features (session 2)
+253769ee Add paquete category to catalog and cotizador + seed packages and promos in DB
+964b014f Fix build errors: remove unused vars, fix any types, add vendedor to DatosNegocio
+c89bcc79 Add ComboboxInput with smart suggestions throughout admin
+783465e1 Add cat├ílogo, cotizador, tareas, pagos recurrentes, pago-link y p├ígina de pago p├║blica
+049421b6 Make entire admin panel responsive for mobile and tablet
+8818d049 Make admin sidebar responsive with mobile drawer
+26d2aa02 Add PWA support + sales playbook + update project guide
+4b046562 Add prospect pipeline kanban + analizador improvements
+45e87c4c Fix cuestionario: call AI directly instead of self-fetch
+59be9258 Add dynamic questionnaire for personalized quotation
+69e28d55 Fix report sharing: serve reports through public route bypassing RLS
+e966da0c Add automatic quotation generator to digital analyzer
+37b3264c Fix report viewer: serve HTML through proxy route instead of direct Storage URL
+857326f3 Fix AI analyze: strip markdown fences from Claude response before JSON parse
+9a17aea0 Add @anthropic-ai/sdk to dependencies for Vercel build
+d40463be Add AI integration: auto-fill analyzer, content generator, and strategy playbook
+a7782c84 Add dashboard improvements, onboarding automation, payment reminders, deliverable approval, and business reports
+e38b1613 Add digital presence analyzer to admin panel
+8789cf10 Add 6 portal improvements: file upload, notifications, profile editing, chat attachments, invoice PDF, nav badges
+9911c11d Tone down portal visual effects for a subtler, more elegant feel
+255cb04d Update email sender to custom domain hola@northpeakdigital.com.mx
+18a40698 Add notification system, improved dashboard, client status, payment due dates, and activity timeline
+a9d98a07 Show contract signature status and image in admin documents tab
+0028c370 Fix contract signing: add RLS update policy, fix badge to track unsigned contracts
+2b06e105 Fix admin payment registration: add error handling and toast notifications
+a2be17aa Fix visual effects not visible: boost opacities, fix z-index stacking
+318f3e0c Add Portal de Clientes button to landing page footer
+8ec4dde7 Fix visual effects not visible: negative z-index was behind solid background
+96ce96c1 Increase visual effects visibility: stronger opacities, remove mix-blend-mode
+253fbb18 Add admin productivity features: activity feed, Cmd+K search, onboarding checklist, notes, templates, quick reply
+3b51a40b Add premium visual effects: cursor glow, 3D tilt cards, animated background, dot grid
+9630ca84 Fix middleware: skip Supabase for login path and handle missing env vars
+f5e8bfc1 Fix Resend client lazy initialization for build compatibility
+a25c7cf9 Add 11 new features: email, password, charts, badges, realtime, signature, payments, theme, CSV, calendar, testimonials
+44bd6d50 Add privacy policy page (Aviso de Privacidad LFPDPPP)
+235ce0bc Add interactive UX effects: cursor glow, 3D tilt, magnetic buttons, parallax
+1c85844f Double logo size in nav and footer
+63496545 Add logo and favicon assets
+a007df77 Add testimonials, about, FAQ, logos, and analytics placeholders
+74d6d8d9 Update WhatsApp phone number to +52 81 2198 0008
+bf91cfa3 Initial commit: NorthPeak Digital landing page

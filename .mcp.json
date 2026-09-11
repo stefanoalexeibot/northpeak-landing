@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_ce70a145cb39f3fe8c2a9890ae0f32bc27f7350d"
+      ]
+    },
+    "n8n": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "supergateway",
+        "--streamableHttp",
+        "https://npdigital.app.n8n.cloud/mcp-server/http",
+        "--header",
+        "authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjUzMzE2Ny04ZDFhLTQ5MGItYjQ1Ny1iNmQ1YzI1ZWQ0NTkiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6ImVlZDNhYjBmLTMyODMtNDdiNS04ZjRkLTcxMzM3MjNiYTZhZCIsImlhdCI6MTc3MTQyNzkxM30.I6VimIedlhFXeH_J0ll5SnnLntwRxnSZSzqnV985gxs"
+      ]
+    }
+  }
+}
