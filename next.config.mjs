@@ -2,6 +2,7 @@
 const nextConfig = {
   async rewrites() {
     return [
+      { source: "/command-center", destination: "/command-center/index.html" },
       ...["luminosa", "forma", "alma"].map((template) => ({
         source: "/pilates/spgg/plantillas/" + template,
         destination: "/pilates/spgg/plantillas/" + template + "/index.html",
