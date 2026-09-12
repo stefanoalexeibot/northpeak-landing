@@ -55,6 +55,7 @@
     @media(max-width:480px){.wrap{width:calc(100% - 40px)}.brand strong{font-size:1rem}.brand small{font-size:.5625rem}.brand-mark{width:28px}.nav-right{gap:8px}.nav-right .button{padding:10px 12px;font-size:.75rem}.nav-right .button svg{display:none}.hero h1{font-size:2.65rem}.hero .eyebrow{font-size:.625rem;max-width:290px}.hero-copy>p{margin:22px 0}.hero .actions .button{padding:14px 18px;gap:12px}.hero-foot{gap:16px;font-size:.75rem;margin-top:25px}.hero-foot span+span{padding-left:16px}.hero-photo{height:350px;border-top-left-radius:80px}.hero-note{width:285px;padding:16px;gap:12px}.hero-caption{display:none}.hero-art{padding-left:15px}.service-strip .wrap{font-size:.625rem}.service-strip span::before{margin-right:6px}.pain-grid{grid-template-columns:1fr;gap:22px}.pain-grid h2{max-width:280px}.package{padding:26px}.demo-cover{padding:26px;min-height:310px}.demo-nav{padding:18px}.demo-nav>span:last-child{font-size:.625rem}.demo-footer{padding:18px;font-size:.625rem}.reservation-demo{display:flex;padding:24px;gap:20px}.demo-topline{display:flex;justify-content:space-between;width:100%;font-size:.6875rem}.demo-topline span{margin:0}.reservation-card{width:100%;padding:24px}.social-grid{gap:8px}.social-tile span{left:10px;bottom:10px;font-size:1rem}.social-tile.type strong{font-size:1.3rem;margin:12px 0}.social-tile.type small{font-size:.5rem}.process-grid{grid-template-columns:1fr 1fr;gap:24px}.process-step h3{font-size:1rem}.process-step p{font-size:.875rem}.footer-bottom{flex-direction:column}.final-cta{padding:75px 20px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
   </style>
+  <link rel="stylesheet" href="/pilates/spgg/experience.css">
 </head>
 <body>
 <a class="skip" href="#contenido">Ir al contenido</a>
@@ -72,7 +73,7 @@
     </a>
     <nav class="nav-links" aria-label="Navegación principal"><a href="#experiencia">La experiencia</a><a href="#paquetes">Paquetes</a><a href="#como-funciona">Proceso</a></nav>
     <div class="nav-right">
-      <a class="button button-small" href="https://wa.me/528121980008?text=Hola%20NorthPeak%2C%20quiero%20una%20pl%C3%A1tica%20sobre%20mi%20estudio%20de%20Pilates." target="_blank" rel="noopener noreferrer">Platiquemos <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+      <a class="button button-small" href="/pilates/spgg/diagnostico?origen=general">Platiquemos <svg aria-hidden="true"><use href="#arrow"/></svg></a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </div>
@@ -85,7 +86,7 @@
       <h1>Una presencia<br>a la altura<br><em>de tu estudio.</em></h1>
       <p>Diseñamos tu web, conectamos tus reservas y creamos contenido que se siente como tu marca. Para que el siguiente paso sea una clase, no otro mensaje pendiente.</p>
       <div class="actions">
-        <a class="button" href="https://wa.me/528121980008?text=Hola%20NorthPeak%2C%20quiero%20mejorar%20la%20presencia%20digital%20de%20mi%20estudio." target="_blank" rel="noopener noreferrer">Hablemos de tu estudio <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+        <a class="button" href="/pilates/spgg/diagnostico?origen=general">Hablemos de tu estudio <svg aria-hidden="true"><use href="#arrow"/></svg></a>
         <a class="button button-outline" href="#experiencia">Ver la experiencia</a>
       </div>
       <div class="hero-foot"><span>Diseño con intención</span><span>Reservas online</span><span>Enfoque local</span></div>
@@ -105,7 +106,8 @@
         <div><span class="eyebrow">01 / La experiencia</span><h2>Tu esencia.<br><em>En cada punto de contacto.</em></h2></div>
         <p>Desde Instagram hasta la reserva: el mismo cuidado, la misma identidad y un camino claro para conocer tu estudio.</p>
       </div>
-      <div class="showcase-stage reveal" aria-label="Ejemplo conceptual de una web y su sistema de reservas">
+      <div class="experience-tabs" role="tablist" aria-label="Explorar la experiencia"><button type="button" role="tab" id="tab-web" aria-selected="true" aria-controls="panel-web">Tu web</button><button type="button" role="tab" id="tab-reservas" tabindex="-1" aria-selected="false" aria-controls="panel-reservas">Tus reservas</button><button type="button" role="tab" id="tab-instagram" tabindex="-1" aria-selected="false" aria-controls="panel-instagram">Tu Instagram</button></div>
+      <div class="experience-panel" id="panel-web" role="tabpanel" aria-labelledby="tab-web" tabindex="0"><div class="showcase-stage reveal" aria-label="Ejemplo conceptual de una web y su sistema de reservas">
         <div class="desktop-demo">
           <div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Tu sitio · Diseño de ejemplo</span><span aria-hidden="true">↗</span></div>
           <div class="demo-nav"><span class="serif">LUMINOSA</span><span>El estudio &nbsp; / &nbsp; Clases &nbsp; / &nbsp; Reservas</span></div>
@@ -127,6 +129,29 @@
           </div>
           <p class="demo-disclaimer">Concepto ilustrativo. Marca, horarios y pantallas de ejemplo; no realiza reservas.</p>
         </div>
+      </div>
+
+      </div>
+      <div class="experience-panel" id="panel-reservas" role="tabpanel" aria-labelledby="tab-reservas" tabindex="0" hidden>
+        <div class="booking-panel">
+          <div><span class="eyebrow">Pruébalo tú misma</span><h3>Menos mensajes.<br><em>Más movimiento.</em></h3><p>Elige una clase, un día y un horario. Así de sencillo podría ser el siguiente paso para tus alumnas.</p><p class="small">Demo interactiva con horarios ficticios. No consulta disponibilidad ni realiza reservas.</p></div>
+          <form id="booking-demo" class="booking-preview">
+            <span class="eyebrow">Luminosa / Agenda de ejemplo</span>
+            <label for="demo-class">Tu clase</label><select name="class" id="demo-class"><option>Reformer</option><option>Mat Pilates</option><option>Barre</option></select>
+            <label for="demo-day">Tu día</label><select name="day" id="demo-day"><option>martes 15</option><option>miércoles 16</option><option>jueves 17</option></select>
+            <label for="demo-time">Tu horario</label><select name="time" id="demo-time"><option>8:00</option><option>9:00</option><option>18:00</option></select>
+            <button class="button" type="submit">Probar confirmación <svg aria-hidden="true"><use href="#arrow"/></svg></button>
+            <output id="booking-feedback" aria-live="polite">Elige una combinación y prueba la confirmación.</output>
+          </form>
+        </div>
+      </div>
+      <div class="experience-panel" id="panel-instagram" role="tabpanel" aria-labelledby="tab-instagram" tabindex="0" hidden>
+        <div class="instagram-panel"><div class="instagram-copy"><span class="eyebrow">Una misma historia</span><h3>Que te reconozcan.<br><em>Antes de llegar.</em></h3><p>Un lenguaje visual que acompaña tus clases, tus espacios y tus momentos. Dirección de ejemplo para una marca conceptual.</p></div>
+        <div class="social-grid">
+          <div class="social-tile photo"><img src="/pilates/spgg/pilates-woman.jpg" alt="Ejemplo de publicación de Pilates" loading="lazy"><span>Encuentra<br>tu ritmo.</span></div>
+          <div class="social-tile type"><small>LUMINOSA / STUDIO</small><strong>Un momento.<br><em>Solo tuyo.</em></strong><em>REFORMER · MAT · BARRE</em></div>
+          <div class="social-tile photo"><img src="/pilates/spgg/barre-class.jpg" alt="Ejemplo de publicación de Barre" loading="lazy"><span>La fuerza<br>de sentirte bien.</span></div>
+        </div></div>
       </div>
       <div class="showcase-bottom reveal">
         <div><span class="eyebrow">Una identidad que se reconoce</span><h3>También en su próximo scroll.</h3><p>Fotografía, Reels y piezas gráficas que cuentan la misma historia. Creamos una presencia coherente con el espacio y la experiencia que ofreces.</p><p class="small" style="margin-top:16px">Muestra de dirección visual · Proyecto conceptual.</p></div>
@@ -158,7 +183,7 @@
           <div class="price"><strong>$9,900</strong><span>MXN · pago único</span></div><div class="package-note">Entrega estimada: 10–14 días hábiles.</div>
           <ul class="included"><li>Web de 5 secciones alineada a tu marca</li><li>Integración con tu sistema de reservas</li><li>Sesión de fotos del estudio · 2 horas</li><li>Perfil de Google y capacitación inicial</li></ul>
           <details><summary>Ver todo lo que incluye</summary><div class="detail-body"><strong>Diseño web</strong><ul><li>Diseño adaptable a celular, paleta y tipografía de tu marca.</li><li>Servicios, horarios, precios, ubicación, contacto y WhatsApp.</li><li>Optimización de velocidad y SSL.</li></ul><strong>Reservas y lanzamiento</strong><ul><li>Integración con AgendaPro o una plataforma compatible.</li><li>Reservas online y confirmaciones según las funciones del plan elegido.</li><li>Enlace de reservas para tu biografía de Instagram.</li><li>Alta u optimización del Perfil de Negocio de Google.</li><li>Una sesión fotográfica de 2 horas y capacitación de 30 minutos.</li></ul></div></details>
-          <a class="button" href="https://wa.me/528121980008?text=Hola%20NorthPeak%2C%20me%20interesa%20Lanzamiento%20Digital%20para%20mi%20estudio%20de%20Pilates." target="_blank" rel="noopener noreferrer">Quiero mi página web <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+          <a class="button" href="/pilates/spgg/diagnostico?origen=lanzamiento">Quiero mi página web <svg aria-hidden="true"><use href="#arrow"/></svg></a>
         </article>
         <article class="package featured reveal">
           <div class="package-top"><span>02 / ACOMPAÑAMIENTO MENSUAL</span><svg class="line-icon" style="margin:0" aria-hidden="true"><use href="#image"/></svg></div>
@@ -166,13 +191,14 @@
           <div class="price"><strong>$7,500</strong><span>MXN / mes</span></div><div class="package-note">Mes a mes · Cancelación con 15 días de aviso.</div>
           <ul class="included"><li>Gestión y optimización de Meta Ads</li><li>3 Reels editados + 6 diseños gráficos</li><li>Una sesión de fotos cada mes</li><li>Mantenimiento y reporte de resultados</li></ul>
           <details><summary>Ver todo lo que incluye</summary><div class="detail-body"><strong>Publicidad y contenido</strong><ul><li>Campañas en Facebook e Instagram con enfoque local en SPGG.</li><li>Anuncios de clases de prueba o pases de bienvenida.</li><li>Optimización semanal y revisión de resultados.</li><li>3 Reels, 6 diseños y una sesión fotográfica mensual.</li><li>Guiones para organizar la grabación de contenido.</li></ul><strong>Acompañamiento</strong><ul><li>Actualización de horarios y precios de tu web.</li><li>Monitoreo de la conexión con tu sistema de citas.</li><li>Reporte mensual de consultas, costo por contacto y nuevas alumnas registradas.</li></ul></div></details>
-          <a class="button" href="https://wa.me/528121980008?text=Hola%20NorthPeak%2C%20me%20interesa%20Crecimiento%20Continuo%20para%20mi%20estudio%20de%20Pilates." target="_blank" rel="noopener noreferrer">Hablemos de crecimiento <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+          <a class="button" href="/pilates/spgg/diagnostico?origen=crecimiento">Hablemos de crecimiento <svg aria-hidden="true"><use href="#arrow"/></svg></a>
         </article>
       </div>
       <p class="pricing-foot">Antes de empezar, dejamos por escrito el alcance, los impuestos aplicables y el presupuesto de anuncios, dominio, alojamiento y licencias que requiera tu estudio. Las integraciones dependen de la plataforma y el plan contratado.</p>
     </div>
   </section>
 
+  <figure class="editorial-break"><img src="/pilates/spgg/barre-class.jpg" alt="Referencia visual de movimiento en un estudio de Barre" loading="lazy"><figcaption><span>Diseño que acompaña tu esencia</span><em>El cuidado se siente.<br>También en digital.</em></figcaption></figure>
   <section class="section light" id="como-funciona">
     <div class="wrap">
       <div class="section-intro reveal"><div><span class="eyebrow">03 / El proceso</span><h2>Claro desde<br><em>la primera plática.</em></h2></div><p>Un equipo, una dirección visual y pasos definidos para poner tu estudio en digital.</p></div>
@@ -217,8 +243,8 @@
     <span class="eyebrow rose">Hablemos de tu estudio</span>
     <h2>Tu siguiente etapa<br><em>empieza con una plática.</em></h2>
     <p>Cuéntanos dónde estás y qué te gustaría mejorar. En 30 minutos trazamos un primer camino para tu estudio.</p>
-    <div class="actions"><a class="button" href="https://wa.me/528121980008?text=Hola%20NorthPeak%2C%20quiero%20agendar%20una%20pl%C3%A1tica%20de%2030%20minutos%20para%20mi%20estudio%20de%20Pilates." target="_blank" rel="noopener noreferrer">Agendar plática gratuita <svg aria-hidden="true"><use href="#arrow"/></svg></a><a class="button button-outline" href="#paquetes">Ver paquetes</a></div>
-    <p class="small" style="margin-top:20px;margin-bottom:0">Sin compromiso · Por WhatsApp</p>
+    <div class="actions"><a class="button" href="/pilates/spgg/diagnostico?origen=general">Agendar plática gratuita <svg aria-hidden="true"><use href="#arrow"/></svg></a><a class="button button-outline" href="#paquetes">Ver paquetes</a></div>
+    <p class="small" style="margin-top:20px;margin-bottom:0">Primero conocemos tu estudio · Después, platicamos por WhatsApp</p>
   </section>
 </main>
 <footer><div class="wrap"><div class="footer-inner"><a class="brand" href="/"><span><strong>NorthPeak Digital</strong><small>PILATES & WELLNESS · SPGG</small></span></a><div class="footer-links"><a href="/">NorthPeak</a><a href="#resultados">Cómo medimos</a><a href="/privacidad">Privacidad</a><a href="https://wa.me/528121980008" target="_blank" rel="noopener noreferrer">WhatsApp</a></div></div><div class="footer-bottom"><span>© 2026 NorthPeak Digital</span><span>San Pedro Garza García · Nuevo León, México</span></div></div></footer>
@@ -242,5 +268,7 @@
   });
   window.matchMedia('(min-width: 801px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
 </script>
+<a class="button mobile-contact" href="/pilates/spgg/diagnostico?origen=movil" hidden>Diseñemos tu siguiente paso <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+<script src="/pilates/spgg/experience.js" defer></script>
 </body>
 </html>
