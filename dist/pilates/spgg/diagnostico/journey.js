@@ -4,17 +4,23 @@ const root = '/pilates/spgg/diagnostico';
 const key = 'northpeak-pilates-journey-v1';
 const screen = document.getElementById('screen');
 const params = new URLSearchParams(location.search);
-const origins = ['general','lanzamiento','crecimiento','movil'];
+const origins = ['general','lanzamiento','crecimiento','movil','plantilla'];
+const templateNames = {luminosa:'Luminosa · Pilates Reformer',forma:'Forma · Barre & Sculpt',alma:'Alma · Yoga & Mat'};
+const templateIds = Object.keys(templateNames);
 const initialOrigin = origins.includes(params.get('origen')) ? params.get('origen') : 'general';
-let state = {answers:{}, origin:initialOrigin};
+let state = {answers:{}, origin:initialOrigin, template:null};
 try {
   const stored = JSON.parse(sessionStorage.getItem(key));
   if (stored && typeof stored.answers === 'object' && stored.answers && Date.now() - stored.savedAt < 7200000) {
     state.answers = stored.answers;
     state.origin = origins.includes(stored.origin) ? stored.origin : initialOrigin;
+    state.template = templateIds.includes(stored.template) ? stored.template : null;
   }
 } catch {}
 if (params.has('origen')) state.origin = initialOrigin;
+if (params.has('plantilla')) state.template = templateIds.includes(params.get('plantilla')) ? params.get('plantilla') : null;
+else if (params.has('origen') && initialOrigin !== 'plantilla') state.template = null;
+if (state.template) state.origin = 'plantilla';
 const steps = [
  {slug:'estudio',title:'Cuéntanos de tu estudio.',intro:'Empecemos por el movimiento que te define.',field:'type',image:'hero-studio.jpg',chapter:'EL ESTUDIO',quote:'Cada espacio empieza<br><em>con una intención.</em>',options:[
  ['Pilates Reformer','Movimiento, precisión y atención al detalle.'],['Mat, Barre o Yoga','Bienestar que se vive de distintas formas.'],['Estudio multidisciplina','Varias experiencias bajo una misma marca.'],['Estoy por abrir','Estamos construyendo el siguiente capítulo.']]},
@@ -37,7 +43,7 @@ function valid(index) {
  return typeof a.name==='string'&&a.name.trim().length>=2&&a.name.length<=70&&typeof a.studio==='string'&&a.studio.trim().length>=2&&a.studio.length<=90;
 }
 function firstIncomplete() { for(let i=0;i<steps.length;i++) if(!valid(i))return i;return steps.length; }
-function path(index) { return root+'?paso='+(index===6?'tu-plan':steps[index].slug); }
+function path(index) { return root+'?paso='+(index===6?'tu-plan':steps[index].slug)+(state.template?'&plantilla='+state.template:''); }
 function move(index,replace=false) {
  index=Math.min(Math.max(0,index),firstIncomplete());
  history[replace?'replaceState':'pushState']({step:index},'',path(index));
@@ -79,6 +85,7 @@ function render(index,focus) {
  screen.replaceChildren();
  const section=document.createElement('div');section.className='step';screen.append(section);
  const title=document.createElement('h1');title.tabIndex=-1;title.textContent=final?'Tu estudio. Tu siguiente paso.':s.title;section.append(title);
+ if(state.template){const chosen=document.createElement('p');chosen.className='note';chosen.textContent='Diseño que te interesa: '+templateNames[state.template];section.append(chosen);}
  if(final){renderSummary(section);}
  else{
   const intro=document.createElement('p');intro.className='intro';intro.textContent=s.intro;section.append(intro);
@@ -121,6 +128,7 @@ function renderSummary(section){
  card.querySelector('h2').textContent=rec.name;card.querySelector('.reason').textContent=rec.reason;card.querySelector('.price').textContent=rec.price;
  rec.route.forEach(label=>{const span=document.createElement('span');span.textContent=label;card.querySelector('.route-map').append(span);});section.append(card);
  const pairs=[['Estudio',a.studio],['Disciplina',a.type],['Situación',a.stage],['Prioridad',a.goal],['Inversión',a.budget],['Inicio',a.time],['Ubicación',a.zone]];
+ if(state.template)pairs.unshift(['Plantilla',templateNames[state.template]]);
  const dl=document.createElement('dl');dl.className='summary';
  pairs.forEach(([key,value])=>{const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=key;dd.textContent=value;row.append(dt,dd);dl.append(row);});section.append(dl);
  const note=document.createElement('p');note.className='note';note.textContent='Orientación inicial, no cotización definitiva. Revisaremos alcance, impuestos, anuncios y licencias. '+(a.zone!=='San Pedro Garza García'?'Confirmaremos la cobertura en tu ubicación. ':'')+'Todavía no has reservado una cita.';section.append(note);
