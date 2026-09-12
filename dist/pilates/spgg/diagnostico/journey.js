@@ -21,6 +21,9 @@ if (params.has('origen')) state.origin = initialOrigin;
 if (params.has('plantilla')) state.template = templateIds.includes(params.get('plantilla')) ? params.get('plantilla') : null;
 else if (params.has('origen') && initialOrigin !== 'plantilla') state.template = null;
 if (state.template) state.origin = 'plantilla';
+if (state.template && !state.answers.studio) {
+ try { const preview=JSON.parse(sessionStorage.getItem('northpeak-preview-brand'));if(preview&&Date.now()-preview.savedAt<7200000&&typeof preview.name==='string'&&preview.name.trim().length>=2)state.answers.studio=preview.name.trim().slice(0,45); } catch {}
+}
 const steps = [
  {slug:'estudio',title:'Cuéntanos de tu estudio.',intro:'Empecemos por el movimiento que te define.',field:'type',image:'hero-studio.jpg',chapter:'EL ESTUDIO',quote:'Cada espacio empieza<br><em>con una intención.</em>',options:[
  ['Pilates Reformer','Movimiento, precisión y atención al detalle.'],['Mat, Barre o Yoga','Bienestar que se vive de distintas formas.'],['Estudio multidisciplina','Varias experiencias bajo una misma marca.'],['Estoy por abrir','Estamos construyendo el siguiente capítulo.']]},
