@@ -39,3 +39,10 @@ Integrar con el portal administrativo existente, autenticación, permisos por or
 ## Validación
 
 `node tests/command-center.cjs` verifica exportación e importación mediante los controladores de la aplicación, exclusión de notas internas y escape HTML en los ocho documentos, cálculo de esfuerzo, comparación con base cero, rechazo de archivos incompatibles y aviso de fallo de almacenamiento. La vista del navegador se revisa por separado. No requiere librerías adicionales.
+
+## Agenda y presentación comercial
+
+**Qué hago hoy** reúne los siguientes pasos y entregables pendientes de todos los expedientes, ordenados en vencidos, hoy, próximos y sin fecha. Excluye entregables listos y expedientes que no continuaron. Usa la fecha local del equipo; no envía avisos ni marca acciones completadas automáticamente. Abre cada expediente para actualizar el estado o la siguiente fecha.
+
+**Presentar al cliente** prepara cinco pantallas desde el expediente seleccionado: situación, oportunidad, dirección visual, alcance e inversión y próximo paso. Edita esos contenidos en Descubrimiento y Propuesta. Las notas internas, bitácora y costos internos quedan fuera. Los campos vacíos se indican como pendientes de conversación. Incluye navegación anterior/siguiente e impresión de las cinco pantallas. Es una propuesta de conversación, no firma ni aprobación.
+

@@ -15,5 +15,21 @@ window.NP = (() => {
  const clean=(v,n=6000)=>typeof v==='string'?v.slice(0,n):'';
  function answers(raw){const out={};for(const [id] of fields)out[id]=clean(raw?.[id]);return out;}
  function normalize(raw){if(!raw||typeof raw!=='object'||typeof raw.id!=='string'||!/^[\w-]{1,80}$/.test(raw.id))throw Error('Expediente inválido');const c=create();c.id=raw.id;c.created=clean(raw.created,40);c.stage=stages.includes(raw.stage)?raw.stage:'Prospecto';c.answers=answers(raw.answers);c.internal=clean(raw.internal);for(const k in c.proposal)c.proposal[k]=clean(raw.proposal?.[k]);for(const k in c.costs)c.costs[k]=clean(raw.costs?.[k],30);if(Array.isArray(raw.tasks))c.tasks=raw.tasks.slice(0,100).map(t=>({id:uid(),title:clean(t.title,200),output:clean(t.output),owner:clean(t.owner,100),date:clean(t.date,20),status:['Pendiente','En curso','En revisión','Listo'].includes(t.status)?t.status:'Pendiente',url:clean(t.url,2000)}));if(Array.isArray(raw.metrics))c.metrics=raw.metrics.slice(0,20).map(m=>Object.fromEntries(['name','before','after','source','periodBefore','periodAfter'].map(k=>[k,clean(m[k],500)])));c.log=Array.isArray(raw.log)?raw.log.slice(-100).map(l=>({date:clean(l.date,40),text:clean(l.text)})):[];return c;}
- return {stages,sections,fields,milestones,create,answers,normalize,clean};
+ function agenda(clients,today){
+  const items=[];
+  for(const c of clients){if(c.stage==='No continuó')continue;
+   if(c.answers.next||c.answers.nextDate)items.push({client:c.id,title:c.answers.next||'Confirmar siguiente encuentro',date:c.answers.nextDate||'',owner:c.answers.decision||'Por acordar',section:'discovery',study:c.answers.studio||'Estudio por definir'});
+   if(c.stage==='Propuesta'&&!c.answers.next&&!c.answers.nextDate)items.push({client:c.id,title:'Definir seguimiento de propuesta',date:'',owner:'NorthPeak',section:'proposal',study:c.answers.studio||'Estudio por definir'});
+   for(const t of c.tasks)if(t.status!=='Listo')items.push({client:c.id,title:t.title,date:t.date,owner:t.owner||'Por acordar',section:'delivery',study:c.answers.studio||'Estudio por definir'});
+  }
+  return items.map(i=>({...i,bucket:!/^\d{4}-\d{2}-\d{2}$/.test(i.date)?'Sin fecha':i.date<today?'Vencido':i.date===today?'Hoy':'Próximo'})).sort((a,b)=>{const order=['Vencido','Hoy','Próximo','Sin fecha'];return order.indexOf(a.bucket)-order.indexOf(b.bucket)||a.date.localeCompare(b.date);});
+ }
+ function presentation(c){return [
+  {title:'Tu estudio, hoy.',label:'01 / LO QUE ESCUCHAMOS',blocks:[['Tu experiencia',c.answers.difference],['Recorrido actual',c.answers.journey],['Lo que queremos resolver',c.answers.friction]]},
+  {title:'Una oportunidad con dirección.',label:'02 / TU SIGUIENTE ETAPA',blocks:[['Prioridad',c.proposal.objective||c.answers.goal],['Punto de partida',c.answers.baseline],['A quién queremos llegar',c.answers.audience]]},
+  {title:'Una experiencia que te representa.',label:'03 / DIRECCIÓN RECOMENDADA',blocks:[['Dirección visual por conversar',c.answers.style],['Experiencia y alcance',c.proposal.scope||c.answers.scope],['Colaboración del estudio',c.proposal.clientNeeds||c.answers.commitments]]},
+  {title:'Alcance y compromisos claros.',label:'04 / INVERSIÓN Y CALENDARIO',blocks:[['Inversión · MXN',c.proposal.amount],['Pago',c.proposal.payment],['Calendario',c.proposal.schedule],['Fuera de alcance',c.proposal.exclusions],['Revisiones',c.proposal.revisions]]},
+  {title:'El siguiente paso, juntos.',label:'05 / PARA CONFIRMAR',blocks:[['Próximo paso',c.answers.next],['Quién revisa y decide',c.answers.decision],['Fecha de seguimiento',c.answers.nextDate],['Criterios de entrega',c.proposal.acceptance]]}
+ ];}
+ return {stages,sections,fields,milestones,create,answers,normalize,clean,agenda,presentation};
 })();

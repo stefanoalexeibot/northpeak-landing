@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),{webcrypto}=require('node:crypto');
 function environment(){
  const nodes=new Map(),stored=new Map();let fail=false;
- const node=()=>({innerHTML:'',textContent:'',value:'',dataset:{},listeners:{},classList:{add(){},remove(){}},addEventListener(k,fn){this.listeners[k]=fn;},append(){},click(){},showModal(){this.open=true;},close(){this.open=false;}});
+ const node=()=>({innerHTML:'',textContent:'',value:'',dataset:{},listeners:{},classList:{add(){},remove(){}},addEventListener(k,fn){this.listeners[k]=fn;},append(){},after(){},click(){},showModal(){this.open=true;},close(){this.open=false;}});
  const get=s=>{if(!nodes.has(s))nodes.set(s,node());return nodes.get(s);};
  const ctx={console,crypto:webcrypto,URL,Blob,Intl,Date,setTimeout:()=>0,clearTimeout(){},confirm:()=>true,navigator:{},location:{hostname:'localhost',origin:'http://localhost:4173'},localStorage:{getItem:k=>stored.get(k),setItem(k,v){if(fail)throw Error('quota');stored.set(k,v);}},document:{querySelector:get,createElement:node,body:node()},window:{print(){}}};
  vm.createContext(ctx);for(const file of ['model.js','center.js'])vm.runInContext(fs.readFileSync('public/command-center/'+file,'utf8'),ctx);
@@ -19,6 +19,8 @@ function environment(){
  await e.upload({type:'northpeak-intake',version:1,ref:id,answers:{studio:'Respuestas del cliente',goal:'Más reservas',__proto__:{admin:true}}});e.get('#confirm-import').onclick();assert.equal(e.state().clients[0].answers.studio,'Respuestas del cliente');assert.equal(e.state().clients[0].internal,'PRIVATE-NOTES');assert.equal(e.state().clients[0].costs.hours,'10');
  await e.upload({type:'invalid',version:1});assert.equal(e.state().clients.length,1);assert(e.get('#notice').textContent.includes('compatible'));
  await e.click({tab:'impact'});e.input('metrics.0.before','0');e.input('metrics.0.after','10');assert(e.get('[data-delta="0"]').textContent.includes('base cero'));e.input('metrics.0.before','5');assert(e.get('[data-delta="0"]').textContent.includes('100.0%'));
+ const N=e.ctx.window.NP,sample=N.create();sample.internal='PRIVATE';sample.tasks=[{title:'Done',status:'Listo',date:'2026-09-13'},{title:'Late',status:'Pendiente',date:'2026-09-13'},{title:'Today',status:'Pendiente',date:'2026-09-14'},{title:'Later',status:'Pendiente',date:'2026-09-15'},{title:'Undated',status:'Pendiente',date:''}];assert.deepEqual(Array.from(N.agenda([sample],'2026-09-14'),x=>x.bucket),['Vencido','Hoy','Próximo','Sin fecha']);assert.equal(N.presentation(sample).length,5);assert(!JSON.stringify(N.presentation(sample)).includes('PRIVATE'));sample.stage='No continuó';assert.equal(N.agenda([sample],'2026-09-14').length,0);
  e.setFail();e.input('internal','changed');assert(e.get('#save-status').textContent.includes('No se pudo guardar'));
  console.log('PASS: eight client documents exclude private notes and escape HTML; backup and response imports; invalid files; internal cost arithmetic; zero-baseline metrics; storage failure reporting.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
+
